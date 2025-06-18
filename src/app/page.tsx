@@ -649,57 +649,59 @@ export default function InventoryManager() {
                           <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
                           Inventario de Productos
                         </h3>
-                        <div className="overflow-x-auto max-h-96">
-                          <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-                            <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
-                              <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {/* Mensaje cuando no hay productos */}
-                              {products.length === 0 && (
+                        <div className="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
+                          <div className="min-w-[800px] lg:min-w-full"> {/* Ancho mínimo en móvil, natural en desktop */}
+                            <table className="w-full text-left text-sm">
+                              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                                 <tr>
-                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                                    No hay productos en inventario
-                                  </td>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
                                 </tr>
-                              )}
-                              {/* Lista de productos */}
-                              {products.map(p => {
-                                const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
-                                const proveedor = suppliers.find(s => s.id === p.supplierId);
-                                return (
-                                  <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">
-                                      <div className="flex items-center gap-2">
-                                        {p.image ? (
-                                          <img src={p.image} alt={p.name} className="w-8 h-8 object-cover rounded" />
-                                        ) : (
-                                          <Package size={20} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
-                                        )}
-                                        <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
-                                      </div>
+                              </thead>
+                              <tbody>
+                                {/* Mensaje cuando no hay productos */}
+                                {products.length === 0 && (
+                                  <tr>
+                                    <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                      No hay productos en inventario
                                     </td>
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
-                                    <td className={`p-2 ${
-                                      diasParaCaducar <= 1 
-                                        ? 'text-red-600 dark:text-red-400 font-bold' 
-                                        : diasParaCaducar <= 3 
-                                        ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
-                                        : 'text-gray-900 dark:text-gray-100'
-                                    }`}>
-                                      {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
-                                    </td>
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
                                   </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
+                                )}
+                                {/* Lista de productos */}
+                                {products.map(p => {
+                                  const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
+                                  const proveedor = suppliers.find(s => s.id === p.supplierId);
+                                  return (
+                                    <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">
+                                        <div className="flex items-center gap-2">
+                                          {p.image ? (
+                                            <img src={p.image} alt={p.name} className="w-8 h-8 object-cover rounded" />
+                                          ) : (
+                                            <Package size={20} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                                          )}
+                                          <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
+                                        </div>
+                                      </td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                                      <td className={`p-2 ${
+                                        diasParaCaducar <= 1 
+                                          ? 'text-red-600 dark:text-red-400 font-bold' 
+                                          : diasParaCaducar <= 3 
+                                          ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
+                                          : 'text-gray-900 dark:text-gray-100'
+                                      }`}>
+                                        {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
+                                      </td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </section>
                     )}
@@ -958,90 +960,92 @@ export default function InventoryManager() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-                <thead className="bg-gray-200 dark:bg-gray-700">
-                  <tr>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
-                    {compactView ? (
-                      <>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
-                      </>
-                    ) : (
-                      <>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha Entrada</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha Expiración</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Precio</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
-                      </>
-                    )}
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {productosFiltrados.length === 0 ? (
+            <div className="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
+              <div className="min-w-[800px] lg:min-w-full"> {/* Ancho mínimo en móvil, natural en desktop */}
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-gray-200 dark:bg-gray-700">
                     <tr>
-                      <td colSpan={compactView ? 4 : 8} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                        No se encontraron productos
-                      </td>
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
+                      {compactView ? (
+                        <>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
+                        </>
+                      ) : (
+                        <>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha Entrada</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha Expiración</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Precio</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
+                        </>
+                      )}
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Acciones</th>
                     </tr>
-                  ) : (
-                    productosFiltrados.map(p => {
-                      const proveedor = suppliers.find(s => s.id === p.supplierId);
-                      const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
-                      return (
-                        <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                          <td className="p-2">
-                            <div className="flex items-center gap-2">
-                              {p.image ? (
-                                <img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded" />
-                              ) : (
-                                <Package size={24} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
-                              )}
-                              <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
-                            </div>
-                          </td>
-                          {compactView ? (
-                            <>
-                              <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
-                              <td className={`p-2 ${
-                                diasParaCaducar <= 1 
-                                  ? 'text-red-600 dark:text-red-400 font-bold' 
-                                  : diasParaCaducar <= 3 
-                                  ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
-                                  : 'text-gray-900 dark:text-gray-100'
-                              }`}>
-                                {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
-                              </td>
-                            </>
-                          ) : (
-                            <>
-                              <td className="p-2 text-gray-900 dark:text-gray-100">{format(p.entryDate, 'dd/MM/yyyy')}</td>
-                              <td className="p-2 text-gray-900 dark:text-gray-100">{format(p.expirationDate, 'dd/MM/yyyy')}</td>
-                              <td className="p-2 text-gray-900 dark:text-gray-100">${p.price.toFixed(2)}</td>
-                              <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
-                              <td className="p-2 text-gray-900 dark:text-gray-100">{p.type}</td>
-                              <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
-                            </>
-                          )}
-                          <td className="p-2">
-                            <button 
-                              onClick={() => { setScannedProduct(p); setActionQuantity(1); setShowScanModal(true); }} 
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded flex items-center gap-1"
-                              aria-label={`Gestionar producto ${p.name}`}
-                            >
-                              <ShoppingCart size={16} aria-hidden="true" /> Gestionar
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {productosFiltrados.length === 0 ? (
+                      <tr>
+                        <td colSpan={compactView ? 4 : 8} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                          No se encontraron productos
+                        </td>
+                      </tr>
+                    ) : (
+                      productosFiltrados.map(p => {
+                        const proveedor = suppliers.find(s => s.id === p.supplierId);
+                        const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
+                        return (
+                          <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <td className="p-2">
+                              <div className="flex items-center gap-2">
+                                {p.image ? (
+                                  <img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded" />
+                                ) : (
+                                  <Package size={24} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                                )}
+                                <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
+                              </div>
+                            </td>
+                            {compactView ? (
+                              <>
+                                <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                                <td className={`p-2 ${
+                                  diasParaCaducar <= 1 
+                                    ? 'text-red-600 dark:text-red-400 font-bold' 
+                                    : diasParaCaducar <= 3 
+                                    ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
+                                    : 'text-gray-900 dark:text-gray-100'
+                                }`}>
+                                  {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                <td className="p-2 text-gray-900 dark:text-gray-100">{format(p.entryDate, 'dd/MM/yyyy')}</td>
+                                <td className="p-2 text-gray-900 dark:text-gray-100">{format(p.expirationDate, 'dd/MM/yyyy')}</td>
+                                <td className="p-2 text-gray-900 dark:text-gray-100">${p.price.toFixed(2)}</td>
+                                <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                                <td className="p-2 text-gray-900 dark:text-gray-100">{p.type}</td>
+                                <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
+                              </>
+                            )}
+                            <td className="p-2">
+                              <button 
+                                onClick={() => { setScannedProduct(p); setActionQuantity(1); setShowScanModal(true); }} 
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded flex items-center gap-1"
+                                aria-label={`Gestionar producto ${p.name}`}
+                              >
+                                <ShoppingCart size={16} aria-hidden="true" /> Gestionar
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </section>
         )}
