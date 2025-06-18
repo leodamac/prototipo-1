@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Trash2, RefreshCw, X, GripVertical, Settings, Menu } from 'lucide-react';
+import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Trash2, RefreshCw, X, GripVertical, Settings, Menu, Plus } from 'lucide-react';
 import { format, subDays, addDays, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -407,6 +407,71 @@ export default function InventoryManager() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showScanModal]);
+
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+  const [newProduct, setNewProduct] = useState<Partial<Product>>({
+    name: '',
+    type: '',
+    price: 0,
+    stock: 0,
+    supplierId: '',
+    image: '',
+    qrCode: '',
+    barcode: '',
+  });
+  const [newSupplier, setNewSupplier] = useState<Partial<Supplier>>({
+    name: '',
+    contact: '',
+    products: [],
+  });
+
+  // Añadir estas funciones junto a los demás handlers
+  const handleAddProduct = () => {
+    const product: Product = {
+      id: `prod-${Date.now()}`,
+      name: newProduct.name || '',
+      type: newProduct.type || '',
+      price: newProduct.price || 0,
+      stock: newProduct.stock || 0,
+      supplierId: newProduct.supplierId || '',
+      image: newProduct.image || '',
+      qrCode: newProduct.qrCode || `QR${Date.now()}`,
+      barcode: newProduct.barcode || `BAR${Date.now()}`,
+      entryDate: new Date(),
+      expirationDate: addDays(new Date(), 30), // Por defecto 30 días
+    };
+
+    setProducts([...products, product]);
+    setShowAddProductModal(false);
+    setNewProduct({
+      name: '',
+      type: '',
+      price: 0,
+      stock: 0,
+      supplierId: '',
+      image: '',
+      qrCode: '',
+      barcode: '',
+    });
+  };
+
+  const handleAddSupplier = () => {
+    const supplier: Supplier = {
+      id: `sup-${Date.now()}`,
+      name: newSupplier.name || '',
+      contact: newSupplier.contact || '',
+      products: [],
+    };
+
+    setSuppliers([...suppliers, supplier]);
+    setShowAddSupplierModal(false);
+    setNewSupplier({
+      name: '',
+      contact: '',
+      products: [],
+    });
+  };
 
   if (!isClient) {
     return null; // O un spinner de carga si lo prefieres
@@ -947,42 +1012,14 @@ export default function InventoryManager() {
                 Productos
               </h2>
               
-              <div className="flex flex-wrap gap-2 items-center">
-                {/* Input de búsqueda */}
-                <input
-                  type="text"
-                  placeholder="Buscar producto, QR o código de barras"
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                  aria-label="Buscar producto, QR o código de barras"
-                />
-
-                {/* Select de tipo */}
-                <select 
-                  value={filterType} 
-                  onChange={e => setFilterType(e.target.value)} 
-                  className="rounded border border-gray-300 dark:border-gray-600 px-2 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  aria-label="Filtrar por tipo"
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Input de búsqueda y filtros existentes */}
+                <button
+                  onClick={() => setShowAddProductModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
                 >
-                  <option value="all" className="text-gray-900 dark:text-gray-100">Todos los tipos</option>
-                  {Array.from(new Set(products.map(p => p.type))).map(type => (
-                    <option key={type} value={type} className="text-gray-900 dark:text-gray-100">{type}</option>
-                  ))}
-                </select>
-
-                {/* Select de proveedor */}
-                <select 
-                  value={filterSupplier} 
-                  onChange={e => setFilterSupplier(e.target.value)} 
-                  className="rounded border border-gray-300 dark:border-gray-600 px-2 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  aria-label="Filtrar por proveedor"
-                >
-                  <option value="all" className="text-gray-900 dark:text-gray-100">Todos los proveedores</option>
-                  {suppliers.map(s => (
-                    <option key={s.id} value={s.id} className="text-gray-900 dark:text-gray-100">{s.name}</option>
-                  ))}
-                </select>
+                  <Plus size={20} /> Añadir Producto
+                </button>
               </div>
             </div>
 
@@ -1131,11 +1168,20 @@ export default function InventoryManager() {
         {/* Pestaña Proveedores */}
         {activeTab === 'suppliers' && (
           <section>
-            <h2 className="text-2xl font-semibold flex items-center gap-2 mb-4 text-gray-900 dark:text-gray-100">
-              <Users size={28} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-              Proveedores
-            </h2>
-            
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+              <h2 className="text-2xl font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                <Users size={28} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                Proveedores
+              </h2>
+              
+              <button
+                onClick={() => setShowAddSupplierModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+              >
+                <Plus size={20} /> Añadir Proveedor
+              </button>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                 <thead className="bg-gray-200 dark:bg-gray-700">
@@ -1331,6 +1377,170 @@ export default function InventoryManager() {
                       </button>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para añadir producto */}
+      {showAddProductModal && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]">
+          <div className="fixed inset-0 overflow-y-auto pt-16 sm:pt-20">
+            <div className="flex min-h-full items-start justify-center p-4">
+              <div 
+                className="bg-white dark:bg-gray-800 w-full max-w-md rounded-lg shadow-xl"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Añadir Nuevo Producto
+                  </h3>
+                </div>
+
+                <div className="p-4 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      Nombre del Producto
+                    </label>
+                    <input
+                      type="text"
+                      value={newProduct.name}
+                      onChange={e => setNewProduct({...newProduct, name: e.target.value})}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      Tipo
+                    </label>
+                    <input
+                      type="text"
+                      value={newProduct.type}
+                      onChange={e => setNewProduct({...newProduct, type: e.target.value})}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        Precio
+                      </label>
+                      <input
+                        type="number"
+                        value={newProduct.price}
+                        onChange={e => setNewProduct({...newProduct, price: Number(e.target.value)})}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        Stock Inicial
+                      </label>
+                      <input
+                        type="number"
+                        value={newProduct.stock}
+                        onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      Proveedor
+                    </label>
+                    <select
+                      value={newProduct.supplierId}
+                      onChange={e => setNewProduct({...newProduct, supplierId: e.target.value})}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    >
+                      <option value="">Seleccionar proveedor</option>
+                      {suppliers.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowAddProductModal(false)}
+                    className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddProduct}
+                    className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Añadir Producto
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para añadir proveedor */}
+      {showAddSupplierModal && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]">
+          <div className="fixed inset-0 overflow-y-auto pt-16 sm:pt-20">
+            <div className="flex min-h-full items-start justify-center p-4">
+              <div 
+                className="bg-white dark:bg-gray-800 w-full max-w-md rounded-lg shadow-xl"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Añadir Nuevo Proveedor
+                  </h3>
+                </div>
+
+                <div className="p-4 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      Nombre del Proveedor
+                    </label>
+                    <input
+                      type="text"
+                      value={newSupplier.name}
+                      onChange={e => setNewSupplier({...newSupplier, name: e.target.value})}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+                      Contacto
+                    </label>
+                    <input
+                      type="text"
+                      value={newSupplier.contact}
+                      onChange={e => setNewSupplier({...newSupplier, contact: e.target.value})}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowAddSupplierModal(false)}
+                    className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAddSupplier}
+                    className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Añadir Proveedor
+                  </button>
                 </div>
               </div>
             </div>
