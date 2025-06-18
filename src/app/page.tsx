@@ -302,7 +302,7 @@ export default function InventoryManager() {
         '30d': 30,
         '90d': 90,
         '365d': 365
-      }[dateRange];
+      }[dateRange] ?? 7; // Valor por defecto 7 días
 
       for (let i = dias - 1; i >= 0; i--) {
         const fecha = startOfDay(subDays(new Date(), i));
@@ -504,6 +504,76 @@ export default function InventoryManager() {
       products: [],
     });
   };
+
+  // Añadir estos cálculos junto a los otros useMemo
+  const ventasTotales = useMemo(() => {
+    return sales
+      .filter(s => 
+        s.type === 'sale' &&
+        (filterType === 'all' || products.find(p => p.id === s.productId)?.type === filterType) &&
+        (filterSupplier === 'all' || products.find(p => p.id === s.productId)?.supplierId === filterSupplier)
+      )
+      .reduce((total, s) => {
+        const producto = products.find(p => p.id === s.productId);
+        return total + (s.quantity * (producto?.price || 0));
+      }, 0);
+  }, [sales, products, filterType, filterSupplier]);
+
+  const porcentajeCrecimiento = useMemo(() => {
+    // Calcular ventas del periodo actual vs anterior
+    const periodoEnDias = {
+      '7d': 7,
+      '30d': 30,
+      '90d': 90,
+      '365d': 365,
+      'year': 365
+    }[dateRange] ?? 7; // Valor por defecto 7 días
+
+    const ventasPeriodoActual = sales
+      .filter(s => 
+        s.type === 'sale' &&
+        s.date >= subDays(new Date(), periodoEnDias) &&
+        (filterType === 'all' || products.find(p => p.id === s.productId)?.type === filterType) &&
+        (filterSupplier === 'all' || products.find(p => p.id === s.productId)?.supplierId === filterSupplier)
+      )
+      .reduce((total, s) => {
+        const producto = products.find(p => p.id === s.productId);
+        return total + (s.quantity * (producto?.price || 0));
+      }, 0);
+
+    const ventasPeriodoAnterior = sales
+      .filter(s => 
+        s.type === 'sale' &&
+        s.date >= subDays(new Date(), periodoEnDias * 2) &&
+        s.date < subDays(new Date(), periodoEnDias) &&
+        (filterType === 'all' || products.find(p => p.id === s.productId)?.type === filterType) &&
+        (filterSupplier === 'all' || products.find(p => p.id === s.productId)?.supplierId === filterSupplier)
+      )
+      .reduce((total, s) => {
+        const producto = products.find(p => p.id === s.productId);
+        return total + (s.quantity * (producto?.price || 0));
+      }, 0);
+
+    if (ventasPeriodoAnterior === 0) return 100;
+    return ((ventasPeriodoActual - ventasPeriodoAnterior) / ventasPeriodoAnterior * 100).toFixed(1);
+  }, [sales, products, dateRange, filterType, filterSupplier]);
+
+  const productosCaducados = useMemo(() => {
+    return products.filter(p => 
+      differenceInDays(p.expirationDate, new Date()) < 0 &&
+      (filterType === 'all' || p.type === filterType) &&
+      (filterSupplier === 'all' || p.supplierId === filterSupplier)
+    );
+  }, [products, filterType, filterSupplier]);
+
+  const productosPorCaducar = useMemo(() => {
+    return products.filter(p => {
+      const dias = differenceInDays(p.expirationDate, new Date());
+      return dias >= 0 && dias <= 7 &&
+        (filterType === 'all' || p.type === filterType) &&
+        (filterSupplier === 'all' || p.supplierId === filterSupplier);
+    });
+  }, [products, filterType, filterSupplier]);
 
   if (!isClient) {
     return null; // O un spinner de carga si lo prefieres
@@ -732,375 +802,568 @@ export default function InventoryManager() {
           </div>
         )}
 
-        {/* Contenido de pestañas */}
+        {/* Filtros y KPIs en el dashboard */}
         {activeTab === 'dashboard' && (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={manejarDragEnd}>
-            <SortableContext items={widgets.map(w => w.id)} strategy={verticalListSortingStrategy}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {widgets.map(widget => widget.visible && (
-                  <SortableWidget 
-                    key={widget.id} 
-                    widget={widget}
+          <>
+            {/* 1. Primero, añadir el filtro global al inicio del dashboard */}
+            <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros Globales</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Periodo
+                  </label>
+                  <label htmlFor="dashboard-date-range" className="sr-only">Periodo</label>
+                  <select
+                    id="dashboard-date-range"
+                    value={dateRange}
+                    onChange={(e) => setDateRange(e.target.value)}
+                    className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
-                    {/* Widget de Tabla de Inventario */}
-                    {widget.type === 'inventory-table' && (
-                      <section aria-label="Tabla de inventario">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-                          Inventario de Productos
-                        </h3>
-                        <div className="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
-                          <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
-                              <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">
-                                  Nombre
-                                </th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[120px]">
-                                  Días para caducar
-                                </th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">
-                                  Precio
-                                </th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">
-                                  Acciones
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                              {products.length === 0 ? (
+                    <option value="7d">Últimos 7 días</option>
+                    <option value="30d">Últimos 30 días</option>
+                    <option value="90d">Últimos 90 días</option>
+                    <option value="365d">Último año</option>
+                    <option value="year">Por año</option>
+                  </select>
+                </div>
+
+                {dateRange === 'year' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Año
+                    </label>
+                    <label htmlFor="dashboard-year-select" className="sr-only">Año</label>
+                    <select
+                      id="dashboard-year-select"
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(Number(e.target.value))}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    >
+                      {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                        <option key={year} value={year}>{year}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tipo de Producto
+                  </label>
+                  <label htmlFor="filter-type-select" className="sr-only">Tipo de Producto</label>
+                  <select
+                    id="filter-type-select"
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="all">Todos los tipos</option>
+                    {Array.from(new Set(products.map(p => p.type))).map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Proveedor
+                  </label>
+                  <label htmlFor="filter-supplier-select" className="sr-only">Proveedor</label>
+                  <select
+                    id="filter-supplier-select"
+                    value={filterSupplier}
+                    onChange={(e) => setFilterSupplier(e.target.value)}
+                    className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="all">Todos los proveedores</option>
+                    {suppliers.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Añadir el nuevo widget de KPIs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Ventas Totales</h3>
+                  <ShoppingCart size={20} className="text-blue-500" />
+                </div>
+                <div className="mt-2 flex items-baseline">
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    ${ventasTotales.toFixed(2)}
+                  </p>
+                  <p className="ml-2 text-sm text-green-600 dark:text-green-400">
+                    +{porcentajeCrecimiento}%
+                  </p>
+                </div>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  vs periodo anterior
+                </p>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Productos Caducados</h3>
+                  <AlertTriangle size={20} className="text-red-500" />
+                </div>
+                <div className="mt-2">
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    {productosCaducados.length}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Última semana
+                </p>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Por Caducar</h3>
+                  <Calendar size={20} className="text-yellow-500" />
+                </div>
+                <div className="mt-2">
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    {productosPorCaducar.length}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Próximos 7 días
+                </p>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Stock Bajo</h3>
+                  <Package size={20} className="text-orange-500" />
+                </div>
+                <div className="mt-2">
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                    {productosStockBajo.length}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Necesitan reposición
+                </p>
+              </div>
+            </div>
+
+            {/* Continuar con el DndContext y los widgets existentes */}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={manejarDragEnd}>
+              <SortableContext items={widgets.map(w => w.id)} strategy={verticalListSortingStrategy}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {widgets.map(widget => widget.visible && (
+                    <SortableWidget 
+                      key={widget.id} 
+                      widget={widget}
+                    >
+                      {/* Widget de Tabla de Inventario */}
+                      {widget.type === 'inventory-table' && (
+                        <section aria-label="Tabla de inventario">
+                          <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                            <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                            Inventario de Productos
+                          </h3>
+                          <div className="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
+                            <table className="w-full text-left text-sm">
+                              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
                                 <tr>
-                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                                    No hay productos en inventario
-                                  </td>
+                                  {/* Columna de nombre/producto - mantener ancho para la imagen + texto */}
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[180px]">
+                                    Nombre
+                                  </th>
+                                  
+                                  {/* Columnas de fechas - reducir el ancho mínimo */}
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
+                                    Fecha Entrada
+                                  </th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
+                                    Fecha Expiración
+                                  </th>
+                                  
+                                  {/* Columnas numéricas - reducir significativamente */}
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[70px]">
+                                    Precio
+                                  </th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[60px]">
+                                    Stock
+                                  </th>
+                                  
+                                  {/* Columnas de texto corto */}
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
+                                    Tipo
+                                  </th>
+                                  
+                                  {/* Columnas más largas */}
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[120px]">
+                                    Proveedor
+                                  </th>
+                                  
+                                  {/* Columna de acciones */}
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
+                                    Acciones
+                                  </th>
                                 </tr>
-                              ) : (
-                                products.map(p => {
-                                  const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
-                                  return (
-                                    <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                      <td className="p-2">
-                                        <div className="flex items-center gap-2">
-                                          {p.image ? (
-                                            <img src={p.image} alt={p.name} className="w-8 h-8 object-cover rounded" />
-                                          ) : (
-                                            <Package size={20} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
-                                          )}
-                                          <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
-                                        </div>
-                                      </td>
-                                      <td className={`p-2 ${
-                                        diasParaCaducar <= 1 
-                                          ? 'text-red-600 dark:text-red-400 font-bold' 
-                                          : diasParaCaducar <= 3 
-                                          ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
-                                          : 'text-gray-900 dark:text-gray-100'
-                                      }`}>
-                                        {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
-                                      </td>
-                                      <td className="p-2 text-gray-900 dark:text-gray-100">
-                                        ${p.price.toFixed(2)}
-                                      </td>
-                                      <td className="p-2">
-                                        <button 
-                                          onClick={() => { setScannedProduct(p); setActionQuantity(1); setShowScanModal(true); }} 
-                                          className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded flex items-center gap-1"
-                                          aria-label={`Gestionar producto ${p.name}`}
-                                        >
-                                          <ShoppingCart size={16} aria-hidden="true" /> Gestionar
-                                        </button>
-                                      </td>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                {products.filter(p => 
+                                  (filterType === 'all' || p.type === filterType) &&
+                                  (filterSupplier === 'all' || p.supplierId === filterSupplier)
+                                ).length === 0 ? (
+                                  <tr>
+                                    <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                      No hay productos en inventario
+                                    </td>
+                                  </tr>
+                                ) : (
+                                  products
+                                    .filter(p => 
+                                      (filterType === 'all' || p.type === filterType) &&
+                                      (filterSupplier === 'all' || p.supplierId === filterSupplier)
+                                    )
+                                    .map(p => {
+                                      const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
+                                      return (
+                                        <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                          <td className="p-2">
+                                            <div className="flex items-center gap-2">
+                                              {p.image ? (
+                                                <img src={p.image} alt={p.name} className="w-8 h-8 object-cover rounded" />
+                                              ) : (
+                                                <Package size={20} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                                              )}
+                                              <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
+                                            </div>
+                                          </td>
+                                          <td className={`p-2 ${
+                                            diasParaCaducar <= 1 
+                                              ? 'text-red-600 dark:text-red-400 font-bold' 
+                                              : diasParaCaducar <= 3 
+                                              ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
+                                              : 'text-gray-900 dark:text-gray-100'
+                                          }`}>
+                                            {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
+                                          </td>
+                                          <td className="p-2 text-gray-900 dark:text-gray-100">
+                                            ${p.price.toFixed(2)}
+                                          </td>
+                                          <td className="p-2">
+                                            <button 
+                                              onClick={() => { setScannedProduct(p); setActionQuantity(1); setShowScanModal(true); }} 
+                                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded flex items-center gap-1"
+                                              aria-label={`Gestionar producto ${p.name}`}
+                                            >
+                                              <ShoppingCart size={16} aria-hidden="true" /> Gestionar
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </section>
+                      )}
+
+                      {/* Widget de Ventas Recientes */}
+                      {widget.type === 'recent-sales' && (
+                        <section aria-label="Ventas recientes">
+                          <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                            <ShoppingCart size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                            Últimas Ventas
+                          </h3>
+                          <div className="overflow-x-auto max-h-96">
+                            <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
+                              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+                                <tr>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">Producto</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Cantidad</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Precio Unit.</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Fecha</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {ventasRecientes.length === 0 ? (
+                                  <tr>
+                                    <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                      No hay ventas recientes
+                                    </td>
+                                  </tr>
+                                ) : (
+                                  ventasRecientes.map(s => (
+                                    <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{s.nombreProducto}</td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{s.quantity}</td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">${s.precio.toFixed(2)}</td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{format(s.date, 'dd/MM/yyyy')}</td>
                                     </tr>
-                                  );
-                                })
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      </section>
-                    )}
+                                  ))
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </section>
+                      )}
 
-                    {/* Widget de Ventas Recientes */}
-                    {widget.type === 'recent-sales' && (
-                      <section aria-label="Ventas recientes">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <ShoppingCart size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-                          Últimas Ventas
-                        </h3>
-                        <div className="overflow-x-auto max-h-96">
-                          <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-                            <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
-                              <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Cantidad</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Precio Unit.</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Fecha</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {ventasRecientes.length === 0 ? (
+                      {/* Widget de Stock Bajo */}
+                      {widget.type === 'low-stock' && (
+                        <section aria-label="Productos con stock bajo">
+                          <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                            <AlertTriangle size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                            Productos con Stock Bajo
+                          </h3>
+                          <div className="overflow-x-auto max-h-96">
+                            <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
+                              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                                 <tr>
-                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                                    No hay ventas recientes
-                                  </td>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">Producto</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Stock</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Tipo</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Proveedor</th>
                                 </tr>
-                              ) : (
-                                ventasRecientes.map(s => (
-                                  <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{s.nombreProducto}</td>
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{s.quantity}</td>
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">${s.precio.toFixed(2)}</td>
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{format(s.date, 'dd/MM/yyyy')}</td>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                {productosStockBajo.length === 0 && (
+                                  <tr>
+                                    <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                      No hay productos con stock bajo
+                                    </td>
                                   </tr>
-                                ))
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      </section>
-                    )}
-
-                    {/* Widget de Stock Bajo */}
-                    {widget.type === 'low-stock' && (
-                      <section aria-label="Productos con stock bajo">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <AlertTriangle size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-                          Productos con Stock Bajo
-                        </h3>
-                        <div className="overflow-x-auto max-h-96">
-                          <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-                            <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
-                              <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Stock</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Tipo</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Proveedor</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                              {productosStockBajo.length === 0 && (
-                                <tr>
-                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                                    No hay productos con stock bajo
-                                  </td>
-                                </tr>
-                              )}
-                              {productosStockBajo.map(p => {
-                                const proveedor = suppliers.find(s => s.id === p.supplierId);
-                                return (
-                                  <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{p.name}</td>
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{p.type}</td>
-                                    <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </section>
-                    )}
-
-                    {/* Widget de Productos por Caducar */}
-                    {widget.type === 'expiring-soon' && (
-                      <section aria-label="Productos próximos a caducar">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <Calendar size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-                          Productos Próximos a Caducar
-                        </h3>
-                        <div className="overflow-x-auto max-h-96">
-                          <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-                            <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
-                              <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Días para caducar</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Stock</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Proveedor</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                              {productosProximosCaducar.length === 0 ? (
-                                <tr>
-                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                                    No hay productos próximos a caducar
-                                  </td>
-                                </tr>
-                              ) : (
-                                productosProximosCaducar.map(p => {
-                                  const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
+                                )}
+                                {productosStockBajo.map(p => {
                                   const proveedor = suppliers.find(s => s.id === p.supplierId);
                                   return (
                                     <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
                                       <td className="p-2 text-gray-900 dark:text-gray-100">{p.name}</td>
-                                      <td className={`p-2 ${
-                                        diasParaCaducar <= 1 
-                                          ? 'text-red-600 dark:text-red-400 font-bold' 
-                                          : diasParaCaducar <= 3 
-                                          ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
-                                          : 'text-gray-900 dark:text-gray-100'
-                                      }`}>
-                                        {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
-                                      </td>
                                       <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{p.type}</td>
                                       <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
                                     </tr>
                                   );
-                                })
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      </section>
-                    )}
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </section>
+                      )}
 
-                    {/* Widget de Tendencia de Ventas */}
-                    {widget.type === 'sales-trend' && isClient && (
-                      <section aria-label="Tendencia de ventas">
-                        <div className="flex flex-col gap-4">
-                          <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                            <TrendingUp size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-                            Tendencia de Ventas
+                      {/* Widget de Productos por Caducar */}
+                      {widget.type === 'expiring-soon' && (
+                        <section aria-label="Productos próximos a caducar">
+                          <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                            <Calendar size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                            Productos Próximos a Caducar
                           </h3>
+                          <div className="overflow-x-auto max-h-96">
+                            <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
+                              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+                                <tr>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">Producto</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Días para caducar</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Stock</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Proveedor</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                {productosProximosCaducar.length === 0 ? (
+                                  <tr>
+                                    <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                      No hay productos próximos a caducar
+                                    </td>
+                                  </tr>
+                                ) : (
+                                  productosProximosCaducar.map(p => {
+                                    const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
+                                    const proveedor = suppliers.find(s => s.id === p.supplierId);
+                                    return (
+                                      <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <td className="p-2 text-gray-900 dark:text-gray-100">{p.name}</td>
+                                        <td className={`p-2 ${
+                                          diasParaCaducar <= 1 
+                                            ? 'text-red-600 dark:text-red-400 font-bold' 
+                                            : diasParaCaducar <= 3 
+                                            ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
+                                            : 'text-gray-900 dark:text-gray-100'
+                                        }`}>
+                                          {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
+                                        </td>
+                                        <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                                        <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
+                                      </tr>
+                                    );
+                                  })
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </section>
+                      )}
 
-                          {/* Filtros */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                            <select
-                              value={dateRange}
-                              onChange={(e) => setDateRange(e.target.value)}
-                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                            >
-                              <option value="7d">Últimos 7 días</option>
-                              <option value="30d">Últimos 30 días</option>
-                              <option value="90d">Últimos 90 días</option>
-                              <option value="365d">Último año</option>
-                              <option value="year">Por año</option>
-                            </select>
+                      {/* Widget de Tendencia de Ventas */}
+                      {widget.type === 'sales-trend' && isClient && (
+                        <section aria-label="Tendencia de ventas">
+                          <div className="flex flex-col gap-4">
+                            <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                              <TrendingUp size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                              Tendencia de Ventas
+                            </h3>
 
-                            {dateRange === 'year' && (
+                            {/* Filtros */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                              <label htmlFor="dashboard-date-range" className="sr-only">Periodo</label>
                               <select
-                                value={selectedYear}
-                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                id="dashboard-date-range"
+                                value={dateRange}
+                                onChange={(e) => setDateRange(e.target.value)}
                                 className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                               >
-                                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                                  <option key={year} value={year}>{year}</option>
+                                <option value="7d">Últimos 7 días</option>
+                                <option value="30d">Últimos 30 días</option>
+                                <option value="90d">Últimos 90 días</option>
+                                <option value="365d">Último año</option>
+                                <option value="year">Por año</option>
+                              </select>
+
+                              {dateRange === 'year' && (
+                                <div>
+                                  <label htmlFor="dashboard-year-select-sales-trend" className="sr-only">Año</label>
+                                  <select
+                                    id="dashboard-year-select-sales-trend"
+                                    aria-label="Año"
+                                    value={selectedYear}
+                                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                    className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                  >
+                                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                                      <option key={year} value={year}>{year}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+
+                              <label htmlFor="sales-trend-filter-type" className="sr-only">Tipo de Producto</label>
+                              <select
+                                id="sales-trend-filter-type"
+                                value={filterType}
+                                onChange={(e) => setFilterType(e.target.value)}
+                                className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                              >
+                                <option value="all">Todos los tipos</option>
+                                {Array.from(new Set(products.map(p => p.type))).map(type => (
+                                  <option key={type} value={type}>{type}</option>
                                 ))}
                               </select>
-                            )}
 
-                            <select
-                              value={filterType}
-                              onChange={(e) => setFilterType(e.target.value)}
-                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                            >
-                              <option value="all">Todos los tipos</option>
-                              {Array.from(new Set(products.map(p => p.type))).map(type => (
-                                <option key={type} value={type}>{type}</option>
-                              ))}
-                            </select>
-
-                            <select
-                              value={filterSupplier}
-                              onChange={(e) => setFilterSupplier(e.target.value)}
-                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                            >
-                              <option value="all">Todos los proveedores</option>
-                              {suppliers.map(s => (
-                                <option key={s.id} value={s.id}>{s.name}</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          {/* Gráfico */}
-                          <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart 
-                                data={datosTendenciaVentas}
-                                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                              <label htmlFor="inventory-by-type-filter-supplier" className="sr-only">Proveedor</label>
+                              <select
+                                id="inventory-by-type-filter-supplier"
+                                value={filterSupplier}
+                                onChange={(e) => setFilterSupplier(e.target.value)}
+                                className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                               >
-                                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
-                                <XAxis 
-                                  dataKey="fecha" 
-                                  className="text-gray-900 dark:text-gray-100" 
-                                />
-                                <YAxis 
-                                  className="text-gray-900 dark:text-gray-100"
-                                />
-                                <Tooltip
-                                  contentStyle={{
-                                    backgroundColor: 'rgb(var(--bg-white))',
-                                    borderColor: 'rgb(var(--border-gray-300))',
-                                    color: 'rgb(var(--text-gray-900))',
-                                    fontSize: '12px',
-                                    padding: '8px',
-                                    borderRadius: '4px'
-                                  }}
-                                />
-                                <Legend />
-                                <Line type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                              </LineChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-                      </section>
-                    )}
+                                <option value="all">Todos los proveedores</option>
+                                {suppliers.map(s => (
+                                  <option key={s.id} value={s.id}>{s.name}</option>
+                                ))}
+                              </select>
+                            </div>
 
-                    {/* Widget de Inventario por Tipo */}
-                    {widget.type === 'inventory-by-type' && isClient && (
-                      <section aria-label="Inventario por tipo">
-                        <div className="flex flex-col gap-4">
-                          <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                            <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-                            Inventario por Tipo
-                          </h3>
-
-                          {/* Filtros */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <select
-                              value={filterSupplier}
-                              onChange={(e) => setFilterSupplier(e.target.value)}
-                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                            >
-                              <option value="all">Todos los proveedores</option>
-                              {suppliers.map(s => (
-                                <option key={s.id} value={s.id}>{s.name}</option>
-                              ))}
-                            </select>
+                            {/* Gráfico */}
+                            <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart 
+                                  data={datosTendenciaVentas}
+                                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                                >
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                                  <XAxis 
+                                    dataKey="fecha" 
+                                    className="text-gray-900 dark:text-gray-100" 
+                                  />
+                                  <YAxis 
+                                    className="text-gray-900 dark:text-gray-100"
+                                  />
+                                  <Tooltip
+                                    contentStyle={{
+                                      backgroundColor: 'rgb(var(--bg-white))',
+                                      borderColor: 'rgb(var(--border-gray-300))',
+                                      color: 'rgb(var(--text-gray-900))',
+                                      fontSize: '12px',
+                                      padding: '8px',
+                                      borderRadius: '4px'
+                                    }}
+                                  />
+                                  <Legend />
+                                  <Line type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
                           </div>
+                        </section>
+                      )}
 
-                          {/* Gráfico */}
-                          <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={inventarioPorTipo}>
-                                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
-                                <XAxis 
-                                  dataKey="tipo" 
-                                  className="text-gray-900 dark:text-gray-100"
-                                />
-                                <YAxis 
-                                  className="text-gray-900 dark:text-gray-100"
-                                />
-                                <Tooltip 
-                                  contentStyle={{ 
-                                    backgroundColor: 'rgb(var(--bg-white))',
-                                    borderColor: 'rgb(var(--border-gray-300))',
-                                    color: 'rgb(var(--text-gray-900))'
-                                  }} 
-                                />
-                                <Legend />
-                                <Bar dataKey="stock" fill="#3b82f6" />
-                              </BarChart>
-                            </ResponsiveContainer>
+                      {/* Widget de Inventario por Tipo */}
+                      {widget.type === 'inventory-by-type' && isClient && (
+                        <section aria-label="Inventario por tipo">
+                          <div className="flex flex-col gap-4">
+                            <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                              <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                              Inventario por Tipo
+                            </h3>
+
+                            {/* Filtros */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              <label htmlFor="inventory-by-type-filter-supplier" className="sr-only">Proveedor</label>
+                              <select
+                                id="inventory-by-type-filter-supplier"
+                                value={filterSupplier}
+                                onChange={(e) => setFilterSupplier(e.target.value)}
+                                className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                              >
+                                <option value="all">Todos los proveedores</option>
+                                {suppliers.map(s => (
+                                  <option key={s.id} value={s.id}>{s.name}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Gráfico */}
+                            <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={inventarioPorTipo}>
+                                  <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                                  <XAxis 
+                                    dataKey="tipo" 
+                                    className="text-gray-900 dark:text-gray-100"
+                                  />
+                                  <YAxis 
+                                    className="text-gray-900 dark:text-gray-100"
+                                  />
+                                  <Tooltip 
+                                    contentStyle={{ 
+                                      backgroundColor: 'rgb(var(--bg-white))',
+                                      borderColor: 'rgb(var(--border-gray-300))',
+                                      color: 'rgb(var(--text-gray-900))'
+                                    }} 
+                                  />
+                                  <Legend />
+                                  <Bar dataKey="stock" fill="#3b82f6" />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </div>
                           </div>
-                        </div>
-                      </section>
-                    )}
-                  </SortableWidget>
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+                        </section>
+                      )}
+                    </SortableWidget>
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </>
         )}
 
         {/* Pestaña Productos */}
@@ -1128,29 +1391,47 @@ export default function InventoryManager() {
                 <table className="w-full text-left text-sm">
                   <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
                     <tr>
-                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">Nombre</th>
-                      {compactView ? (
-                        <>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Stock</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Días para caducar</th>
-                        </>
-                      ) : (
-                        <>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Fecha Entrada</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Fecha Expiración</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[80px]">Precio</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[80px]">Stock</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Tipo</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[150px]">Proveedor</th>
-                        </>
-                      )}
-                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Acciones</th>
+                      {/* Columna de nombre/producto - mantener ancho para la imagen + texto */}
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[180px]">
+                        Nombre
+                      </th>
+                      
+                      {/* Columnas de fechas - reducir el ancho mínimo */}
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
+                        Fecha Entrada
+                      </th>
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
+                        Fecha Expiración
+                      </th>
+                      
+                      {/* Columnas numéricas - reducir significativamente */}
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[70px]">
+                        Precio
+                      </th>
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[60px]">
+                        Stock
+                      </th>
+                      
+                      {/* Columnas de texto corto */}
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
+                        Tipo
+                      </th>
+                      
+                      {/* Columnas más largas */}
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[120px]">
+                        Proveedor
+                      </th>
+                      
+                      {/* Columna de acciones */}
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {productosFiltrados.length === 0 ? (
                       <tr>
-                        <td colSpan={compactView ? 4 : 8} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
                           No se encontraron productos
                         </td>
                       </tr>
@@ -1279,6 +1560,7 @@ export default function InventoryManager() {
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               >
                 <Plus size={20} /> Añadir Proveedor
+             
               </button>
             </div>
 
@@ -1347,306 +1629,74 @@ export default function InventoryManager() {
               <small id="scanErrorHelp" className="text-gray-500 dark:text-gray-400">
                 Ajusta la probabilidad de que el escaneo falle para probar la búsqueda manual.
               </small>
-
-              <label htmlFor="darkModeToggle" className="block font-semibold mt-6 mb-2 text-gray-900 dark:text-gray-100">Modo Oscuro</label>
-              <button onClick={() => setDarkMode(!darkMode)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" aria-pressed={darkMode} aria-label="Alternar modo oscuro">
-                {darkMode ? 'Desactivar Modo Oscuro' : 'Activar Modo Oscuro'}
-              </button>
             </div>
           </section>
         )}
-      </main>
 
-      {/* Modal de escaneo mejorado */}
-      {showScanModal && scannedProduct && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]" onClick={() => {
-          setShowScanModal(false);
-          setScannedProduct(null);
-        }}>
-          <div className="fixed inset-0 overflow-y-auto pt-16 sm:pt-20"> {/* Añadido padding-top para evitar el header */}
-            <div className="flex min-h-full items-start justify-center p-4">
-              <div 
-                ref={modalRef}
-                onClick={e => e.stopPropagation()} 
-                className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-lg shadow-xl"
-              >
-                {/* Header del modal */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                    <Scan size={20} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
-                    Producto Escaneado
-                  </h3>
-                  <button
-                    onClick={() => { setShowScanModal(false); setScannedProduct(null); }}
-                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                    aria-label="Cerrar modal"
-                  >
-                    <X size={20} aria-hidden="true" />
-                  </button>
-                </div>
-
-                {/* Contenido del modal con scroll independiente */}
-                <div className="p-4 max-h-[calc(100vh-12rem)] overflow-y-auto">
-                  {/* Imagen y detalles en grid responsivo */}
-                  <div className="grid sm:grid-cols-[180px,1fr] gap-4">
-                    {/* Imagen del producto */}
-                    <div className="flex-shrink-0 mx-auto sm:mx-0">
-                      {scannedProduct.image ? (
-                        <img 
-                          src={scannedProduct.image} 
-                          alt={scannedProduct.name} 
-                          className="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-lg border border-gray-200 dark:border-gray-700" 
-                        />
-                      ) : (
-                        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                          <Package size={48} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Detalles del producto */}
-                    <div className="space-y-3">
-                      <div className="grid gap-2">
-                        <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100">{scannedProduct.name}</h4>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <p className="text-gray-900 dark:text-gray-100">
-                            <span className="font-medium">Entrada:</span><br />
-                            {format(scannedProduct.entryDate, 'dd/MM/yyyy')}
-                          </p>
-                          <p className="text-gray-900 dark:text-gray-100">
-                            <span className="font-medium">Expiración:</span><br />
-                            {format(scannedProduct.expirationDate, 'dd/MM/yyyy')}
-                          </p>
-                          <p className="text-gray-900 dark:text-gray-100">
-                            <span className="font-medium">Precio:</span><br />
-                            ${scannedProduct.price.toFixed(2)}
-                          </p>
-                          <p className="text-gray-900 dark:text-gray-100">
-                            <span className="font-medium">Stock:</span><br />
-                            {scannedProduct.stock} unidades
-                          </p>
-                          <p className="text-gray-900 dark:text-gray-100">
-                            <span className="font-medium">Tipo:</span><br />
-                            {scannedProduct.type}
-                          </p>
-                          <p className="text-gray-900 dark:text-gray-100">
-                            <span className="font-medium">QR:</span><br />
-                            {scannedProduct.qrCode}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer del modal con acciones */}
-                <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Control de cantidad */}
-                    <div className="flex items-center gap-2">
-                      <label htmlFor="actionQuantity" className="font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                        Cantidad:
-                      </label>
-                      <input
-                        id="actionQuantity"
-                        type="number"
-                        min={1}
-                        max={10000}
-                        value={actionQuantity}
-                        onChange={e => setActionQuantity(Math.max(1, Math.min(10000, Number(e.target.value))))}
-                        className="w-20 rounded border border-gray-300 dark:border-gray-600 px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
-
-                    {/* Botones de acción */}
-                    <div className="flex flex-wrap gap-2 sm:ml-auto">
-                      <button 
-                        onClick={() => manejarAccionProducto('sell')} 
-                        className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
-                        <Check size={18} aria-hidden="true" /> Vender
-                      </button>
-                      <button 
-                        onClick={() => manejarAccionProducto('dispose')} 
-                        className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
-                        <Trash2 size={18} aria-hidden="true" /> Desechar
-                      </button>
-                      <button 
-                        onClick={() => manejarAccionProducto('restock')} 
-                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justifycenter gap-2">
-                        <RefreshCw size={18} aria-hidden="true" /> Reabastecer
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para añadir producto */}
-      {showAddProductModal && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]">
-          <div className="fixed inset-0 overflow-y-auto pt-16 sm:pt-20">
-            <div className="flex min-h-full items-start justify-center p-4">
-              <div 
-                className="bg-white dark:bg-gray-800 w-full max-w-md rounded-lg shadow-xl"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Añadir Nuevo Producto
-                  </h3>
-                </div>
-
-                <div className="p-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                      Nombre del Producto
-                    </label>
-                    <input
-                      type="text"
-                      value={newProduct.name}
-                      onChange={e => setNewProduct({...newProduct, name: e.target.value})}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
+        {/* Modal para añadir proveedor */}
+        {showAddSupplierModal && (
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]">
+            <div className="fixed inset-0 overflow-y-auto pt-16 sm:pt-20">
+              <div className="flex min-h-full items-start justify-center p-4">
+                <div 
+                  className="bg-white dark:bg-gray-800 w-full max-w-md rounded-lg shadow-xl"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      Añadir Nuevo Proveedor
+                    </h3>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                      Tipo
-                    </label>
-                    <input
-                      type="text"
-                      value={newProduct.type}
-                      onChange={e => setNewProduct({...newProduct, type: e.target.value})}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                        Precio
+                        Nombre del Proveedor
                       </label>
                       <input
-                        type="number"
-                        value={newProduct.price}
-                        onChange={e => setNewProduct({...newProduct, price: Number(e.target.value)})}
+                        type="text"
+                        value={newSupplier.name}
+                        onChange={e => setNewSupplier({...newSupplier, name: e.target.value})}
                         className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        placeholder="Nombre del proveedor"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                        Stock Inicial
+                        Contacto
                       </label>
                       <input
-                        type="number"
-                        value={newProduct.stock}
-                        onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})}
+                        type="text"
+                        value={newSupplier.contact}
+                        onChange={e => setNewSupplier({...newSupplier, contact: e.target.value})}
                         className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        placeholder="Contacto del proveedor"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                      Proveedor
-                    </label>
-                    <select
-                      value={newProduct.supplierId}
-                      onChange={e => setNewProduct({...newProduct, supplierId: e.target.value})}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowAddSupplierModal(false)}
+                      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                      <option value="">Seleccionar proveedor</option>
-                      {suppliers.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleAddSupplier}
+                      className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Añadir Proveedor
+                    </button>
                   </div>
-                </div>
-
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
-                  <button
-                    onClick={() => setShowAddProductModal(false)}
-                    className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleAddProduct}
-                    className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Añadir Producto
-                  </button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Modal para añadir proveedor */}
-      {showAddSupplierModal && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]">
-          <div className="fixed inset-0 overflow-y-auto pt-16 sm:pt-20">
-            <div className="flex min-h-full items-start justify-center p-4">
-              <div 
-                className="bg-white dark:bg-gray-800 w-full max-w-md rounded-lg shadow-xl"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Añadir Nuevo Proveedor
-                  </h3>
-                </div>
-
-                <div className="p-4 space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                      Nombre del Proveedor
-                    </label>
-                    <input
-                      type="text"
-                      value={newSupplier.name}
-                      onChange={e => setNewSupplier({...newSupplier, name: e.target.value})}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                      Contacto
-                    </label>
-                    <input
-                      type="text"
-                      value={newSupplier.contact}
-                      onChange={e => setNewSupplier({...newSupplier, contact: e.target.value})}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                </div>
-
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
-                  <button
-                    onClick={() => setShowAddSupplierModal(false)}
-                    className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleAddSupplier}
-                    className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Añadir Proveedor
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </main>
 
       <footer className="mt-auto bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 py-4 text-center">
