@@ -132,6 +132,8 @@ export default function InventoryManager() {
   ]);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [dateRange, setDateRange] = useState('7d'); // '7d', '30d', '90d', '365d', 'year'
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -272,27 +274,57 @@ export default function InventoryManager() {
   }, [selectedPeriod, customDays]);
 
   const datosTendenciaVentas = useMemo(() => {
-    const dias = obtenerDiasPeriodo();
-    const datos = [];
+    let datos = [];
     
-    for (let i = dias - 1; i >= 0; i--) {
-      const fecha = startOfDay(subDays(new Date(), i));
-      const finDia = endOfDay(fecha);
-      const ventasDia = sales.filter(s => 
-        s.type === 'sale' && 
-        s.date >= fecha && 
-        s.date <= finDia &&
-        (filterType === 'all' || products.find(p => p.id === s.productId)?.type === filterType) &&
-        (filterSupplier === 'all' || products.find(p => p.id === s.productId)?.supplierId === filterSupplier)
-      );
-      
-      datos.push({
-        fecha: format(fecha, 'dd/MM'),
-        ventas: ventasDia.reduce((sum, s) => sum + s.quantity, 0)
-      });
+    if (dateRange === 'year') {
+      // Datos por mes para el año seleccionado
+      for (let month = 0; month < 12; month++) {
+        const fecha = new Date(selectedYear, month, 1);
+        const finMes = new Date(selectedYear, month + 1, 0);
+        
+        const ventasMes = sales.filter(s => 
+          s.type === 'sale' && 
+          s.date >= fecha && 
+          s.date <= finMes &&
+          (filterType === 'all' || products.find(p => p.id === s.productId)?.type === filterType) &&
+          (filterSupplier === 'all' || products.find(p => p.id === s.productId)?.supplierId === filterSupplier)
+        );
+        
+        datos.push({
+          fecha: format(fecha, 'MMM yyyy'),
+          ventas: ventasMes.reduce((sum, s) => sum + s.quantity, 0)
+        });
+      }
+    } else {
+      // Datos por día según el rango seleccionado
+      const dias = {
+        '7d': 7,
+        '30d': 30,
+        '90d': 90,
+        '365d': 365
+      }[dateRange];
+
+      for (let i = dias - 1; i >= 0; i--) {
+        const fecha = startOfDay(subDays(new Date(), i));
+        const finDia = endOfDay(fecha);
+        
+        const ventasDia = sales.filter(s => 
+          s.type === 'sale' && 
+          s.date >= fecha && 
+          s.date <= finDia &&
+          (filterType === 'all' || products.find(p => p.id === s.productId)?.type === filterType) &&
+          (filterSupplier === 'all' || products.find(p => p.id === s.productId)?.supplierId === filterSupplier)
+        );
+        
+        datos.push({
+          fecha: format(fecha, 'dd/MM'),
+          ventas: ventasDia.reduce((sum, s) => sum + s.quantity, 0)
+        });
+      }
     }
+    
     return datos;
-  }, [sales, products, filterType, filterSupplier, obtenerDiasPeriodo]);
+  }, [sales, products, filterType, filterSupplier, dateRange, selectedYear]);
 
   const inventarioPorTipo = useMemo(() => {
     const mapaTipo = new Map<string, number>();
@@ -925,41 +957,91 @@ export default function InventoryManager() {
                     {/* Widget de Tendencia de Ventas */}
                     {widget.type === 'sales-trend' && isClient && (
                       <section aria-label="Tendencia de ventas">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <TrendingUp size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-                          Tendencia de Ventas
-                        </h3>
-                        <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart 
-                              data={datosTendenciaVentas}
-                              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                        <div className="flex flex-col gap-4">
+                          <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                            <TrendingUp size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                            Tendencia de Ventas
+                          </h3>
+
+                          {/* Filtros */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                            <select
+                              value={dateRange}
+                              onChange={(e) => setDateRange(e.target.value)}
+                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                             >
-                              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
-                              <XAxis 
-                                dataKey="fecha" 
-                                className="text-gray-900 dark:text-gray-100" 
-                              />
-                              <YAxis 
-                                className="text-gray-900 dark:text-gray-100"
-                              />
-                              <Tooltip
-                                contentStyle={{
-                                  backgroundColor: 'rgb(var(--bg-white))',
-                                  borderColor: 'rgb(var(--border-gray-300))',
-                                  color: 'rgb(var(--text-gray-900))',
-                                  fontSize: '12px',
-                                  padding: '8px',
-                                  borderRadius: '4px'
-                                }}
-                                wrapperStyle={{
-                                  zIndex: 1000
-                                }}
-                              />
-                              <Legend />
-                              <Line type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                            </LineChart>
-                          </ResponsiveContainer>
+                              <option value="7d">Últimos 7 días</option>
+                              <option value="30d">Últimos 30 días</option>
+                              <option value="90d">Últimos 90 días</option>
+                              <option value="365d">Último año</option>
+                              <option value="year">Por año</option>
+                            </select>
+
+                            {dateRange === 'year' && (
+                              <select
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                              >
+                                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                                  <option key={year} value={year}>{year}</option>
+                                ))}
+                              </select>
+                            )}
+
+                            <select
+                              value={filterType}
+                              onChange={(e) => setFilterType(e.target.value)}
+                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            >
+                              <option value="all">Todos los tipos</option>
+                              {Array.from(new Set(products.map(p => p.type))).map(type => (
+                                <option key={type} value={type}>{type}</option>
+                              ))}
+                            </select>
+
+                            <select
+                              value={filterSupplier}
+                              onChange={(e) => setFilterSupplier(e.target.value)}
+                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            >
+                              <option value="all">Todos los proveedores</option>
+                              {suppliers.map(s => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Gráfico */}
+                          <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart 
+                                data={datosTendenciaVentas}
+                                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                                <XAxis 
+                                  dataKey="fecha" 
+                                  className="text-gray-900 dark:text-gray-100" 
+                                />
+                                <YAxis 
+                                  className="text-gray-900 dark:text-gray-100"
+                                />
+                                <Tooltip
+                                  contentStyle={{
+                                    backgroundColor: 'rgb(var(--bg-white))',
+                                    borderColor: 'rgb(var(--border-gray-300))',
+                                    color: 'rgb(var(--text-gray-900))',
+                                    fontSize: '12px',
+                                    padding: '8px',
+                                    borderRadius: '4px'
+                                  }}
+                                />
+                                <Legend />
+                                <Line type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
                         </div>
                       </section>
                     )}
@@ -967,32 +1049,50 @@ export default function InventoryManager() {
                     {/* Widget de Inventario por Tipo */}
                     {widget.type === 'inventory-by-type' && isClient && (
                       <section aria-label="Inventario por tipo">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
-                          Inventario por Tipo
-                        </h3>
-                        <div className="w-full" style={{ height: "250px" }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={inventarioPorTipo}>
-                              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
-                              <XAxis 
-                                dataKey="tipo" 
-                                className="text-gray-900 dark:text-gray-100"
-                              />
-                              <YAxis 
-                                className="text-gray-900 dark:text-gray-100"
-                              />
-                              <Tooltip 
-                                contentStyle={{ 
-                                  backgroundColor: 'rgb(var(--bg-white))',
-                                  borderColor: 'rgb(var(--border-gray-300))',
-                                  color: 'rgb(var(--text-gray-900))'
-                                }} 
-                              />
-                              <Legend />
-                              <Bar dataKey="stock" fill="#3b82f6" />
-                            </BarChart>
-                          </ResponsiveContainer>
+                        <div className="flex flex-col gap-4">
+                          <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                            <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                            Inventario por Tipo
+                          </h3>
+
+                          {/* Filtros */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <select
+                              value={filterSupplier}
+                              onChange={(e) => setFilterSupplier(e.target.value)}
+                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            >
+                              <option value="all">Todos los proveedores</option>
+                              {suppliers.map(s => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Gráfico */}
+                          <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={inventarioPorTipo}>
+                                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                                <XAxis 
+                                  dataKey="tipo" 
+                                  className="text-gray-900 dark:text-gray-100"
+                                />
+                                <YAxis 
+                                  className="text-gray-900 dark:text-gray-100"
+                                />
+                                <Tooltip 
+                                  contentStyle={{ 
+                                    backgroundColor: 'rgb(var(--bg-white))',
+                                    borderColor: 'rgb(var(--border-gray-300))',
+                                    color: 'rgb(var(--text-gray-900))'
+                                  }} 
+                                />
+                                <Legend />
+                                <Bar dataKey="stock" fill="#3b82f6" />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
                         </div>
                       </section>
                     )}
@@ -1372,7 +1472,7 @@ export default function InventoryManager() {
                       </button>
                       <button 
                         onClick={() => manejarAccionProducto('restock')} 
-                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
+                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justifycenter gap-2">
                         <RefreshCw size={18} aria-hidden="true" /> Reabastecer
                       </button>
                     </div>
