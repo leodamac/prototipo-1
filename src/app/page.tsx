@@ -659,36 +659,36 @@ export default function InventoryManager() {
                           Inventario de Productos
                         </h3>
                         <div className="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
-                          <div className="min-w-[800px] lg:min-w-full"> {/* Ancho mínimo en móvil, natural en desktop */}
-                            <table className="w-full text-left text-sm">
-                              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
+                          <table className="w-full text-left text-sm">
+                            <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
+                              <tr>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">
+                                  Nombre
+                                </th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[120px]">
+                                  Días para caducar
+                                </th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">
+                                  Precio
+                                </th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">
+                                  Acciones
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                              {products.length === 0 ? (
                                 <tr>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[200px]">Nombre</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Fecha Entrada</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Fecha Expiración</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[80px]">Precio</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[80px]">Stock</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Tipo</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[150px]">Proveedor</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[100px]">Acciones</th>
+                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    No hay productos en inventario
+                                  </td>
                                 </tr>
-                              </thead>
-                              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                {/* Mensaje cuando no hay productos */}
-                                {products.length === 0 && (
-                                  <tr>
-                                    <td colSpan={8} className="p-4 text-center text-gray-500 dark:text-gray-400">
-                                      No hay productos en inventario
-                                    </td>
-                                  </tr>
-                                )}
-                                {/* Lista de productos */}
-                                {products.map(p => {
+                              ) : (
+                                products.map(p => {
                                   const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
-                                  const proveedor = suppliers.find(s => s.id === p.supplierId);
                                   return (
                                     <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                      <td className="p-2 text-gray-900 dark:text-gray-100">
+                                      <td className="p-2">
                                         <div className="flex items-center gap-2">
                                           {p.image ? (
                                             <img src={p.image} alt={p.name} className="w-8 h-8 object-cover rounded" />
@@ -698,12 +698,18 @@ export default function InventoryManager() {
                                           <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
                                         </div>
                                       </td>
-                                      <td className="p-2 text-gray-900 dark:text-gray-100">{format(p.entryDate, 'dd/MM/yyyy')}</td>
-                                      <td className="p-2 text-gray-900 dark:text-gray-100">{format(p.expirationDate, 'dd/MM/yyyy')}</td>
-                                      <td className="p-2 text-gray-900 dark:text-gray-100">${p.price.toFixed(2)}</td>
-                                      <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
-                                      <td className="p-2 text-gray-900 dark:text-gray-100">{p.type}</td>
-                                      <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
+                                      <td className={`p-2 ${
+                                        diasParaCaducar <= 1 
+                                          ? 'text-red-600 dark:text-red-400 font-bold' 
+                                          : diasParaCaducar <= 3 
+                                          ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
+                                          : 'text-gray-900 dark:text-gray-100'
+                                      }`}>
+                                        {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
+                                      </td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">
+                                        ${p.price.toFixed(2)}
+                                      </td>
                                       <td className="p-2">
                                         <button 
                                           onClick={() => { setScannedProduct(p); setActionQuantity(1); setShowScanModal(true); }} 
@@ -715,10 +721,10 @@ export default function InventoryManager() {
                                       </td>
                                     </tr>
                                   );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
+                                })
+                              )}
+                            </tbody>
+                          </table>
                         </div>
                       </section>
                     )}
