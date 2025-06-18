@@ -1,7 +1,7 @@
 'use client';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Eye, EyeOff, Trash2, RefreshCw, X, GripVertical, Settings, Menu } from 'lucide-react';
+import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Trash2, RefreshCw, X, GripVertical, Settings, Menu } from 'lucide-react';
 import { format, subDays, addDays, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -380,6 +380,34 @@ export default function InventoryManager() {
     setIsClient(true);
   }, []);
 
+  // Primero, añade estos hooks para manejar los clicks fuera
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Añade este useEffect para manejar clicks fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      // Para notificaciones
+      if (notificationsRef.current && 
+          !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+      
+      // Para el modal de escaneo
+      if (modalRef.current && 
+          !modalRef.current.contains(event.target as Node) && 
+          showScanModal) {
+        setShowScanModal(false);
+        setScannedProduct(null);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showScanModal]);
+
   if (!isClient) {
     return null; // O un spinner de carga si lo prefieres
   }
@@ -474,40 +502,42 @@ export default function InventoryManager() {
 
                   {showNotifications && (
                     <div className="absolute right-0 mt-2 w-80 max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notificaciones</h3>
-                        <button 
-                          onClick={marcarNotificacionesLeidas}
-                          className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
-                          Marcar todas
-                        </button>
-                      </div>
-                      
-                      {notifications.length === 0 ? (
-                        <p className="p-4 text-center text-gray-500 dark:text-gray-400">
-                          No hay notificaciones
-                        </p>
-                      ) : (
-                        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                          {notifications.map(n => (
-                            <li key={n.id} className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                              n.read ? 'opacity-75' : ''
-                            }`}>
-                              <div className="flex gap-3 items-start">
-                                {n.type === 'danger' && <AlertTriangle className="text-red-600 dark:text-red-400 flex-shrink-0" />}
-                                {n.type === 'warning' && <AlertTriangle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" />}
-                                {n.type === 'info' && <Bell className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
-                                <div>
-                                  <p className="text-gray-900 dark:text-gray-100 text-sm">{n.message}</p>
-                                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                                    {format(n.date, 'dd/MM/yyyy HH:mm')}
-                                  </span>
+                      <div ref={notificationsRef}>
+                        <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notificaciones</h3>
+                          <button 
+                            onClick={marcarNotificacionesLeidas}
+                            className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                            Marcar todas
+                          </button>
+                        </div>
+                        
+                        {notifications.length === 0 ? (
+                          <p className="p-4 text-center text-gray-500 dark:text-gray-400">
+                            No hay notificaciones
+                          </p>
+                        ) : (
+                          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                            {notifications.map(n => (
+                              <li key={n.id} className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                                n.read ? 'opacity-75' : ''
+                              }`}>
+                                <div className="flex gap-3 items-start">
+                                  {n.type === 'danger' && <AlertTriangle className="text-red-600 dark:text-red-400 flex-shrink-0" />}
+                                  {n.type === 'warning' && <AlertTriangle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" />}
+                                  {n.type === 'info' && <Bell className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
+                                  <div>
+                                    <p className="text-gray-900 dark:text-gray-100 text-sm">{n.message}</p>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                      {format(n.date, 'dd/MM/yyyy HH:mm')}
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1153,10 +1183,17 @@ export default function InventoryManager() {
 
       {/* Modal de escaneo mejorado */}
       {showScanModal && scannedProduct && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={() => {
+          setShowScanModal(false);
+          setScannedProduct(null);
+        }}>
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4">
-              <div className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-lg shadow-xl p-6">
+              <div 
+                ref={modalRef}
+                onClick={e => e.stopPropagation()} 
+                className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-lg shadow-xl p-6"
+              >
                 {/* Botón cerrar en la esquina */}
                 <button
                   onClick={() => { setShowScanModal(false); setScannedProduct(null); }}
@@ -1258,41 +1295,46 @@ export default function InventoryManager() {
 
       {/* Panel de notificaciones móvil */}
       {showNotifications && (
-        <div className="md:hidden fixed inset-x-4 bottom-24 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-[60vh] overflow-y-auto">
-          <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notificaciones</h3>
-            <button 
-              onClick={marcarNotificacionesLeidas}
-              className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
-              Marcar todas
-            </button>
-          </div>
-          
-          {notifications.length === 0 ? (
-            <p className="p-4 text-center text-gray-500 dark:text-gray-400">
-              No hay notificaciones
-            </p>
-          ) : (
-            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-              {notifications.map(n => (
-                <li key={n.id} className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                  n.read ? 'opacity-75' : ''
-                }`}>
-                  <div className="flex gap-3 items-start">
-                    {n.type === 'danger' && <AlertTriangle className="text-red-600 dark:text-red-400 flex-shrink-0" />}
-                    {n.type === 'warning' && <AlertTriangle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" />}
-                    {n.type === 'info' && <Bell className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
-                    <div>
-                      <p className="text-gray-900 dark:text-gray-100 text-sm">{n.message}</p>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {format(n.date, 'dd/MM/yyyy HH:mm')}
-                      </span>
+        <div className="md:hidden fixed inset-x-4 bottom-24 z-50">
+          <div 
+            ref={notificationsRef}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-[60vh] overflow-y-auto"
+          >
+            <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notificaciones</h3>
+              <button 
+                onClick={marcarNotificacionesLeidas}
+                className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                Marcar todas
+              </button>
+            </div>
+            
+            {notifications.length === 0 ? (
+              <p className="p-4 text-center text-gray-500 dark:text-gray-400">
+                No hay notificaciones
+              </p>
+            ) : (
+              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                {notifications.map(n => (
+                  <li key={n.id} className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                    n.read ? 'opacity-75' : ''
+                  }`}>
+                    <div className="flex gap-3 items-start">
+                      {n.type === 'danger' && <AlertTriangle className="text-red-600 dark:text-red-400 flex-shrink-0" />}
+                      {n.type === 'warning' && <AlertTriangle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" />}
+                      {n.type === 'info' && <Bell className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
+                      <div>
+                        <p className="text-gray-900 dark:text-gray-100 text-sm">{n.message}</p>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {format(n.date, 'dd/MM/yyyy HH:mm')}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       )}
     </div>
