@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Eye, EyeOff, Trash2, RefreshCw, X, GripVertical, Settings } from 'lucide-react';
+import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Eye, EyeOff, Trash2, RefreshCw, X, GripVertical, Settings, Menu } from 'lucide-react';
 import { format, subDays, addDays, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -69,9 +69,9 @@ function SortableWidget({ widget, children }: { widget: DashboardWidget; childre
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="relative bg-white dark:bg-gray-800 rounded shadow p-4">
+    <div ref={setNodeRef} style={style} className="relative bg-white dark:bg-gray-800 rounded shadow-lg dark:shadow-gray-900/30 p-4">
       <div className="absolute top-2 right-2 cursor-move z-10" {...attributes} {...listeners}>
-        <GripVertical size={20} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Mover widget" />
+        <GripVertical size={20} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Mover widget" />
       </div>
       {children}
     </div>
@@ -79,7 +79,33 @@ function SortableWidget({ widget, children }: { widget: DashboardWidget; childre
 }
 
 export default function InventoryManager() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("darkMode");
+      if (saved !== null) return saved === "true";
+      return false; // Siempre claro por defecto
+    }
+    return false;
+  });
+
+  // Este efecto asegura que la clase dark solo esté si darkMode es true
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("darkMode", String(darkMode));
+  }, [darkMode]);
+
+  // Este efecto limpia la clase dark en el primer render del cliente si no debe estar
+  useEffect(() => {
+    const saved = localStorage.getItem("darkMode");
+    if (saved === null || saved === "false") {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
@@ -104,6 +130,8 @@ export default function InventoryManager() {
     { id: '5', type: 'low-stock', visible: true },
     { id: '6', type: 'expiring-soon', visible: true }
   ]);
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -347,62 +375,234 @@ export default function InventoryManager() {
     }
   };
 
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null; // O un spinner de carga si lo prefieres
+  }
+
   return (
-    <div className={`${darkMode ? 'dark' : ''} min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500 font-sans`}>      
-      <header className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 shadow sticky top-0 z-50">
-        <h1 className="text-xl font-bold flex items-center gap-2"><Package size={24} aria-hidden="true" /> Gestor de Inventario</h1>
-        <nav className="flex items-center gap-4">
-          <button onClick={() => setActiveTab('dashboard')} className={`px-3 py-1 rounded ${activeTab === 'dashboard' ? 'bg-blue-600 text-white' : 'hover:bg-blue-200 dark:hover:bg-blue-700'}`} aria-label="Ir al Panel Principal">Panel Principal</button>
-          <button onClick={() => setActiveTab('products')} className={`px-3 py-1 rounded ${activeTab === 'products' ? 'bg-blue-600 text-white' : 'hover:bg-blue-200 dark:hover:bg-blue-700'}`} aria-label="Ir a Productos">Productos</button>
-          <button onClick={() => setActiveTab('sales')} className={`px-3 py-1 rounded ${activeTab === 'sales' ? 'bg-blue-600 text-white' : 'hover:bg-blue-200 dark:hover:bg-blue-700'}`} aria-label="Ir a Ventas">Ventas</button>
-          <button onClick={() => setActiveTab('suppliers')} className={`px-3 py-1 rounded ${activeTab === 'suppliers' ? 'bg-blue-600 text-white' : 'hover:bg-blue-200 dark:hover:bg-blue-700'}`} aria-label="Ir a Proveedores">Proveedores</button>
-          <button onClick={() => setActiveTab('settings')} className={`px-3 py-1 rounded ${activeTab === 'settings' ? 'bg-blue-600 text-white' : 'hover:bg-blue-200 dark:hover:bg-blue-700'}`} aria-label="Ir a Configuraciones">Configuraciones</button>
-          <button onClick={() => setDarkMode(!darkMode)} aria-label="Alternar modo oscuro" className="p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700 transition">
-            {darkMode ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />}
-          </button>
-          <button onClick={() => setShowNotifications(!showNotifications)} aria-label="Mostrar notificaciones" className="relative p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700 transition">
-            <Bell size={20} aria-hidden="true" />
-            {notificacionesNoLeidas > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center font-bold animate-pulse" aria-label={`${notificacionesNoLeidas} notificaciones sin leer`}>{notificacionesNoLeidas}</span>
-            )}
-          </button>
-        </nav>
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <header className="bg-white dark:bg-gray-800 shadow sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo y título */}
+            <h1 className="text-xl font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400">
+              <Package size={24} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+              Red Vida
+            </h1>
+
+            {/* Navegación Desktop */}
+            <nav className="hidden md:flex items-center gap-2">
+              <button onClick={() => setActiveTab('dashboard')} 
+                className={`px-3 py-1 rounded transition-colors ${
+                  activeTab === 'dashboard' 
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                }`}>
+                Panel
+              </button>
+              <button onClick={() => setActiveTab('products')} 
+                className={`px-3 py-1 rounded transition-colors ${
+                  activeTab === 'products' 
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                }`}>
+                Productos
+              </button>
+              <button onClick={() => setActiveTab('sales')} 
+                className={`px-3 py-1 rounded transition-colors ${
+                  activeTab === 'sales' 
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                }`}>
+                Ventas
+              </button>
+              <button onClick={() => setActiveTab('suppliers')} 
+                className={`px-3 py-1 rounded transition-colors ${
+                  activeTab === 'suppliers' 
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                }`}>
+                Proveedores
+              </button>
+              <button onClick={() => setActiveTab('settings')} 
+                className={`px-3 py-1 rounded transition-colors ${
+                  activeTab === 'settings' 
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                }`}>
+                Configuración
+              </button>
+            </nav>
+
+            {/* Iconos de utilidad */}
+            <div className="flex items-center gap-2">
+              {/* Botón de menú hamburguesa */}
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                aria-label="Menú principal">
+                <Menu size={24} aria-hidden="true" />
+              </button>
+
+              {/* Iconos solo en desktop */}
+              <div className="hidden md:flex items-center gap-2">
+                <button 
+                  type='button' 
+                  onClick={() => setDarkMode(!darkMode)} 
+                  className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                  aria-label="Alternar modo oscuro">
+                  {darkMode ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />}
+                </button>
+
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowNotifications(!showNotifications)} 
+                    className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                    aria-label="Mostrar notificaciones">
+                    <Bell size={20} aria-hidden="true" />
+                    {notificacionesNoLeidas > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-600 dark:bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                        {notificacionesNoLeidas}
+                      </span>
+                    )}
+                  </button>
+
+                  {showNotifications && (
+                    <div className="absolute right-0 mt-2 w-80 max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                      <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notificaciones</h3>
+                        <button 
+                          onClick={marcarNotificacionesLeidas}
+                          className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+                          Marcar todas
+                        </button>
+                      </div>
+                      
+                      {notifications.length === 0 ? (
+                        <p className="p-4 text-center text-gray-500 dark:text-gray-400">
+                          No hay notificaciones
+                        </p>
+                      ) : (
+                        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                          {notifications.map(n => (
+                            <li key={n.id} className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                              n.read ? 'opacity-75' : ''
+                            }`}>
+                              <div className="flex gap-3 items-start">
+                                {n.type === 'danger' && <AlertTriangle className="text-red-600 dark:text-red-400 flex-shrink-0" />}
+                                {n.type === 'warning' && <AlertTriangle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" />}
+                                {n.type === 'info' && <Bell className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
+                                <div>
+                                  <p className="text-gray-900 dark:text-gray-100 text-sm">{n.message}</p>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    {format(n.date, 'dd/MM/yyyy HH:mm')}
+                                  </span>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Menú móvil */}
+          {isMobileMenuOpen && (
+            <nav className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+              <div className="flex flex-col gap-2">
+                {/* Enlaces de navegación */}
+                <button onClick={() => {setActiveTab('dashboard'); setIsMobileMenuOpen(false);}} 
+                  className={`px-3 py-2 rounded transition-colors ${
+                    activeTab === 'dashboard' 
+                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                  }`}>
+                  Panel
+                </button>
+                <button onClick={() => {setActiveTab('products'); setIsMobileMenuOpen(false);}} 
+                  className={`px-3 py-2 rounded transition-colors ${
+                    activeTab === 'products' 
+                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                  }`}>
+                  Productos
+                </button>
+                <button onClick={() => {setActiveTab('sales'); setIsMobileMenuOpen(false);}} 
+                  className={`px-3 py-2 rounded transition-colors ${
+                    activeTab === 'sales' 
+                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                  }`}>
+                  Ventas
+                </button>
+                <button onClick={() => {setActiveTab('suppliers'); setIsMobileMenuOpen(false);}} 
+                  className={`px-3 py-2 rounded transition-colors ${
+                    activeTab === 'suppliers' 
+                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                  }`}>
+                  Proveedores
+                </button>
+                <button onClick={() => {setActiveTab('settings'); setIsMobileMenuOpen(false);}} 
+                  className={`px-3 py-2 rounded transition-colors ${
+                    activeTab === 'settings' 
+                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
+                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                  }`}>
+                  Configuración
+                </button>
+              </div>
+            </nav>
+          )}
+        </div>
       </header>
 
-      {/* Notificaciones desplegables */}
-      {showNotifications && (
-        <div className="fixed top-16 right-4 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50">
-          <div className="flex justify-between items-center p-2 border-b border-gray-300 dark:border-gray-700">
-            <h2 className="font-semibold">Notificaciones</h2>
-            <button onClick={marcarNotificacionesLeidas} aria-label="Marcar todas como leídas" className="text-blue-600 hover:underline">Marcar todas</button>
-          </div>
-          {notifications.length === 0 && <p className="p-4 text-center text-gray-500">No hay notificaciones</p>}
-          <ul>
-            {notifications.map(n => (
-              <li key={n.id} className={`p-3 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${n.read ? 'opacity-60' : 'font-semibold'}`}>
-                <div className="flex items-center gap-2">
-                  {n.type === 'danger' && <AlertTriangle className="text-red-600" size={18} aria-hidden="true" />}
-                  {n.type === 'warning' && <AlertTriangle className="text-yellow-500" size={18} aria-hidden="true" />}
-                  {n.type === 'info' && <Bell className="text-blue-500" size={18} aria-hidden="true" />}
-                  <span>{n.message}</span>
-                </div>
-                <small className="text-xs text-gray-500 dark:text-gray-400">{format(n.date, 'dd/MM/yyyy HH:mm')}</small>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <main className="p-4 max-w-7xl mx-auto">
-        {/* Sección de escaneo siempre visible en dashboard con botón prominente y animado */}
+      <main className="flex-grow p-4 max-w-7xl mx-auto w-full bg-gray-50 dark:bg-gray-900">
+        {/* Botón de escaneo QR más prominente */}
         {activeTab === 'dashboard' && (
-          <section className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h2 className="text-2xl font-semibold flex items-center gap-2"><Scan size={28} aria-hidden="true" /> Escanear Producto</h2>
-            <button onClick={manejarEscaneo} className="relative bg-blue-600 hover:bg-blue-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg animate-pulse focus:outline-none focus:ring-4 focus:ring-blue-400 transition" aria-label="Escanear producto">
+          <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
+            <button 
+              onClick={manejarEscaneo} 
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              aria-label="Escanear producto">
               <Scan size={32} aria-hidden="true" />
               <span className="sr-only">Escanear producto</span>
             </button>
-          </section>
+
+            {/* Botón de notificaciones en móvil */}
+            <div className="md:hidden">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative"
+                aria-label="Ver notificaciones">
+                <Bell size={24} aria-hidden="true" />
+                {notificacionesNoLeidas > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 dark:bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                    {notificacionesNoLeidas}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Botón de tema */}
+            <div className="md:hidden">
+              <button 
+                onClick={() => setDarkMode(!darkMode)}
+                className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                aria-label="Cambiar tema">
+                {darkMode ? <Sun size={24} aria-hidden="true" /> : <Moon size={24} aria-hidden="true" />}
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Contenido de pestañas */}
@@ -412,39 +612,59 @@ export default function InventoryManager() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {widgets.map(widget => widget.visible && (
                   <SortableWidget key={widget.id} widget={widget}>
+                    {/* Widget de Tabla de Inventario */}
                     {widget.type === 'inventory-table' && (
                       <section aria-label="Tabla de inventario">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Package size={20} aria-hidden="true" /> Inventario de Productos</h3>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                          <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                          Inventario de Productos
+                        </h3>
                         <div className="overflow-x-auto max-h-96">
                           <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                             <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                               <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Nombre</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Stock</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Días para caducar</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Proveedor</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
                               </tr>
                             </thead>
                             <tbody>
+                              {/* Mensaje cuando no hay productos */}
                               {products.length === 0 && (
-                                <tr><td colSpan={4} className="p-4 text-center text-gray-500">No hay productos en inventario</td></tr>
+                                <tr>
+                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    No hay productos en inventario
+                                  </td>
+                                </tr>
                               )}
+                              {/* Lista de productos */}
                               {products.map(p => {
                                 const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
                                 const proveedor = suppliers.find(s => s.id === p.supplierId);
-                                let colorTexto = '';
-                                if (diasParaCaducar <= 1) colorTexto = 'text-red-600 font-bold';
-                                else if (diasParaCaducar <= 3) colorTexto = 'text-yellow-600 font-semibold';
-                                else colorTexto = 'text-gray-900 dark:text-gray-100';
                                 return (
                                   <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <td className="p-2 flex items-center gap-2">
-                                      {p.image ? <img src={p.image} alt={p.name} className="w-8 h-8 object-cover rounded" /> : <Package size={20} aria-hidden="true" />}
-                                      {p.name}
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">
+                                      <div className="flex items-center gap-2">
+                                        {p.image ? (
+                                          <img src={p.image} alt={p.name} className="w-8 h-8 object-cover rounded" />
+                                        ) : (
+                                          <Package size={20} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                                        )}
+                                        <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
+                                      </div>
                                     </td>
-                                    <td className="p-2">{p.stock}</td>
-                                    <td className={`p-2 ${colorTexto}`}>{diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}</td>
-                                    <td className="p-2">{proveedor?.name || 'Desconocido'}</td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                                    <td className={`p-2 ${
+                                      diasParaCaducar <= 1 
+                                        ? 'text-red-600 dark:text-red-400 font-bold' 
+                                        : diasParaCaducar <= 3 
+                                        ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
+                                        : 'text-gray-900 dark:text-gray-100'
+                                    }`}>
+                                      {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
+                                    </td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
                                   </tr>
                                 );
                               })}
@@ -453,91 +673,80 @@ export default function InventoryManager() {
                         </div>
                       </section>
                     )}
-                    {widget.type === 'sales-trend' && (
-                      <section aria-label="Tendencia de ventas">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><TrendingUp size={20} aria-hidden="true" /> Tendencia de Ventas</h3>
-                        <ResponsiveContainer width="100%" height={250}>
-                          <LineChart data={datosTendenciaVentas} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#444' : '#ccc'} />
-                            <XAxis dataKey="fecha" stroke={darkMode ? '#ddd' : '#333'} />
-                            <YAxis stroke={darkMode ? '#ddd' : '#333'} />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="ventas" stroke="#3b82f6" activeDot={{ r: 8 }} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </section>
-                    )}
-                    {widget.type === 'inventory-by-type' && (
-                      <section aria-label="Inventario por tipo">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Package size={20} aria-hidden="true" /> Inventario por Tipo</h3>
-                        <ResponsiveContainer width="100%" height={250}>
-                          <BarChart data={inventarioPorTipo} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#444' : '#ccc'} />
-                            <XAxis dataKey="tipo" stroke={darkMode ? '#ddd' : '#333'} />
-                            <YAxis stroke={darkMode ? '#ddd' : '#333'} />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="stock" fill="#10b981" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </section>
-                    )}
+
+                    {/* Widget de Ventas Recientes */}
                     {widget.type === 'recent-sales' && (
                       <section aria-label="Ventas recientes">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><ShoppingCart size={20} aria-hidden="true" /> Últimas Ventas</h3>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                          <ShoppingCart size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                          Últimas Ventas
+                        </h3>
                         <div className="overflow-x-auto max-h-96">
                           <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                             <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                               <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Cantidad</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Precio Unitario</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Fecha</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Cantidad</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Precio Unit.</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {ventasRecientes.length === 0 && (
-                                <tr><td colSpan={4} className="p-4 text-center text-gray-500">No hay ventas recientes</td></tr>
-                              )}
-                              {ventasRecientes.map(s => (
-                                <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                  <td className="p-2">{s.nombreProducto}</td>
-                                  <td className="p-2">{s.quantity}</td>
-                                  <td className="p-2">${s.precio.toFixed(2)}</td>
-                                  <td className="p-2">{format(s.date, 'dd/MM/yyyy')}</td>
+                              {ventasRecientes.length === 0 ? (
+                                <tr>
+                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    No hay ventas recientes
+                                  </td>
                                 </tr>
-                              ))}
+                              ) : (
+                                ventasRecientes.map(s => (
+                                  <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{s.nombreProducto}</td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{s.quantity}</td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">${s.precio.toFixed(2)}</td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{format(s.date, 'dd/MM/yyyy')}</td>
+                                  </tr>
+                                ))
+                              )}
                             </tbody>
                           </table>
                         </div>
                       </section>
                     )}
+
+                    {/* Widget de Stock Bajo */}
                     {widget.type === 'low-stock' && (
                       <section aria-label="Productos con stock bajo">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><AlertTriangle size={20} aria-hidden="true" /> Productos con Stock Bajo</h3>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                          <AlertTriangle size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                          Productos con Stock Bajo
+                        </h3>
                         <div className="overflow-x-auto max-h-96">
                           <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                             <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                               <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Stock</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Tipo</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Proveedor</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
                               </tr>
                             </thead>
                             <tbody>
                               {productosStockBajo.length === 0 && (
-                                <tr><td colSpan={4} className="p-4 text-center text-gray-500">No hay productos con stock bajo</td></tr>
+                                <tr>
+                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    No hay productos con stock bajo
+                                  </td>
+                                </tr>
                               )}
                               {productosStockBajo.map(p => {
                                 const proveedor = suppliers.find(s => s.id === p.supplierId);
                                 return (
                                   <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <td className="p-2">{p.name}</td>
-                                    <td className="p-2">{p.stock}</td>
-                                    <td className="p-2">{p.type}</td>
-                                    <td className="p-2">{proveedor?.name || 'Desconocido'}</td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{p.name}</td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{p.type}</td>
+                                    <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
                                   </tr>
                                 );
                               })}
@@ -546,41 +755,121 @@ export default function InventoryManager() {
                         </div>
                       </section>
                     )}
+
+                    {/* Widget de Productos por Caducar */}
                     {widget.type === 'expiring-soon' && (
                       <section aria-label="Productos próximos a caducar">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Calendar size={20} aria-hidden="true" /> Productos Próximos a Caducar</h3>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                          <Calendar size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                          Productos Próximos a Caducar
+                        </h3>
                         <div className="overflow-x-auto max-h-96">
                           <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                             <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                               <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Días para caducar</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Stock</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600">Proveedor</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {productosProximosCaducar.length === 0 && (
-                                <tr><td colSpan={4} className="p-4 text-center text-gray-500">No hay productos próximos a caducar</td></tr>
+                              {productosProximosCaducar.length === 0 ? (
+                                <tr>
+                                  <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                                    No hay productos próximos a caducar
+                                  </td>
+                                </tr>
+                              ) : (
+                                productosProximosCaducar.map(p => {
+                                  const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
+                                  const proveedor = suppliers.find(s => s.id === p.supplierId);
+                                  return (
+                                    <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{p.name}</td>
+                                      <td className={`p-2 ${
+                                        diasParaCaducar <= 1 
+                                          ? 'text-red-600 dark:text-red-400 font-bold' 
+                                          : diasParaCaducar <= 3 
+                                          ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
+                                          : 'text-gray-900 dark:text-gray-100'
+                                      }`}>
+                                        {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
+                                      </td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                                      <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
+                                    </tr>
+                                  );
+                                })
                               )}
-                              {productosProximosCaducar.map(p => {
-                                const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
-                                const proveedor = suppliers.find(s => s.id === p.supplierId);
-                                let colorTexto = '';
-                                if (diasParaCaducar <= 1) colorTexto = 'text-red-600 font-bold';
-                                else if (diasParaCaducar <= 3) colorTexto = 'text-yellow-600 font-semibold';
-                                else colorTexto = 'text-gray-900 dark:text-gray-100';
-                                return (
-                                  <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    <td className="p-2">{p.name}</td>
-                                    <td className={`p-2 ${colorTexto}`}>{diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}</td>
-                                    <td className="p-2">{p.stock}</td>
-                                    <td className="p-2">{proveedor?.name || 'Desconocido'}</td>
-                                  </tr>
-                                );
-                              })}
                             </tbody>
                           </table>
+                        </div>
+                      </section>
+                    )}
+
+                    {/* Widget de Tendencia de Ventas */}
+                    {widget.type === 'sales-trend' && isClient && (
+                      <section aria-label="Tendencia de ventas">
+                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                          <TrendingUp size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                          Tendencia de Ventas
+                        </h3>
+                        <div className="w-full" style={{ height: "250px" }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={datosTendenciaVentas}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                              <XAxis 
+                                dataKey="fecha" 
+                                className="text-gray-900 dark:text-gray-100" 
+                              />
+                              <YAxis 
+                                className="text-gray-900 dark:text-gray-100"
+                              />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'rgb(var(--bg-white))',
+                                  borderColor: 'rgb(var(--border-gray-300))',
+                                  color: 'rgb(var(--text-gray-900))'
+                                }} 
+                              />
+                              <Legend />
+                              <Line type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </section>
+                    )}
+
+                    {/* Widget de Inventario por Tipo */}
+                    {widget.type === 'inventory-by-type' && isClient && (
+                      <section aria-label="Inventario por tipo">
+                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                          <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                          Inventario por Tipo
+                        </h3>
+                        <div className="w-full" style={{ height: "250px" }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={inventarioPorTipo}>
+                              <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                              <XAxis 
+                                dataKey="tipo" 
+                                className="text-gray-900 dark:text-gray-100"
+                              />
+                              <YAxis 
+                                className="text-gray-900 dark:text-gray-100"
+                              />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'rgb(var(--bg-white))',
+                                  borderColor: 'rgb(var(--border-gray-300))',
+                                  color: 'rgb(var(--text-gray-900))'
+                                }} 
+                              />
+                              <Legend />
+                              <Bar dataKey="stock" fill="#3b82f6" />
+                            </BarChart>
+                          </ResponsiveContainer>
                         </div>
                       </section>
                     )}
@@ -595,31 +884,47 @@ export default function InventoryManager() {
         {activeTab === 'products' && (
           <section>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-              <h2 className="text-2xl font-semibold flex items-center gap-2"><Package size={28} aria-hidden="true" /> Productos</h2>
+              <h2 className="text-2xl font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                <Package size={28} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                Productos
+              </h2>
+              
               <div className="flex flex-wrap gap-2 items-center">
+                {/* Input de búsqueda */}
                 <input
                   type="text"
                   placeholder="Buscar producto, QR o código de barras"
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 w-full sm:w-64"
+                  className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                   aria-label="Buscar producto, QR o código de barras"
                 />
-                <select value={filterType} onChange={e => setFilterType(e.target.value)} className="rounded border border-gray-300 dark:border-gray-600 px-2 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Filtrar por tipo">
-                  <option value="all">Todos los tipos</option>
-                  {[...new Set(products.map(p => p.type))].map(type => (
-                    <option key={type} value={type}>{type}</option>
+
+                {/* Select de tipo */}
+                <select 
+                  value={filterType} 
+                  onChange={e => setFilterType(e.target.value)} 
+                  className="rounded border border-gray-300 dark:border-gray-600 px-2 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  aria-label="Filtrar por tipo"
+                >
+                  <option value="all" className="text-gray-900 dark:text-gray-100">Todos los tipos</option>
+                  {Array.from(new Set(products.map(p => p.type))).map(type => (
+                    <option key={type} value={type} className="text-gray-900 dark:text-gray-100">{type}</option>
                   ))}
                 </select>
-                <select value={filterSupplier} onChange={e => setFilterSupplier(e.target.value)} className="rounded border border-gray-300 dark:border-gray-600 px-2 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" aria-label="Filtrar por proveedor">
-                  <option value="all">Todos los proveedores</option>
+
+                {/* Select de proveedor */}
+                <select 
+                  value={filterSupplier} 
+                  onChange={e => setFilterSupplier(e.target.value)} 
+                  className="rounded border border-gray-300 dark:border-gray-600 px-2 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  aria-label="Filtrar por proveedor"
+                >
+                  <option value="all" className="text-gray-900 dark:text-gray-100">Todos los proveedores</option>
                   {suppliers.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
+                    <option key={s.id} value={s.id} className="text-gray-900 dark:text-gray-100">{s.name}</option>
                   ))}
                 </select>
-                <button onClick={() => setCompactView(!compactView)} aria-pressed={compactView} className="px-3 py-1 rounded border bg-blue-600 text-white hover:bg-blue-700 transition" aria-label="Alternar vista compacta">
-                  {compactView ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
-                </button>
               </div>
             </div>
 
@@ -627,61 +932,84 @@ export default function InventoryManager() {
               <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                 <thead className="bg-gray-200 dark:bg-gray-700">
                   <tr>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Nombre</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
                     {compactView ? (
                       <>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600">Stock</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600">Días para caducar</th>
+                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
+                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
                       </>
                     ) : (
                       <>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600">Fecha Entrada</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600">Fecha Expiración</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600">Precio</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600">Stock</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600">Tipo</th>
-                        <th className="p-2 border-b border-gray-300 dark:border-gray-600">Proveedor</th>
+                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha Entrada</th>
+                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha Expiración</th>
+                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Precio</th>
+                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
+                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
+                        <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
                       </>
                     )}
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Acciones</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {productosFiltrados.length === 0 && (
-                    <tr><td colSpan={compactView ? 4 : 8} className="p-4 text-center text-gray-500">No se encontraron productos</td></tr>
+                  {productosFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={compactView ? 4 : 8} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        No se encontraron productos
+                      </td>
+                    </tr>
+                  ) : (
+                    productosFiltrados.map(p => {
+                      const proveedor = suppliers.find(s => s.id === p.supplierId);
+                      const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
+                      return (
+                        <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                          <td className="p-2">
+                            <div className="flex items-center gap-2">
+                              {p.image ? (
+                                <img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded" />
+                              ) : (
+                                <Package size={24} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                              )}
+                              <span className="text-gray-900 dark:text-gray-100">{p.name}</span>
+                            </div>
+                          </td>
+                          {compactView ? (
+                            <>
+                              <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                              <td className={`p-2 ${
+                                diasParaCaducar <= 1 
+                                  ? 'text-red-600 dark:text-red-400 font-bold' 
+                                  : diasParaCaducar <= 3 
+                                  ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
+                                  : 'text-gray-900 dark:text-gray-100'
+                              }`}>
+                                {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td className="p-2 text-gray-900 dark:text-gray-100">{format(p.entryDate, 'dd/MM/yyyy')}</td>
+                              <td className="p-2 text-gray-900 dark:text-gray-100">{format(p.expirationDate, 'dd/MM/yyyy')}</td>
+                              <td className="p-2 text-gray-900 dark:text-gray-100">${p.price.toFixed(2)}</td>
+                              <td className="p-2 text-gray-900 dark:text-gray-100">{p.stock}</td>
+                              <td className="p-2 text-gray-900 dark:text-gray-100">{p.type}</td>
+                              <td className="p-2 text-gray-900 dark:text-gray-100">{proveedor?.name || 'Desconocido'}</td>
+                            </>
+                          )}
+                          <td className="p-2">
+                            <button 
+                              onClick={() => { setScannedProduct(p); setActionQuantity(1); setShowScanModal(true); }} 
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded flex items-center gap-1"
+                              aria-label={`Gestionar producto ${p.name}`}
+                            >
+                              <ShoppingCart size={16} aria-hidden="true" /> Gestionar
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
-                  {productosFiltrados.map(p => {
-                    const proveedor = suppliers.find(s => s.id === p.supplierId);
-                    const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
-                    return (
-                      <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td className="p-2 flex items-center gap-2">
-                          {p.image ? <img src={p.image} alt={p.name} className="w-10 h-10 object-cover rounded" /> : <Package size={24} aria-hidden="true" />}
-                          <span>{p.name}</span>
-                        </td>
-                        {compactView ? (
-                          <>
-                            <td className="p-2">{p.stock}</td>
-                            <td className={`p-2 ${diasParaCaducar <= 1 ? 'text-red-600 font-bold' : diasParaCaducar <= 3 ? 'text-yellow-600 font-semibold' : 'text-gray-900 dark:text-gray-100'}`}>{diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}</td>
-                          </>
-                        ) : (
-                          <>
-                            <td className="p-2">{format(p.entryDate, 'dd/MM/yyyy')}</td>
-                            <td className="p-2">{format(p.expirationDate, 'dd/MM/yyyy')}</td>
-                            <td className="p-2">${p.price.toFixed(2)}</td>
-                            <td className="p-2">{p.stock}</td>
-                            <td className="p-2">{p.type}</td>
-                            <td className="p-2">{proveedor?.name || 'Desconocido'}</td>
-                          </>
-                        )}
-                        <td className="p-2 flex flex-wrap gap-1">
-                          <button onClick={() => { setScannedProduct(p); setActionQuantity(1); setShowScanModal(true); }} aria-label={`Gestionar producto ${p.name}`} className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded flex items-center gap-1">
-                            <ShoppingCart size={16} aria-hidden="true" /> Gestionar
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
                 </tbody>
               </table>
             </div>
@@ -691,32 +1019,49 @@ export default function InventoryManager() {
         {/* Pestaña Ventas */}
         {activeTab === 'sales' && (
           <section>
-            <h2 className="text-2xl font-semibold flex items-center gap-2 mb-4"><ShoppingCart size={28} aria-hidden="true" /> Ventas</h2>
+            <h2 className="text-2xl font-semibold flex items-center gap-2 mb-4 text-gray-900 dark:text-gray-100">
+              <ShoppingCart size={28} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+              Ventas
+            </h2>
+            
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                 <thead className="bg-gray-200 dark:bg-gray-700">
                   <tr>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Producto</th>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Cantidad</th>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Tipo</th>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Fecha</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Cantidad</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sales.length === 0 && (
-                    <tr><td colSpan={4} className="p-4 text-center text-gray-500">No hay registros de ventas o desechos</td></tr>
+                  {sales.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        No hay registros de ventas o desechos
+                      </td>
+                    </tr>
+                  ) : (
+                    sales.map(s => {
+                      const producto = products.find(p => p.id === s.productId);
+                      return (
+                        <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                          <td className="p-2 text-gray-900 dark:text-gray-100">
+                            {producto?.name || 'Producto desconocido'}
+                          </td>
+                          <td className="p-2 text-gray-900 dark:text-gray-100">
+                            {s.quantity}
+                          </td>
+                          <td className="p-2 text-gray-900 dark:text-gray-100">
+                            {s.type === 'sale' ? 'Venta' : 'Desecho'}
+                          </td>
+                          <td className="p-2 text-gray-900 dark:text-gray-100">
+                            {format(s.date, 'dd/MM/yyyy')}
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
-                  {sales.map(s => {
-                    const producto = products.find(p => p.id === s.productId);
-                    return (
-                      <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td className="p-2">{producto?.name || 'Producto desconocido'}</td>
-                        <td className="p-2">{s.quantity}</td>
-                        <td className="p-2 capitalize">{s.type === 'sale' ? 'Venta' : 'Desecho'}</td>
-                        <td className="p-2">{format(s.date, 'dd/MM/yyyy')}</td>
-                      </tr>
-                    );
-                  })}
                 </tbody>
               </table>
             </div>
@@ -726,27 +1071,51 @@ export default function InventoryManager() {
         {/* Pestaña Proveedores */}
         {activeTab === 'suppliers' && (
           <section>
-            <h2 className="text-2xl font-semibold flex items-center gap-2 mb-4"><Users size={28} aria-hidden="true" /> Proveedores</h2>
+            <h2 className="text-2xl font-semibold flex items-center gap-2 mb-4 text-gray-900 dark:text-gray-100">
+              <Users size={28} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+              Proveedores
+            </h2>
+            
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                 <thead className="bg-gray-200 dark:bg-gray-700">
                   <tr>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Nombre</th>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Contacto</th>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600">Productos</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
+                      Nombre
+                    </th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
+                      Contacto
+                    </th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
+                      Productos
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {suppliers.length === 0 && (
-                    <tr><td colSpan={3} className="p-4 text-center text-gray-500">No hay proveedores registrados</td></tr>
-                  )}
-                  {suppliers.map(s => (
-                    <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                      <td className="p-2">{s.name}</td>
-                      <td className="p-2">{s.contact}</td>
-                      <td className="p-2">{s.products.length}</td>
+                  {suppliers.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                        No hay proveedores registrados
+                      </td>
                     </tr>
-                  ))}
+                  ) : (
+                    suppliers.map(s => (
+                      <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <td className="p-2 text-gray-900 dark:text-gray-100">
+                          <div className="flex items-center gap-2">
+                            <Users size={20} className="text-gray-500 dark:text-gray-400" aria-hidden="true" />
+                            {s.name}
+                          </div>
+                        </td>
+                        <td className="p-2 text-gray-900 dark:text-gray-100">
+                          {s.contact}
+                        </td>
+                        <td className="p-2 text-gray-900 dark:text-gray-100">
+                          {s.products.length} producto{s.products.length !== 1 ? 's' : ''}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -756,9 +1125,9 @@ export default function InventoryManager() {
         {/* Pestaña Configuraciones */}
         {activeTab === 'settings' && (
           <section>
-            <h2 className="text-2xl font-semibold flex items-center gap-2 mb-4"><Settings size={28} aria-hidden="true" /> Configuraciones</h2>
+            <h2 className="text-2xl font-semibold flex items-center gap-2 mb-4 text-gray-900 dark:text-gray-100"><Settings size={28} aria-hidden="true" /> Configuraciones</h2>
             <div className="max-w-md">
-              <label htmlFor="scanError" className="block font-semibold mb-2">Probabilidad de error al escanear (%)</label>
+              <label htmlFor="scanError" className="block font-semibold mb-2 text-gray-900 dark:text-gray-100">Probabilidad de error al escanear (%)</label>
               <input
                 id="scanError"
                 type="number"
@@ -769,9 +1138,11 @@ export default function InventoryManager() {
                 className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 aria-describedby="scanErrorHelp"
               />
-              <small id="scanErrorHelp" className="text-gray-500 dark:text-gray-400">Ajusta la probabilidad de que el escaneo falle para probar la búsqueda manual.</small>
+              <small id="scanErrorHelp" className="text-gray-500 dark:text-gray-400">
+                Ajusta la probabilidad de que el escaneo falle para probar la búsqueda manual.
+              </small>
 
-              <label htmlFor="darkModeToggle" className="block font-semibold mt-6 mb-2">Modo Oscuro</label>
+              <label htmlFor="darkModeToggle" className="block font-semibold mt-6 mb-2 text-gray-900 dark:text-gray-100">Modo Oscuro</label>
               <button onClick={() => setDarkMode(!darkMode)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" aria-pressed={darkMode} aria-label="Alternar modo oscuro">
                 {darkMode ? 'Desactivar Modo Oscuro' : 'Activar Modo Oscuro'}
               </button>
@@ -780,54 +1151,96 @@ export default function InventoryManager() {
         )}
       </main>
 
-      {/* Modal de escaneo */}
+      {/* Modal de escaneo mejorado */}
       {showScanModal && scannedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="scanModalTitle">
-          <div className="bg-white dark:bg-gray-800 rounded shadow-lg max-w-md w-full p-6 relative">
-            <h3 id="scanModalTitle" className="text-xl font-semibold mb-4 flex items-center gap-2"><Scan size={24} aria-hidden="true" /> Producto Escaneado</h3>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-shrink-0">
-                {scannedProduct.image ? (
-                  <img src={scannedProduct.image} alt={scannedProduct.name} className="w-32 h-32 object-cover rounded" />
-                ) : (
-                  <Package size={64} className="text-gray-400" aria-hidden="true" />
-                )}
-              </div>
-              <div className="flex-grow">
-                <p><strong>Nombre:</strong> {scannedProduct.name}</p>
-                <p><strong>Fecha de Entrada:</strong> {format(scannedProduct.entryDate, 'dd/MM/yyyy')}</p>
-                <p><strong>Fecha de Expiración:</strong> {format(scannedProduct.expirationDate, 'dd/MM/yyyy')}</p>
-                <p><strong>Precio:</strong> ${scannedProduct.price.toFixed(2)}</p>
-                <p><strong>Stock:</strong> {scannedProduct.stock}</p>
-                <p><strong>Tipo:</strong> {scannedProduct.type}</p>
-                <p><strong>Código QR:</strong> {scannedProduct.qrCode}</p>
-                <p><strong>Código de Barras:</strong> {scannedProduct.barcode}</p>
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <div className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-lg shadow-xl p-6">
+                {/* Botón cerrar en la esquina */}
+                <button
+                  onClick={() => { setShowScanModal(false); setScannedProduct(null); }}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                  aria-label="Cerrar modal"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
 
-                <label htmlFor="actionQuantity" className="block mt-4 font-semibold">Cantidad:</label>
-                <input
-                  id="actionQuantity"
-                  type="number"
-                  min={1}
-                  max={10000}
-                  value={actionQuantity}
-                  onChange={e => setActionQuantity(Math.max(1, Math.min(10000, Number(e.target.value))))}
-                  className="w-24 rounded border border-gray-300 dark:border-gray-600 px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  aria-label="Cantidad para acción"
-                />
+                <h3 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Scan size={24} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                  Producto Escaneado
+                </h3>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button onClick={() => manejarAccionProducto('sell')} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-2" aria-label="Vender producto">
-                    <Check size={20} aria-hidden="true" /> Vender
-                  </button>
-                  <button onClick={() => manejarAccionProducto('dispose')} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center gap-2" aria-label="Desechar producto">
-                    <Trash2 size={20} aria-hidden="true" /> Desechar
-                  </button>
-                  <button onClick={() => manejarAccionProducto('restock')} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2" aria-label="Reabastecer producto">
-                    <RefreshCw size={20} aria-hidden="true" /> Reabastecer
-                  </button>
-                  <button onClick={() => { setShowScanModal(false); setScannedProduct(null); }} className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded flex items-center gap-2" aria-label="Cerrar modal">
-                    <X size={20} aria-hidden="true" /> Cerrar
-                  </button>
+                <div className="grid sm:grid-cols-[auto,1fr] gap-6">
+                  <div className="flex-shrink-0 flex items-start justify-center">
+                    {scannedProduct.image ? (
+                      <img src={scannedProduct.image} alt={scannedProduct.name} 
+                        className="w-32 h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700" />
+                    ) : (
+                      <div className="w-32 h-32 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                        <Package size={64} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <p className="text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold">Nombre:</span> {scannedProduct.name}
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold">Fecha de Entrada:</span> {format(scannedProduct.entryDate, 'dd/MM/yyyy')}
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold">Fecha de Expiración:</span> {format(scannedProduct.expirationDate, 'dd/MM/yyyy')}
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold">Precio:</span> ${scannedProduct.price.toFixed(2)}
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold">Stock:</span> {scannedProduct.stock}
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold">Tipo:</span> {scannedProduct.type}
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold">Código QR:</span> {scannedProduct.qrCode}
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        <span className="font-semibold">Código de Barras:</span> {scannedProduct.barcode}
+                      </p>
+                    </div>
+
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <label htmlFor="actionQuantity" className="block mb-2 font-semibold text-gray-900 dark:text-gray-100">
+                        Cantidad:
+                      </label>
+                      <div className="flex items-center gap-4">
+                        <input
+                          id="actionQuantity"
+                          type="number"
+                          min={1}
+                          max={10000}
+                          value={actionQuantity}
+                          onChange={e => setActionQuantity(Math.max(1, Math.min(10000, Number(e.target.value))))}
+                          className="w-24 rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-4">
+                      <button onClick={() => manejarAccionProducto('sell')} 
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                        <Check size={20} aria-hidden="true" /> Vender
+                      </button>
+                      <button onClick={() => manejarAccionProducto('dispose')} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2" aria-label="Desechar producto">
+                        <Trash2 size={20} aria-hidden="true" /> Desechar
+                      </button>
+                      <button onClick={() => manejarAccionProducto('restock')} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2" aria-label="Reabastecer producto">
+                        <RefreshCw size={20} aria-hidden="true" /> Reabastecer
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -835,9 +1248,53 @@ export default function InventoryManager() {
         </div>
       )}
 
-      <footer className="text-center p-4 text-sm text-gray-500 dark:text-gray-400">
-        &copy; {new Date().getFullYear()} Gestor de Inventario - Prototipo
+      <footer className="mt-auto bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 py-4 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            © {new Date().getFullYear()} Gestor de Inventario - Prototipo
+          </p>
+        </div>
       </footer>
+
+      {/* Panel de notificaciones móvil */}
+      {showNotifications && (
+        <div className="md:hidden fixed inset-x-4 bottom-24 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-[60vh] overflow-y-auto">
+          <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notificaciones</h3>
+            <button 
+              onClick={marcarNotificacionesLeidas}
+              className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+              Marcar todas
+            </button>
+          </div>
+          
+          {notifications.length === 0 ? (
+            <p className="p-4 text-center text-gray-500 dark:text-gray-400">
+              No hay notificaciones
+            </p>
+          ) : (
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {notifications.map(n => (
+                <li key={n.id} className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                  n.read ? 'opacity-75' : ''
+                }`}>
+                  <div className="flex gap-3 items-start">
+                    {n.type === 'danger' && <AlertTriangle className="text-red-600 dark:text-red-400 flex-shrink-0" />}
+                    {n.type === 'warning' && <AlertTriangle className="text-yellow-600 dark:text-yellow-400 flex-shrink-0" />}
+                    {n.type === 'info' && <Bell className="text-blue-600 dark:text-blue-400 flex-shrink-0" />}
+                    <div>
+                      <p className="text-gray-900 dark:text-gray-100 text-sm">{n.message}</p>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {format(n.date, 'dd/MM/yyyy HH:mm')}
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }
