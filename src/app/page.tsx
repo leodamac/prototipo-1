@@ -1680,6 +1680,74 @@ export default function InventoryManager() {
           </div>
         )}
 
+        {showScanModal && scannedProduct && (
+          <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center">
+            <div ref={modalRef} className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                Gestionar: {scannedProduct.name}
+              </h3>
+              <div className="mb-4 flex flex-col gap-2">
+                <div>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">Tipo:</span> {scannedProduct.type}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">Precio:</span> ${scannedProduct.price}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">Stock actual:</span> {scannedProduct.stock}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">Caduca:</span> {scannedProduct.expirationDate.toLocaleDateString()}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">Código QR:</span> {scannedProduct.qrCode}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-700 dark:text-gray-300">Código de barras:</span> {scannedProduct.barcode}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
+                  Cantidad
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={scannedProduct.stock}
+                  value={actionQuantity}
+                  onChange={e => setActionQuantity(Number(e.target.value))}
+                  className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => manejarAccionProducto('sell')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                >
+                  Vender
+                </button>
+                <button
+                  onClick={() => manejarAccionProducto('dispose')}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                >
+                  Desechar
+                </button>
+                <button
+                  onClick={() => manejarAccionProducto('restock')}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                >
+                  Reponer
+                </button>
+                <button
+                  onClick={() => { setShowScanModal(false); setScannedProduct(null); }}
+                  className="px-4 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="mt-auto bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
