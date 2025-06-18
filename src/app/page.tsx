@@ -3,10 +3,11 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Eye, EyeOff, Trash2, RefreshCw, X, GripVertical, Settings } from 'lucide-react';
 import { format, subDays, addDays, differenceInDays, startOfDay, endOfDay } from 'date-fns';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+
 
 interface Product {
   id: string;
@@ -337,11 +338,11 @@ export default function InventoryManager() {
   }, [products, searchTerm, filterType, filterSupplier]);
 
   // Manejar reordenamiento de widgets
-  const manejarDragEnd = (event: any) => {
+  const manejarDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (active.id !== over.id) {
+    if (active.id !== over?.id) {
       const oldIndex = widgets.findIndex(w => w.id === active.id);
-      const newIndex = widgets.findIndex(w => w.id === over.id);
+      const newIndex = widgets.findIndex(w => w.id === over?.id);
       setWidgets(arrayMove(widgets, oldIndex, newIndex));
     }
   };
