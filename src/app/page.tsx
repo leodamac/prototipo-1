@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Eye, EyeOff, Trash2, RefreshCw, X, GripVertical } from 'lucide-react';
+import { Package, TrendingUp, AlertTriangle, Bell, Scan, Moon, Sun, Check, Calendar, ShoppingCart, Users, Eye, EyeOff, Trash2, RefreshCw, X, GripVertical, Settings } from 'lucide-react';
 import { format, subDays, addDays, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -88,8 +88,8 @@ export default function InventoryManager() {
   const [showScanModal, setShowScanModal] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
   const [actionQuantity, setActionQuantity] = useState(1);
-  const [selectedPeriod, setSelectedPeriod] = useState('7d');
-  const [customDays, setCustomDays] = useState('');
+  const [selectedPeriod] = useState('7d');
+  const [customDays] = useState('');
   const [compactView, setCompactView] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -319,11 +319,6 @@ export default function InventoryManager() {
       })
       .sort((a, b) => a.expirationDate.getTime() - b.expirationDate.getTime());
   }, [products, filterType, filterSupplier]);
-
-  // Alternar visibilidad de widgets
-  const alternarWidget = (id: string) => {
-    setWidgets(widgets.map(w => w.id === id ? { ...w, visible: !w.visible } : w));
-  };
 
   // Marcar notificaciones como leídas
   const marcarNotificacionesLeidas = () => {
