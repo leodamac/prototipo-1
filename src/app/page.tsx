@@ -644,12 +644,6 @@ export default function InventoryManager() {
                   <SortableWidget 
                     key={widget.id} 
                     widget={widget}
-                    className={`${
-                      // Hacer que algunos widgets ocupen todo el ancho
-                      widget.type === 'inventory-table' || 
-                      widget.type === 'sales-trend' ? 
-                      'xl:col-span-2' : ''
-                    }`}
                   >
                     {/* Widget de Tabla de Inventario */}
                     {widget.type === 'inventory-table' && (
