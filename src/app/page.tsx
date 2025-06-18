@@ -1183,98 +1183,121 @@ export default function InventoryManager() {
 
       {/* Modal de escaneo mejorado */}
       {showScanModal && scannedProduct && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={() => {
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]" onClick={() => {
           setShowScanModal(false);
           setScannedProduct(null);
         }}>
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4">
+          <div className="fixed inset-0 overflow-y-auto pt-16 sm:pt-20"> {/* Añadido padding-top para evitar el header */}
+            <div className="flex min-h-full items-start justify-center p-4">
               <div 
                 ref={modalRef}
                 onClick={e => e.stopPropagation()} 
-                className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-lg shadow-xl p-6"
+                className="relative bg-white dark:bg-gray-800 w-full max-w-2xl rounded-lg shadow-xl"
               >
-                {/* Botón cerrar en la esquina */}
-                <button
-                  onClick={() => { setShowScanModal(false); setScannedProduct(null); }}
-                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                  aria-label="Cerrar modal"
-                >
-                  <X size={20} aria-hidden="true" />
-                </button>
+                {/* Header del modal */}
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <Scan size={20} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                    Producto Escaneado
+                  </h3>
+                  <button
+                    onClick={() => { setShowScanModal(false); setScannedProduct(null); }}
+                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                    aria-label="Cerrar modal"
+                  >
+                    <X size={20} aria-hidden="true" />
+                  </button>
+                </div>
 
-                <h3 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  <Scan size={24} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
-                  Producto Escaneado
-                </h3>
-
-                <div className="grid sm:grid-cols-[auto,1fr] gap-6">
-                  <div className="flex-shrink-0 flex items-start justify-center">
-                    {scannedProduct.image ? (
-                      <img src={scannedProduct.image} alt={scannedProduct.name} 
-                        className="w-32 h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700" />
-                    ) : (
-                      <div className="w-32 h-32 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                        <Package size={64} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="grid gap-2">
-                      <p className="text-gray-900 dark:text-gray-100">
-                        <span className="font-semibold">Nombre:</span> {scannedProduct.name}
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        <span className="font-semibold">Fecha de Entrada:</span> {format(scannedProduct.entryDate, 'dd/MM/yyyy')}
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        <span className="font-semibold">Fecha de Expiración:</span> {format(scannedProduct.expirationDate, 'dd/MM/yyyy')}
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        <span className="font-semibold">Precio:</span> ${scannedProduct.price.toFixed(2)}
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        <span className="font-semibold">Stock:</span> {scannedProduct.stock}
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        <span className="font-semibold">Tipo:</span> {scannedProduct.type}
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        <span className="font-semibold">Código QR:</span> {scannedProduct.qrCode}
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        <span className="font-semibold">Código de Barras:</span> {scannedProduct.barcode}
-                      </p>
+                {/* Contenido del modal con scroll independiente */}
+                <div className="p-4 max-h-[calc(100vh-12rem)] overflow-y-auto">
+                  {/* Imagen y detalles en grid responsivo */}
+                  <div className="grid sm:grid-cols-[180px,1fr] gap-4">
+                    {/* Imagen del producto */}
+                    <div className="flex-shrink-0 mx-auto sm:mx-0">
+                      {scannedProduct.image ? (
+                        <img 
+                          src={scannedProduct.image} 
+                          alt={scannedProduct.name} 
+                          className="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-lg border border-gray-200 dark:border-gray-700" 
+                        />
+                      ) : (
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                          <Package size={48} className="text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                        </div>
+                      )}
                     </div>
 
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <label htmlFor="actionQuantity" className="block mb-2 font-semibold text-gray-900 dark:text-gray-100">
+                    {/* Detalles del producto */}
+                    <div className="space-y-3">
+                      <div className="grid gap-2">
+                        <h4 className="font-semibold text-lg text-gray-900 dark:text-gray-100">{scannedProduct.name}</h4>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <p className="text-gray-900 dark:text-gray-100">
+                            <span className="font-medium">Entrada:</span><br />
+                            {format(scannedProduct.entryDate, 'dd/MM/yyyy')}
+                          </p>
+                          <p className="text-gray-900 dark:text-gray-100">
+                            <span className="font-medium">Expiración:</span><br />
+                            {format(scannedProduct.expirationDate, 'dd/MM/yyyy')}
+                          </p>
+                          <p className="text-gray-900 dark:text-gray-100">
+                            <span className="font-medium">Precio:</span><br />
+                            ${scannedProduct.price.toFixed(2)}
+                          </p>
+                          <p className="text-gray-900 dark:text-gray-100">
+                            <span className="font-medium">Stock:</span><br />
+                            {scannedProduct.stock} unidades
+                          </p>
+                          <p className="text-gray-900 dark:text-gray-100">
+                            <span className="font-medium">Tipo:</span><br />
+                            {scannedProduct.type}
+                          </p>
+                          <p className="text-gray-900 dark:text-gray-100">
+                            <span className="font-medium">QR:</span><br />
+                            {scannedProduct.qrCode}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer del modal con acciones */}
+                <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {/* Control de cantidad */}
+                    <div className="flex items-center gap-2">
+                      <label htmlFor="actionQuantity" className="font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                         Cantidad:
                       </label>
-                      <div className="flex items-center gap-4">
-                        <input
-                          id="actionQuantity"
-                          type="number"
-                          min={1}
-                          max={10000}
-                          value={actionQuantity}
-                          onChange={e => setActionQuantity(Math.max(1, Math.min(10000, Number(e.target.value))))}
-                          className="w-24 rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        />
-                      </div>
+                      <input
+                        id="actionQuantity"
+                        type="number"
+                        min={1}
+                        max={10000}
+                        value={actionQuantity}
+                        onChange={e => setActionQuantity(Math.max(1, Math.min(10000, Number(e.target.value))))}
+                        className="w-20 rounded border border-gray-300 dark:border-gray-600 px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      />
                     </div>
 
-                    <div className="flex flex-wrap gap-2 pt-4">
-                      <button onClick={() => manejarAccionProducto('sell')} 
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-                        <Check size={20} aria-hidden="true" /> Vender
+                    {/* Botones de acción */}
+                    <div className="flex flex-wrap gap-2 sm:ml-auto">
+                      <button 
+                        onClick={() => manejarAccionProducto('sell')} 
+                        className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
+                        <Check size={18} aria-hidden="true" /> Vender
                       </button>
-                      <button onClick={() => manejarAccionProducto('dispose')} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2" aria-label="Desechar producto">
-                        <Trash2 size={20} aria-hidden="true" /> Desechar
+                      <button 
+                        onClick={() => manejarAccionProducto('dispose')} 
+                        className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
+                        <Trash2 size={18} aria-hidden="true" /> Desechar
                       </button>
-                      <button onClick={() => manejarAccionProducto('restock')} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2" aria-label="Reabastecer producto">
-                        <RefreshCw size={20} aria-hidden="true" /> Reabastecer
+                      <button 
+                        onClick={() => manejarAccionProducto('restock')} 
+                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
+                        <RefreshCw size={18} aria-hidden="true" /> Reabastecer
                       </button>
                     </div>
                   </div>
