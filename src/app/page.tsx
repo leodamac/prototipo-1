@@ -596,7 +596,7 @@ export default function InventoryManager() {
         </div>
       </header>
 
-      <main className="flex-grow p-4 max-w-7xl mx-auto w-full bg-gray-50 dark:bg-gray-900">
+      <main className="flex-grow p-4 lg:p-6 xl:p-8 max-w-[2000px] mx-auto w-full">
         {/* Botón de escaneo QR más prominente */}
         {activeTab === 'dashboard' && (
           <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
@@ -661,7 +661,7 @@ export default function InventoryManager() {
                         <div className="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
                           <div className="min-w-[800px] lg:min-w-full"> {/* Ancho mínimo en móvil, natural en desktop */}
                             <table className="w-full text-left text-sm">
-                              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+                              <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
                                 <tr>
                                   <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Nombre</th>
                                   <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Stock</th>
@@ -669,7 +669,7 @@ export default function InventoryManager() {
                                   <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Proveedor</th>
                                 </tr>
                               </thead>
-                              <tbody>
+                              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {/* Mensaje cuando no hay productos */}
                                 {products.length === 0 && (
                                   <tr>
@@ -772,7 +772,7 @@ export default function InventoryManager() {
                                 <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Proveedor</th>
                               </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                               {productosStockBajo.length === 0 && (
                                 <tr>
                                   <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
@@ -814,7 +814,7 @@ export default function InventoryManager() {
                                 <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Proveedor</th>
                               </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                               {productosProximosCaducar.length === 0 ? (
                                 <tr>
                                   <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
@@ -981,7 +981,7 @@ export default function InventoryManager() {
             <div className="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
               <div className="min-w-[800px] lg:min-w-full"> {/* Ancho mínimo en móvil, natural en desktop */}
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-gray-200 dark:bg-gray-700">
+                  <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
                     <tr>
                       <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Nombre</th>
                       {compactView ? (
@@ -1002,7 +1002,7 @@ export default function InventoryManager() {
                       <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {productosFiltrados.length === 0 ? (
                       <tr>
                         <td colSpan={compactView ? 4 : 8} className="p-4 text-center text-gray-500 dark:text-gray-400">
