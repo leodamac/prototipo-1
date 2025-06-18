@@ -978,30 +978,14 @@ export default function InventoryManager() {
                                   
                                   {/* Columnas de fechas - reducir el ancho mínimo */}
                                   <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
-                                    Fecha Entrada
-                                  </th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
-                                    Fecha Expiración
+                                    Días para Caducar
                                   </th>
                                   
                                   {/* Columnas numéricas - reducir significativamente */}
                                   <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[70px]">
                                     Precio
                                   </th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[60px]">
-                                    Stock
-                                  </th>
-                                  
-                                  {/* Columnas de texto corto */}
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
-                                    Tipo
-                                  </th>
-                                  
-                                  {/* Columnas más largas */}
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[120px]">
-                                    Proveedor
-                                  </th>
-                                  
+                              
                                   {/* Columna de acciones */}
                                   <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 min-w-[90px]">
                                     Acciones
