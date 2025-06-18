@@ -639,9 +639,18 @@ export default function InventoryManager() {
         {activeTab === 'dashboard' && (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={manejarDragEnd}>
             <SortableContext items={widgets.map(w => w.id)} strategy={verticalListSortingStrategy}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {widgets.map(widget => widget.visible && (
-                  <SortableWidget key={widget.id} widget={widget}>
+                  <SortableWidget 
+                    key={widget.id} 
+                    widget={widget}
+                    className={`${
+                      // Hacer que algunos widgets ocupen todo el ancho
+                      widget.type === 'inventory-table' || 
+                      widget.type === 'sales-trend' ? 
+                      'xl:col-span-2' : ''
+                    }`}
+                  >
                     {/* Widget de Tabla de Inventario */}
                     {widget.type === 'inventory-table' && (
                       <section aria-label="Tabla de inventario">
@@ -654,10 +663,10 @@ export default function InventoryManager() {
                             <table className="w-full text-left text-sm">
                               <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                                 <tr>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
-                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Nombre</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Stock</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Días para caducar</th>
+                                  <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Proveedor</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -717,10 +726,10 @@ export default function InventoryManager() {
                           <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                             <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                               <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Cantidad</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Precio Unit.</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Producto</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Cantidad</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Precio Unit.</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Fecha</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -757,10 +766,10 @@ export default function InventoryManager() {
                           <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                             <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                               <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Producto</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Stock</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Tipo</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Proveedor</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -799,10 +808,10 @@ export default function InventoryManager() {
                           <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                             <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                               <tr>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
-                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Producto</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Días para caducar</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Stock</th>
+                                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Proveedor</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -847,9 +856,12 @@ export default function InventoryManager() {
                           <TrendingUp size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
                           Tendencia de Ventas
                         </h3>
-                        <div className="w-full" style={{ height: "250px" }}>
+                        <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
                           <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={datosTendenciaVentas}>
+                            <LineChart 
+                              data={datosTendenciaVentas}
+                              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                            >
                               <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
                               <XAxis 
                                 dataKey="fecha" 
@@ -858,12 +870,18 @@ export default function InventoryManager() {
                               <YAxis 
                                 className="text-gray-900 dark:text-gray-100"
                               />
-                              <Tooltip 
-                                contentStyle={{ 
+                              <Tooltip
+                                contentStyle={{
                                   backgroundColor: 'rgb(var(--bg-white))',
                                   borderColor: 'rgb(var(--border-gray-300))',
-                                  color: 'rgb(var(--text-gray-900))'
-                                }} 
+                                  color: 'rgb(var(--text-gray-900))',
+                                  fontSize: '12px',
+                                  padding: '8px',
+                                  borderRadius: '4px'
+                                }}
+                                wrapperStyle={{
+                                  zIndex: 1000
+                                }}
                               />
                               <Legend />
                               <Line type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={2} dot={false} />
@@ -965,23 +983,23 @@ export default function InventoryManager() {
                 <table className="w-full text-left text-sm">
                   <thead className="bg-gray-200 dark:bg-gray-700">
                     <tr>
-                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Nombre</th>
                       {compactView ? (
                         <>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Días para caducar</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Stock</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Días para caducar</th>
                         </>
                       ) : (
                         <>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha Entrada</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha Expiración</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Precio</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Stock</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
-                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Fecha Entrada</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Fecha Expiración</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Precio</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Stock</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Tipo</th>
+                          <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Proveedor</th>
                         </>
                       )}
-                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Acciones</th>
+                      <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1062,10 +1080,10 @@ export default function InventoryManager() {
               <table className="w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                 <thead className="bg-gray-200 dark:bg-gray-700">
                   <tr>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Cantidad</th>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
-                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Fecha</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Producto</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Cantidad</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Tipo</th>
+                    <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 whitespace-nowrap">Fecha</th>
                   </tr>
                 </thead>
                 <tbody>
