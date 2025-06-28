@@ -1,4 +1,97 @@
-@import "tailwindcss/base";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Aquí puedes agregar tus estilos personalizados si los necesitas */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: #111827; /* Tailwind's gray-900 */
+}
+
+.dark body {
+  color: #f3f4f6; /* Tailwind's gray-100 */
+}
+
+/* Custom scrollbar for Webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Firefox scrollbar */
+@supports (scrollbar-width: thin) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+  }
+}
+
+/* Recharts Tooltip Customization */
+.recharts-tooltip-wrapper {
+  background-color: rgb(var(--bg-white)) !important;
+  border: 1px solid rgb(var(--border-gray-300)) !important;
+  border-radius: 4px !important;
+  padding: 8px !important;
+  color: rgb(var(--text-gray-900)) !important;
+  font-size: 12px !important;
+}
+
+.recharts-tooltip-label {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.recharts-tooltip-item {
+  margin-bottom: 2px;
+}
+
+.recharts-tooltip-item-name {
+  color: rgb(var(--text-gray-900));
+}
+
+.recharts-tooltip-item-value {
+  color: rgb(var(--text-gray-900));
+}
+
+/* Define custom CSS variables for colors used in Recharts tooltips */
+@layer base {
+  :root {
+    --bg-white: 255 255 255;
+    --border-gray-300: 209 213 219;
+    --text-gray-900: 17 24 39;
+  }
+
+  .dark {
+    --bg-white: 31 41 55; /* gray-800 */
+    --border-gray-300: 75 85 99; /* gray-600 */
+    --text-gray-900: 243 244 246; /* gray-100 */
+  }
+}

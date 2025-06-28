@@ -9,6 +9,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: '320px', // Custom breakpoint for extra small screens
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
