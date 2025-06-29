@@ -42,20 +42,9 @@ export function CameraScanModal({
     setScanMessage(null);
     setScannedCode(null);
     setIsScanning(true);
-    // The useEffect will handle starting the scanner again if showModal is true and selectedCameraId is set
   }, []);
 
   const handleClose = useCallback(async () => {
-    // Ensure scanner is stopped before closing modal
-    if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
-      try {
-        await html5QrCodeRef.current.stop();
-      } catch (err) {
-        console.error("Error stopping scanner on close:", err);
-      }
-    }
-    html5QrCodeRef.current = null; // Clear the ref after stopping
-
     setShowModal(false);
     setScannedProduct(null);
     setIsScanning(false);
@@ -88,16 +77,16 @@ export function CameraScanModal({
 
   // Effect to start/stop scanner based on state changes
   useEffect(() => {
+    const qrCodeReaderId = "qr-camera-reader";
+    let currentHtml5QrCode: Html5Qrcode | null = null;
+
     if (showModal && selectedCameraId && cameraStatus === 'ready' && isScanning && !scannedProduct) {
-      const qrCodeReaderId = "qr-camera-reader";
-      // Only create a new instance if one doesn't exist or is not scanning
-      if (!html5QrCodeRef.current || !html5QrCodeRef.current.isScanning) {
-        html5QrCodeRef.current = new Html5Qrcode(qrCodeReaderId);
-      }
+      currentHtml5QrCode = new Html5Qrcode(qrCodeReaderId);
+      html5QrCodeRef.current = currentHtml5QrCode; // Store the current instance
 
       const qrCodeSuccessCallback = (decodedText: string) => {
-        setScanMessage(null); // Clear previous messages
-        setScannedCode(null); // Clear previous scanned code
+        setScanMessage(null);
+        setScannedCode(null);
 
         const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
         if (foundProduct) {
@@ -113,12 +102,11 @@ export function CameraScanModal({
 
       const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-      html5QrCodeRef.current.start(
+      currentHtml5QrCode.start(
         selectedCameraId,
         config,
         qrCodeSuccessCallback,
         (errorMessage) => {
-          // This callback is for continuous scanning errors, not for product not found
           // console.warn("QR Code scanning error: ", errorMessage);
         }
       ).catch(err => {
@@ -130,8 +118,8 @@ export function CameraScanModal({
 
     return () => {
       // Cleanup function: stop the scanner when the effect re-runs or component unmounts
-      if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
-        html5QrCodeRef.current.stop().catch(err => console.error("Cleanup: Failed to stop scanner", err));
+      if (currentHtml5QrCode && currentHtml5QrCode.isScanning) {
+        currentHtml5QrCode.stop().catch(err => console.error("Cleanup: Failed to stop scanner", err));
       }
       html5QrCodeRef.current = null; // Clear the ref after stopping
     };
@@ -153,21 +141,8 @@ export function CameraScanModal({
           <select
             id="camera-select"
             value={selectedCameraId || ''}
-            onChange={async (e) => {
-              // Stop current scanner before changing camera
-              if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
-                try {
-                  await html5QrCodeRef.current.stop();
-                } catch (err) {
-                  console.error("Error stopping scanner on camera change:", err);
-                }
-              }
-              html5QrCodeRef.current = null; // Clear the ref after stopping
-
-              const newCameraId = e.target.value;
-              const newCamera = availableCameras.find(c => c.id === newCameraId);
-              setSelectedCameraId(newCameraId);
-              setIsFrontCamera(newCamera ? (newCamera.label.toLowerCase().includes('front') || newCamera.label.toLowerCase().includes('user')) : false);
+            onChange={(e) => {
+              setSelectedCameraId(e.target.value);
               setScannedProduct(null); // Reset scanned product when camera changes
               setCameraStatus('ready'); // Set status to ready to trigger scanner restart
               setScanMessage(null); // Clear messages on camera change
