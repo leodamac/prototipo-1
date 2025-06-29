@@ -13,6 +13,7 @@ interface AddProductModalProps {
   suppliers: Supplier[];
   editingProduct: Product | null;
   clearForm: () => void; // New prop to clear the form
+  addProductError: string | null; // New prop for displaying errors
 }
 
 export function AddProductModal({
@@ -24,6 +25,7 @@ export function AddProductModal({
   suppliers,
   editingProduct,
   clearForm,
+  addProductError,
 }: AddProductModalProps) {
 
   const modalTitle = editingProduct ? 'Editar Producto' : 'Añadir Nuevo Producto';
@@ -41,6 +43,10 @@ export function AddProductModal({
         setProduct={setNewProduct}
         suppliers={suppliers}
       />
+
+      {addProductError && (
+        <p className="text-red-500 text-sm text-center mb-4">{addProductError}</p>
+      )}
 
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
         <button

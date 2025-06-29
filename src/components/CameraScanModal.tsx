@@ -44,7 +44,21 @@ export function CameraScanModal({
     setIsScanning(true);
   }, []);
 
+  const stopHtml5Qrcode = useCallback(async () => {
+    if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+      try {
+        await html5QrCodeRef.current.stop();
+        console.log("Scanner stopped.");
+      } catch (err) {
+        console.error("Error stopping scanner:", err);
+      } finally {
+        html5QrCodeRef.current = null;
+      }
+    }
+  }, []);
+
   const handleClose = useCallback(async () => {
+    await stopHtml5Qrcode();
     setShowModal(false);
     setScannedProduct(null);
     setIsScanning(false);
@@ -52,7 +66,7 @@ export function CameraScanModal({
     setAvailableCameras([]);
     setCameraStatus('idle');
     setScanMessage(null);
-  }, [setShowModal]);
+  }, [setShowModal, stopHtml5Qrcode]);
 
   // Effect to get cameras when modal opens
   useEffect(() => {
@@ -78,15 +92,18 @@ export function CameraScanModal({
   // Effect to start/stop scanner based on state changes
   useEffect(() => {
     const qrCodeReaderId = "qr-camera-reader";
-    let currentHtml5QrCode: Html5Qrcode | null = null;
 
     if (showModal && selectedCameraId && cameraStatus === 'ready' && isScanning && !scannedProduct) {
-      currentHtml5QrCode = new Html5Qrcode(qrCodeReaderId);
-      html5QrCodeRef.current = currentHtml5QrCode; // Store the current instance
+      // Only create a new instance if one doesn't exist or is not scanning
+      if (!html5QrCodeRef.current || !html5QrCodeRef.current.isScanning) {
+        html5QrCodeRef.current = new Html5Qrcode(qrCodeReaderId);
+      }
 
       const qrCodeSuccessCallback = (decodedText: string) => {
-        setScanMessage(null);
-        setScannedCode(null);
+        console.log("Scanned text:", decodedText);
+        console.log("Suppliers data:", suppliers);
+        setScanMessage(null); // Clear previous messages
+        setScannedCode(null); // Clear previous scanned code
 
         const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
         if (foundProduct) {
@@ -102,7 +119,7 @@ export function CameraScanModal({
 
       const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-      currentHtml5QrCode.start(
+      html5QrCodeRef.current.start(
         selectedCameraId,
         config,
         qrCodeSuccessCallback,
@@ -118,12 +135,9 @@ export function CameraScanModal({
 
     return () => {
       // Cleanup function: stop the scanner when the effect re-runs or component unmounts
-      if (currentHtml5QrCode && currentHtml5QrCode.isScanning) {
-        currentHtml5QrCode.stop().catch(err => console.error("Cleanup: Failed to stop scanner", err));
-      }
-      html5QrCodeRef.current = null; // Clear the ref after stopping
+      stopHtml5Qrcode();
     };
-  }, [showModal, selectedCameraId, cameraStatus, suppliers, onProductScanned, scannedProduct, isScanning]);
+  }, [showModal, selectedCameraId, cameraStatus, suppliers, onProductScanned, scannedProduct, isScanning, stopHtml5Qrcode]);
 
   return (
     <Modal isOpen={showModal} onClose={handleClose} title={scannedProduct ? "Producto Encontrado" : "Escanear con Cámara"}>
@@ -139,7 +153,9 @@ export function CameraScanModal({
         <div className="mt-4">
           <label htmlFor="camera-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cámara Actual: {availableCameras.find(c => c.id === selectedCameraId)?.label || 'N/A'}</label>
           <button
-            onClick={() => {
+            onClick={async () => {
+              await stopHtml5Qrcode(); // Stop current scanner before changing camera
+
               const currentIndex = availableCameras.findIndex(c => c.id === selectedCameraId);
               const nextIndex = (currentIndex + 1) % availableCameras.length;
               const nextCamera = availableCameras[nextIndex];

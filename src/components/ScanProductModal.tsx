@@ -53,6 +53,9 @@ export function ScanProductModal({
     try {
       const result = await html5QrCode.scanFileV2(selectedImage, false);
       const decodedText = result.decodedText;
+      console.log("Scanned text (image):", decodedText);
+      console.log("Suppliers data (image):");
+      console.log("Products from suppliers:", suppliers.flatMap(s => s.Product || []));
       const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
       if (foundProduct) {
         setInternalProduct(foundProduct);

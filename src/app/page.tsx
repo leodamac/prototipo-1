@@ -191,6 +191,7 @@ export default function InventoryManager() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const handleAddOrUpdateProduct = async () => {
+    setAddProductError(null); // Clear previous errors
     try {
       if (editingProduct) {
         // Update existing product
@@ -230,7 +231,14 @@ export default function InventoryManager() {
             image: newProduct.image || null,
           }),
         });
-        if (!res.ok) throw new Error('Failed to add product');
+        if (!res.ok) {
+          const errorData = await res.json();
+          if (errorData.code === '23505' && errorData.detail.includes('qrCode')) {
+            throw new Error('Ya existe un producto con este código QR/Barras.');
+          } else {
+            throw new Error('Failed to add product');
+          }
+        }
         const addedProduct = await res.json();
         setProducts(prev => [...prev, {
           ...addedProduct,
@@ -244,8 +252,9 @@ export default function InventoryManager() {
         name: '', type: '', price: 0, stock: 0, supplierId: '', image: '', qrCode: '', barcode: '',
       });
       setEditingProduct(null); // Clear editing state
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al guardar producto:', error);
+      setAddProductError(error.message || 'Error desconocido al guardar el producto.');
     }
   };
 
@@ -477,6 +486,7 @@ export default function InventoryManager() {
     entryDate: new Date(),
     expirationDate: undefined,
   });
+  const [addProductError, setAddProductError] = useState<string | null>(null);
 
   
 
@@ -883,6 +893,7 @@ export default function InventoryManager() {
         suppliers={suppliers}
         editingProduct={editingProduct}
         clearForm={clearAddProductForm}
+        addProductError={addProductError}
       />
 
         <ScanProductModal
