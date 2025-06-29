@@ -63,7 +63,7 @@ export function CameraScanModal({
           setAvailableCameras(cameras);
           const defaultCamera = cameras[0];
           setSelectedCameraId(defaultCamera.id); // Select the first camera by default
-          setIsFrontCamera(defaultCamera.label.toLowerCase().includes('front') || defaultCamera.label.toLowerCase().includes('user'));
+          setIsFrontCamera(defaultCamera.label.toLowerCase().includes('front') || defaultCamera.label.toLowerCase().includes('user') || defaultCamera.label.toLowerCase().includes('facing front'));
           setCameraStatus('ready');
         } else {
           setCameraStatus('no-camera');
@@ -127,7 +127,7 @@ export function CameraScanModal({
 
   return (
     <Modal isOpen={showModal} onClose={handleClose} title={scannedProduct ? "Producto Encontrado" : "Escanear con Cámara"}>
-      <div id="qr-camera-reader" className={`w-full ${!isScanning ? 'hidden' : ''} ${isFrontCamera ? 'scale-x-[-1]' : ''}`}></div>
+      <div id="qr-camera-reader" style={{ width: "100%", display: isScanning ? 'block' : 'none', transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}></div>
 
       {cameraStatus === 'loading' && <p className="text-center text-gray-500 dark:text-gray-400">Cargando cámaras...</p>}
       {cameraStatus === 'no-camera' && <p className="text-center text-red-500">No se encontraron cámaras.</p>}
