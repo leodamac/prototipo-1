@@ -19,7 +19,6 @@ import { SupplierSection } from '../components/SupplierSection';
 import { SettingsSection } from '../components/SettingsSection';
 import ManageStockModal from '../components/ManageStockModal';
 
-import { id } from 'date-fns/locale';
 import { ProductScanResult } from '@/components/ProductScanResult';
 import { Modal } from '@/components/common/Modal';
 
@@ -940,16 +939,15 @@ export default function InventoryManager() {
         notificationsRef={notificationsRef}
       />
 
-      {scannedProduct && (
-        <Modal isOpen={!!scannedProduct} onClose={() => setScannedProduct(null)}>
-        <ProductScanResult
+      <Modal isOpen={!!scannedProduct} onClose={() => setScannedProduct(null)}>
+        {scannedProduct && (<ProductScanResult
           product={scannedProduct}
           suppliers={suppliers}
           onManageStock={handleManageStock}
           onUpdateProduct={handleProductUpdated}
           onSaleCreated={handleSaleCreated}
-        />
-        </Modal>)}
+        />)}
+        </Modal>
     </div>
   );
 }

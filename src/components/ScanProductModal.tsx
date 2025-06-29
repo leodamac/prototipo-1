@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Modal } from './common/Modal';
 import { ProductScanResult } from './ProductScanResult';
+import ManageStockModal from './ManageStockModal';
 
 interface ScanProductModalProps {
   showScanModal: boolean;
@@ -55,7 +56,7 @@ export function ScanProductModal({
 
     setScanMessage(null); // Clear previous messages
     setScannedCode(null); // Clear previous scanned code
-
+    handleRescan(); // Reset scanning state
     const html5QrCode = new Html5Qrcode("qr-reader", { verbose: false });
     try {
       const result = await html5QrCode.scanFileV2(selectedImage, false);
@@ -145,21 +146,23 @@ export function ScanProductModal({
               Añadir Producto con Código {scannedCode}
             </button>
           )}
-          <button
-            onClick={handleRescan}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors mt-2"
-          >
-            Escanear
-          </button>
+
         </div>
       ) : internalProduct ? (
-        <ProductScanResult 
-          product={internalProduct}
+        <>{/*<ProductScanResult
+          product={scannedProduct}
           suppliers={suppliers}
           onManageStock={onManageStock}
-          onUpdateProduct={handleUpdateProduct}
+          onUpdateProduct={onUpdateProduct}
           onSaleCreated={onSaleCreated}
-        />
+        />*/}
+        <ManageStockModal
+          isOpen={!!scannedProduct}
+          onClose={() => {scannedProduct = null;}}
+          product={scannedProduct}
+          onUpdateProduct={onUpdateProduct}
+          onSaleCreated={onSaleCreated}/>
+        </>
       ) : (
         <div className="text-center p-4">
           <p className="text-gray-500 dark:text-gray-400 mb-4">Escanee un código QR o de barras para ver los detalles del producto.</p>
