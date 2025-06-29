@@ -9,66 +9,54 @@ import ManageStockModal from './ManageStockModal';
 interface ScanProductModalProps {
   showScanModal: boolean;
   setShowScanModal: (show: boolean) => void;
-  scannedProduct: Product | null;
-  products: Product[]; // Added products prop
+  products: Product[];
   suppliers: Supplier[];
   
-  onProductNotFound: (scannedCode: string) => void; // New prop
+  onProductNotFound: (scannedCode: string) => void;
   onManageStock: (product: Product) => void;
   onUpdateProduct: (product: Product) => void;
-  onSaleCreated: (sale: Sale) => void; // Add this line
+  onSaleCreated: (sale: Sale) => void;
 }
 
 export function ScanProductModal({
   showScanModal,
   setShowScanModal,
-  scannedProduct,
-  products, // Destructure products
+  products,
   suppliers,
   
   onProductNotFound,
   onManageStock,
   onUpdateProduct,
-  onSaleCreated, // Add this line
+  onSaleCreated,
 }: ScanProductModalProps) {
-  const [internalProduct, setInternalProduct] = useState<Product | null>(scannedProduct);
   const [isScanning, setIsScanning] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const [scannedCode, setScannedCode] = useState<string | null>(null);
 
-  const handleUpdateProduct = (updatedProduct: Product) => {
-    setInternalProduct(updatedProduct);
-    onUpdateProduct(updatedProduct);
-  };
-
-  useEffect(() => {
-    setInternalProduct(scannedProduct);
-    if (showScanModal && !scannedProduct) {
-      setIsScanning(true);
-    } else {
-      setIsScanning(false);
-    }
-  }, [scannedProduct, showScanModal]);
+  const handleCloseModal = useCallback(() => {
+    setShowScanModal(false);
+    setIsScanning(false);
+    setSelectedImage(null);
+    setScanMessage(null);
+    setScannedCode(null);
+  }, [setShowScanModal]);
 
   const handleScan = useCallback(async () => {
     if (!selectedImage) return;
 
     setScanMessage(null); // Clear previous messages
     setScannedCode(null); // Clear previous scanned code
-    handleRescan(); // Reset scanning state
+
     const html5QrCode = new Html5Qrcode("qr-reader", { verbose: false });
     try {
       const result = await html5QrCode.scanFileV2(selectedImage, false);
       const decodedText = result.decodedText;
       console.log("Scanned text (image):", decodedText);
-      console.log("Suppliers data (image):");
-      console.log("Products from suppliers:", suppliers.flatMap(s => s.Product || []));
       const foundProduct = products.find(p => p.qrCode === decodedText || p.barcode === decodedText);
       if (foundProduct) {
-        setInternalProduct(foundProduct);
-        setIsScanning(false);
-        setScanMessage("Producto encontrado!");
+        onManageStock(foundProduct);
+        handleCloseModal();
       } else {
         setScannedCode(decodedText);
         setScanMessage(`Producto con código "${decodedText}" no encontrado.`);
@@ -80,27 +68,10 @@ export function ScanProductModal({
     } finally {
       setSelectedImage(null);
     }
-  }, [selectedImage, suppliers]);
-
-  const handleRescan = useCallback(() => {
-    setInternalProduct(null);
-    setScanMessage(null);
-    setScannedCode(null);
-    setIsScanning(true);
-    setSelectedImage(null);
-  }, []);
-
-  const handleCloseModal = () => {
-    setShowScanModal(false);
-    setInternalProduct(null);
-    setIsScanning(false);
-    setSelectedImage(null);
-    setScanMessage(null);
-    setScannedCode(null);
-  };
+  }, [selectedImage, products, onManageStock, handleCloseModal]);
 
   return (
-    <Modal isOpen={showScanModal} onClose={handleCloseModal} title={isScanning ? "Escanear Producto" : "Detalles del Producto"}>
+    <Modal isOpen={showScanModal} onClose={handleCloseModal} title="Escanear Producto">
       <div id="qr-reader" className="hidden"></div>
       {isScanning ? (
         <div className="flex flex-col items-center justify-center">
@@ -135,7 +106,7 @@ export function ScanProductModal({
             </button>
           )}
           {scanMessage && <p className="text-center text-red-500 mt-2">{scanMessage}</p>}
-          {scannedCode && !internalProduct && (
+          {scannedCode && (
             <button
               onClick={() => {
                 onProductNotFound(scannedCode);
@@ -146,23 +117,7 @@ export function ScanProductModal({
               Añadir Producto con Código {scannedCode}
             </button>
           )}
-
         </div>
-      ) : internalProduct ? (
-        <>{/*<ProductScanResult
-          product={scannedProduct}
-          suppliers={suppliers}
-          onManageStock={onManageStock}
-          onUpdateProduct={onUpdateProduct}
-          onSaleCreated={onSaleCreated}
-        />*/}
-        <ManageStockModal
-          isOpen={!!scannedProduct}
-          onClose={() => {scannedProduct = null;}}
-          product={scannedProduct}
-          onUpdateProduct={onUpdateProduct}
-          onSaleCreated={onSaleCreated}/>
-        </>
       ) : (
         <div className="text-center p-4">
           <p className="text-gray-500 dark:text-gray-400 mb-4">Escanee un código QR o de barras para ver los detalles del producto.</p>

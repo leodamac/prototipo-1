@@ -8,27 +8,24 @@ import ManageStockModal from './ManageStockModal';
 interface CameraScanModalProps {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
-  products: Product[]; // Added products prop
+  products: Product[];
   suppliers: Supplier[];
-  onProductScanned: (product: Product) => void;
   onUpdateProduct: (product: Product) => void;
-  onProductNotFound: (scannedCode: string) => void; // New prop
+  onProductNotFound: (scannedCode: string) => void;
   onManageStock: (product: Product) => void;
-  onSaleCreated: (sale: Sale) => void; // Add this line
+  onSaleCreated: (sale: Sale) => void;
 }
 
 export function CameraScanModal({
   showModal,
   setShowModal,
-  products, // Destructure products
+  products,
   suppliers,
-  onProductScanned,
   onUpdateProduct,
   onProductNotFound,
   onManageStock,
-  onSaleCreated, // Add this line
+  onSaleCreated,
 }: CameraScanModalProps) {
-  const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [availableCameras, setAvailableCameras] = useState<Array<{ id: string; label: string }>>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
@@ -39,7 +36,6 @@ export function CameraScanModal({
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
 
   const handleRescan = useCallback(() => {
-    setScannedProduct(null);
     setScanMessage(null);
     setScannedCode(null);
     setIsScanning(true);
@@ -61,12 +57,12 @@ export function CameraScanModal({
   const handleClose = useCallback(async () => {
     await stopHtml5Qrcode();
     setShowModal(false);
-    setScannedProduct(null);
     setIsScanning(false);
     setSelectedCameraId(null);
     setAvailableCameras([]);
     setCameraStatus('idle');
     setScanMessage(null);
+    setScannedCode(null); // Clear scanned code on close
   }, [setShowModal, stopHtml5Qrcode]);
 
   // Effect to get cameras when modal opens
@@ -103,7 +99,7 @@ export function CameraScanModal({
   useEffect(() => {
     const qrCodeReaderId = "qr-camera-reader";
 
-    if (showModal && selectedCameraId && cameraStatus === 'ready' && isScanning && !scannedProduct) {
+    if (showModal && selectedCameraId && cameraStatus === 'ready' && isScanning) {
       // Only create a new instance if one doesn't exist or is not scanning
       if (!html5QrCodeRef.current || !html5QrCodeRef.current.isScanning) {
         html5QrCodeRef.current = new Html5Qrcode(qrCodeReaderId);
@@ -117,9 +113,8 @@ export function CameraScanModal({
 
         const foundProduct = products.find(p => p.qrCode === decodedText || p.barcode === decodedText);
         if (foundProduct) {
-          setScannedProduct(foundProduct);
-          onProductScanned(foundProduct);
-          setIsScanning(false);
+          onManageStock(foundProduct);
+          handleClose(); // Close the scan modal
         } else {
           setScannedCode(decodedText);
           setScanMessage(`Producto con código "${decodedText}" no encontrado.`);
@@ -147,10 +142,10 @@ export function CameraScanModal({
       // Cleanup function: stop the scanner when the effect re-runs or component unmounts
       stopHtml5Qrcode();
     };
-  }, [showModal, selectedCameraId, cameraStatus, suppliers, onProductScanned, scannedProduct, isScanning, stopHtml5Qrcode]);
+  }, [showModal, selectedCameraId, cameraStatus, suppliers, isScanning, stopHtml5Qrcode, products, onManageStock, handleClose]);
 
   return (
-    <Modal isOpen={showModal} onClose={handleClose} title={scannedProduct ? "Producto Encontrado" : "Escanear con Cámara"}>
+    <Modal isOpen={showModal} onClose={handleClose} title="Escanear con Cámara">
       <div id="qr-camera-reader" style={{ width: "100%", display: isScanning ? 'block' : 'none', transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}></div>
 
       {cameraStatus === 'loading' && <p className="text-center text-gray-500 dark:text-gray-400">Cargando cámaras...</p>}
@@ -171,7 +166,6 @@ export function CameraScanModal({
               const nextCamera = availableCameras[nextIndex];
               setSelectedCameraId(nextCamera.id);
               setIsFrontCamera(nextCamera.label.toLowerCase().includes('front') || nextCamera.label.toLowerCase().includes('user') || nextCamera.label.toLowerCase().includes('facing front'));
-              setScannedProduct(null); // Reset scanned product when camera changes
               setCameraStatus('ready'); // Set status to ready to trigger scanner restart
               setScanMessage(null); // Clear messages on camera change
               setScannedCode(null); // Clear scanned code on camera change
@@ -183,24 +177,7 @@ export function CameraScanModal({
         </div>
       )}
 
-      {!isScanning && scannedProduct && (
-        <>{/*<ProductScanResult
-          product={scannedProduct}
-          suppliers={suppliers}
-          onManageStock={onManageStock}
-          onUpdateProduct={onUpdateProduct}
-          onSaleCreated={onSaleCreated}
-        />*/}
-        <ManageStockModal
-          isOpen={!!scannedProduct}
-          onClose={() => setScannedProduct(null)}
-          product={scannedProduct}
-          onUpdateProduct={onUpdateProduct}
-          onSaleCreated={onSaleCreated}/>
-        </>
-      )}
-
-      {!isScanning && !scannedProduct && cameraStatus !== 'loading' && cameraStatus !== 'error' && cameraStatus !== 'no-camera' && (
+      {!isScanning && cameraStatus !== 'loading' && cameraStatus !== 'error' && cameraStatus !== 'no-camera' && (
         <div className="text-center p-4">
           {scanMessage && <p className="text-red-500 mb-2">{scanMessage}</p>}
           <p className="text-gray-500 dark:text-gray-400 mb-4">Listo para escanear. Asegúrate de que el código esté visible.</p>

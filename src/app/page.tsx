@@ -890,7 +890,6 @@ export default function InventoryManager() {
         <ScanProductModal
           showScanModal={showScanModal}
           setShowScanModal={setShowScanModal}
-          scannedProduct={scannedProduct}
           products={products}
           suppliers={suppliers}
 
@@ -905,7 +904,6 @@ export default function InventoryManager() {
         setShowModal={setShowCameraScanModal}
         products={products}
         suppliers={suppliers}
-        onProductScanned={setScannedProduct}
         onUpdateProduct={handleProductUpdated}
         onProductNotFound={handleProductNotFound}
         onManageStock={handleManageStock}
@@ -939,15 +937,7 @@ export default function InventoryManager() {
         notificationsRef={notificationsRef}
       />
 
-      <Modal isOpen={!!scannedProduct} onClose={() => setScannedProduct(null)}>
-        {scannedProduct && (<ProductScanResult
-          product={scannedProduct}
-          suppliers={suppliers}
-          onManageStock={handleManageStock}
-          onUpdateProduct={handleProductUpdated}
-          onSaleCreated={handleSaleCreated}
-        />)}
-        </Modal>
+      
     </div>
   );
 }
