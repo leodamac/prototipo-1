@@ -762,6 +762,8 @@ export default function InventoryManager() {
                 onManageStock={handleManageStock}
                 onSaleCreated={handleSaleCreated}
               />
+                  //setProductToManageStock(product);
+    //setShowManageStockModal(true);
             )}
 
             {activeTab === 'sales' && (
@@ -887,10 +889,8 @@ export default function InventoryManager() {
       />
 
         <ScanProductModal
-          showScanModal={showManageStockModal}
-          setShowScanModal={setShowCameraScanModal}
-          //showScanModal={showScanModal}
-          //setShowScanModal={setShowScanModal}
+          showScanModal={showScanModal}
+          setShowScanModal={setShowScanModal}
           scannedProduct={scannedProduct}
           products={products}
           suppliers={suppliers}
@@ -902,10 +902,8 @@ export default function InventoryManager() {
         />
 
       <CameraScanModal
-        //showModal={showCameraScanModal}
-        //setShowModal={setShowCameraScanModal}
-        showModal={showManageStockModal}
-        setShowModal={setShowManageStockModal}
+        showModal={showCameraScanModal}
+        setShowModal={setShowCameraScanModal}
         products={products}
         suppliers={suppliers}
         onProductScanned={setScannedProduct}
