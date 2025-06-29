@@ -20,6 +20,8 @@ import { SettingsSection } from '../components/SettingsSection';
 import ManageStockModal from '../components/ManageStockModal';
 
 import { id } from 'date-fns/locale';
+import { ProductScanResult } from '@/components/ProductScanResult';
+import { Modal } from '@/components/common/Modal';
 
 export default function InventoryManager() {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -430,9 +432,7 @@ export default function InventoryManager() {
   };
 
   const handleManageStock = (product: Product) => {
-    //setProductToManageStock(product);
-    //setShowManageStockModal(true);
-    setScannedProduct(product);
+    setProductToManageStock(product);
     setShowManageStockModal(true)
     
   };
@@ -939,6 +939,17 @@ export default function InventoryManager() {
         marcarNotificacionesLeidas={marcarNotificacionesLeidas}
         notificationsRef={notificationsRef}
       />
+
+      {scannedProduct && (
+        <Modal isOpen={!!scannedProduct} onClose={() => setScannedProduct(null)} className="max-w-2xl mx-auto">
+        <ProductScanResult
+          product={scannedProduct}
+          suppliers={suppliers}
+          onManageStock={handleManageStock}
+          onUpdateProduct={handleProductUpdated}
+          onSaleCreated={handleSaleCreated}
+        />
+        </Modal>)}
     </div>
   );
 }

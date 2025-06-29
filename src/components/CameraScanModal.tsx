@@ -3,6 +3,7 @@ import { Product, Sale, Supplier } from '../types';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Modal } from './common/Modal';
 import { ProductScanResult } from './ProductScanResult';
+import ManageStockModal from './ManageStockModal';
 
 interface CameraScanModalProps {
   showModal: boolean;
@@ -183,13 +184,20 @@ export function CameraScanModal({
       )}
 
       {!isScanning && scannedProduct && (
-        <ProductScanResult
+        <>{/*<ProductScanResult
           product={scannedProduct}
           suppliers={suppliers}
           onManageStock={onManageStock}
           onUpdateProduct={onUpdateProduct}
           onSaleCreated={onSaleCreated}
-        />
+        />*/}
+        <ManageStockModal
+          isOpen={!!scannedProduct}
+          onClose={() => setScannedProduct(null)}
+          product={scannedProduct}
+          onUpdateProduct={onUpdateProduct}
+          onSaleCreated={onSaleCreated}/>
+        </>
       )}
 
       {!isScanning && !scannedProduct && cameraStatus !== 'loading' && cameraStatus !== 'error' && cameraStatus !== 'no-camera' && (
