@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Product, Supplier } from '../types';
 
@@ -10,6 +10,7 @@ interface AddProductModalProps {
   handleAddProduct: () => void;
   suppliers: Supplier[];
   editingProduct: Product | null;
+  clearForm: () => void; // New prop to clear the form
 }
 
 export function AddProductModal({
@@ -20,11 +21,38 @@ export function AddProductModal({
   handleAddProduct,
   suppliers,
   editingProduct,
+  clearForm,
 }: AddProductModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        setShowAddProductModal(false);
+        clearForm();
+      }
+    }
+
+    if (showAddProductModal) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showAddProductModal, setShowAddProductModal, clearForm]);
+
   if (!showAddProductModal) return null;
 
   const modalTitle = editingProduct ? 'Editar Producto' : 'Añadir Nuevo Producto';
   const buttonText = editingProduct ? 'Guardar Cambios' : 'Añadir Producto';
+
+  const handleCloseModal = () => {
+    setShowAddProductModal(false);
+    clearForm();
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]">
@@ -32,6 +60,7 @@ export function AddProductModal({
         <div className="flex min-h-full items-start justify-center p-4">
           <div
             className="bg-white dark:bg-gray-800 w-full max-w-md rounded-lg shadow-xl"
+            ref={modalRef} // Add ref here
             onClick={e => e.stopPropagation()}
           >
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -39,7 +68,7 @@ export function AddProductModal({
                 {modalTitle}
               </h3>
               <button
-                onClick={() => setShowAddProductModal(false)}
+                onClick={handleCloseModal}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 aria-label="Cerrar modal"
               >
@@ -200,7 +229,7 @@ export function AddProductModal({
 
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
               <button
-                onClick={() => setShowAddProductModal(false)}
+                onClick={handleCloseModal}
                 className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Cancelar

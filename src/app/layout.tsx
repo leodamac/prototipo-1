@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Gestor de Inventario RED VIDA",
-  description: "Gestion de inventario con códigos QR",
+  title: "Gestor de Inventario FRESHCODE",
+  description: "Gestion de inventario",
 };
 
 export default function RootLayout({

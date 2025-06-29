@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { Supplier } from '../types';
 
@@ -9,6 +9,7 @@ interface AddSupplierModalProps {
   setNewSupplier: (supplier: Partial<Supplier>) => void;
   handleAddSupplier: () => void;
   editingSupplier: Supplier | null;
+  clearForm: () => void; // New prop to clear the form
 }
 
 export function AddSupplierModal({
@@ -18,19 +19,40 @@ export function AddSupplierModal({
   setNewSupplier,
   handleAddSupplier,
   editingSupplier,
+  clearForm,
 }: AddSupplierModalProps) {
   const [validationError, setValidationError] = useState<string | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        setShowAddSupplierModal(false);
+        clearForm();
+      }
+    }
+
     if (showAddSupplierModal) {
       setValidationError(null); // Reset error when modal opens
       if (!editingSupplier) {
         setNewSupplier({ name: '', phone: '', email: '', Product: [] }); // Reset form for new supplier
       }
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [showAddSupplierModal, editingSupplier, setNewSupplier]);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showAddSupplierModal, editingSupplier, setNewSupplier, setShowAddSupplierModal, clearForm]);
 
   if (!showAddSupplierModal) return null;
+
+  const handleCloseModal = () => {
+    setShowAddSupplierModal(false);
+    clearForm();
+  };
 
   const handleAddSupplierClick = () => {
     if (!newSupplier.name || newSupplier.name.trim() === '') {
@@ -51,6 +73,7 @@ export function AddSupplierModal({
         <div className="flex min-h-full items-start justify-center p-4">
           <div
             className="bg-white dark:bg-gray-800 w-full max-w-md rounded-lg shadow-xl"
+            ref={modalRef} // Add ref here
             onClick={e => e.stopPropagation()}
           >
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -58,7 +81,7 @@ export function AddSupplierModal({
                 {editingSupplier ? 'Editar Proveedor' : 'Añadir Nuevo Proveedor'}
               </h3>
               <button
-                onClick={() => setShowAddSupplierModal(false)}
+                onClick={handleCloseModal}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 aria-label="Cerrar modal"
               >
@@ -121,7 +144,7 @@ export function AddSupplierModal({
 
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
               <button
-                onClick={() => setShowAddSupplierModal(false)}
+                onClick={handleCloseModal}
                 className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Cancelar

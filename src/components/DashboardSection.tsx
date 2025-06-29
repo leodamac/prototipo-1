@@ -569,44 +569,44 @@ export function DashboardSection({
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Dashboard Overview</h2>
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Resumen del Panel</h2>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200"
         >
-          <Filter size={20} className="mr-2" /> {showFilters ? 'Hide Filters' : 'Show Filters'}
+          <Filter size={20} className="mr-2" /> {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
         </button>
       </div>
 
       {showFilters && (
         <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Global Filters</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros Globales</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Period
+                Período
               </label>
-              <label htmlFor="dashboard-date-range" className="sr-only">Period</label>
+              <label htmlFor="dashboard-date-range" className="sr-only">Período</label>
               <select
                 id="dashboard-date-range"
                 value={filterState.dateRange}
                 onChange={(e) => dispatch({ type: 'SET_DATE_RANGE', payload: e.target.value })}
                 className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
-                <option value="365d">Last year</option>
-                <option value="year">By year</option>
+                <option value="7d">Últimos 7 días</option>
+                <option value="30d">Últimos 30 días</option>
+                <option value="90d">Últimos 90 días</option>
+                <option value="365d">Último año</option>
+                <option value="year">Por año</option>
               </select>
             </div>
 
             {filterState.dateRange === 'year' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Year
+                  Año
                 </label>
-                <label htmlFor="dashboard-year-select" className="sr-only">Year</label>
+                <label htmlFor="dashboard-year-select" className="sr-only">Año</label>
                 <select
                   id="dashboard-year-select"
                   value={filterState.selectedYear}
@@ -622,16 +622,16 @@ export function DashboardSection({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Product Type
+                Tipo de Producto
               </label>
-              <label htmlFor="filter-type-select" className="sr-only">Product Type</label>
+              <label htmlFor="filter-type-select" className="sr-only">Tipo de Producto</label>
               <select
                 id="filter-type-select"
                 value={filterState.filterType}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_TYPE', payload: e.target.value })}
                 className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
-                <option value="all">All types</option>
+                <option value="all">Todos los tipos</option>
                 {Array.from(new Set(products.map(p => p.type))).map(type => (
                   <option key={type} value={type}>{type}</option>
                 ))}
@@ -640,16 +640,16 @@ export function DashboardSection({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Supplier
+                Proveedor
               </label>
-              <label htmlFor="filter-supplier-select" className="sr-only">Supplier</label>
+              <label htmlFor="filter-supplier-select" className="sr-only">Proveedor</label>
               <select
                 id="filter-supplier-select"
                 value={filterState.filterSupplier}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_SUPPLIER', payload: e.target.value })}
                 className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
-                <option value="all">All suppliers</option>
+                <option value="all">Todos los proveedores</option>
                 {suppliers.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
@@ -658,19 +658,19 @@ export function DashboardSection({
 
             {/* New Filters */}
             <div className="lg:col-span-2">
-              <label htmlFor="filter-product-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Name</label>
+              <label htmlFor="filter-product-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del Producto</label>
               <input
                 type="text"
                 id="filter-product-name"
                 value={filterState.filterProductName}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_PRODUCT_NAME', payload: e.target.value })}
                 className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                placeholder="Search by name"
+                placeholder="Buscar por nombre"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-min-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Price</label>
+              <label htmlFor="filter-min-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Mínimo</label>
               <input
                 type="number"
                 id="filter-min-price"
@@ -681,7 +681,7 @@ export function DashboardSection({
               />
             </div>
             <div>
-              <label htmlFor="filter-max-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Price</label>
+              <label htmlFor="filter-max-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Máximo</label>
               <input
                 type="number"
                 id="filter-max-price"
@@ -693,7 +693,7 @@ export function DashboardSection({
             </div>
 
             <div>
-              <label htmlFor="filter-min-stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Stock</label>
+              <label htmlFor="filter-min-stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Mínimo</label>
               <input
                 type="number"
                 id="filter-min-stock"
@@ -704,7 +704,7 @@ export function DashboardSection({
               />
             </div>
             <div>
-              <label htmlFor="filter-max-stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Stock</label>
+              <label htmlFor="filter-max-stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Máximo</label>
               <input
                 type="number"
                 id="filter-max-stock"
@@ -716,19 +716,19 @@ export function DashboardSection({
             </div>
 
             <div className="lg:col-span-2">
-              <label htmlFor="filter-qr-barcode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">QR / Barcode</label>
+              <label htmlFor="filter-qr-barcode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">QR / Código de Barras</label>
               <input
                 type="text"
                 id="filter-qr-barcode"
                 value={filterState.filterQrBarcode}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_QR_BARCODE', payload: e.target.value })}
                 className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                placeholder="Search by QR or Barcode"
+                placeholder="Buscar por QR o Código de Barras"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-entry-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Entry Date (Start)</label>
+              <label htmlFor="filter-entry-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Entrada (Inicio)</label>
               <input
                 type="date"
                 id="filter-entry-date-start"
@@ -738,7 +738,7 @@ export function DashboardSection({
               />
             </div>
             <div>
-              <label htmlFor="filter-entry-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Entry Date (End)</label>
+              <label htmlFor="filter-entry-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Entrada (Fin)</label>
               <input
                 type="date"
                 id="filter-entry-date-end"
@@ -749,7 +749,7 @@ export function DashboardSection({
             </div>
 
             <div>
-              <label htmlFor="filter-expiration-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expiration Date (Start)</label>
+              <label htmlFor="filter-expiration-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Caducidad (Inicio)</label>
               <input
                 type="date"
                 id="filter-expiration-date-start"
@@ -759,7 +759,7 @@ export function DashboardSection({
               />
             </div>
             <div>
-              <label htmlFor="filter-expiration-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expiration Date (End)</label>
+              <label htmlFor="filter-expiration-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Caducidad (Fin)</label>
               <input
                 type="date"
                 id="filter-expiration-date-end"
@@ -770,7 +770,7 @@ export function DashboardSection({
             </div>
 
             <div>
-              <label htmlFor="filter-sale-quantity-min" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sold Quantity (Min.)</label>
+              <label htmlFor="filter-sale-quantity-min" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad Vendida (Mín.)</label>
               <input
                 type="number"
                 id="filter-sale-quantity-min"
@@ -781,7 +781,7 @@ export function DashboardSection({
               />
             </div>
             <div>
-              <label htmlFor="filter-sale-quantity-max" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sold Quantity (Max.)</label>
+              <label htmlFor="filter-sale-quantity-max" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad Vendida (Máx.)</label>
               <input
                 type="number"
                 id="filter-sale-quantity-max"
@@ -793,7 +793,7 @@ export function DashboardSection({
             </div>
 
             <div>
-              <label htmlFor="filter-sale-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sale Date (Start)</label>
+              <label htmlFor="filter-sale-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Venta (Inicio)</label>
               <input
                 type="date"
                 id="filter-sale-date-start"
@@ -803,7 +803,7 @@ export function DashboardSection({
               />
             </div>
             <div>
-              <label htmlFor="filter-sale-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sale Date (End)</label>
+              <label htmlFor="filter-sale-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Venta (Fin)</label>
               <input
                 type="date"
                 id="filter-sale-date-end"
@@ -814,16 +814,16 @@ export function DashboardSection({
             </div>
 
             <div>
-              <label htmlFor="filter-sale-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sale Type</label>
+              <label htmlFor="filter-sale-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Venta</label>
               <select
                 id="filter-sale-type"
                 value={filterState.filterSaleType}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_SALE_TYPE', payload: e.target.value })}
                 className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
-                <option value="all">All types</option>
-                <option value="sale">Sale</option>
-                <option value="disposal">Disposal</option>
+                <option value="all">Todos los tipos</option>
+                <option value="sale">Venta</option>
+                <option value="disposal">Desecho</option>
               </select>
             </div>
           </div>

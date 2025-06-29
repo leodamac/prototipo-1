@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { Package, Bell, Scan, Moon, Sun, Menu, ShoppingCart, Users } from 'lucide-react';
+import Image from 'next/image';
 import { differenceInDays } from 'date-fns';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -245,6 +246,15 @@ export default function InventoryManager() {
     }
   };
 
+  const clearAddProductForm = () => {
+    setNewProduct({
+      name: '', type: '', price: 0, stock: 0, supplierId: null, image: '', qrCode: '', barcode: '',
+      entryDate: new Date(),
+      expirationDate: undefined,
+    });
+    setEditingProduct(null);
+  };
+
   const handleUpdateProduct = async (updatedProduct: Product) => {
     try {
       const res = await fetch(`/api/products/${updatedProduct.id}`, {
@@ -346,6 +356,11 @@ export default function InventoryManager() {
       console.error('Error al guardar proveedor:', error);
       setSupplierValidationError('Error al guardar el proveedor. Intente de nuevo.');
     }
+  };
+
+  const clearAddSupplierForm = () => {
+    setNewSupplier({ name: '', phone: '', email: '', Product: [] });
+    setEditingSupplier(null);
   };
 
   const handleEditSupplier = (supplier: Supplier) => {
@@ -538,7 +553,7 @@ export default function InventoryManager() {
             {/* Logo y título */}
             <h1 className="text-xl font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400">
               <Package size={24} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
-              Red Vida
+              FreshCode
             </h1>
 
             {/* Botón de regreso al menú principal (visible cuando no estamos en el menú) */}
@@ -585,7 +600,7 @@ export default function InventoryManager() {
                       </span>
                     )}
                   </button>
-                </div>
+              </div>
               </div>
             </div>
           </div>
@@ -689,12 +704,20 @@ export default function InventoryManager() {
 
       <main className={`flex-grow p-4 lg:p-6 xl:p-8 max-w-[2000px] mx-auto w-full ${showMainMenu ? 'flex flex-col justify-center items-center' : ''}`}>
         {showMainMenu ? (
+          <div className="flex flex-col items-center justify-center gap-6 h-full">
+          {darkMode ? (
+                <Image src="/images/logo_dark.png" alt="Productos Icon Dark" width={512} height={512} className="lg:w-7xl lg:h-7xl" />
+              ) : (
+                <Image src="/images/logo_light.png" alt="Productos Icon Light" width={512} height={512} className="lg:w-7xl lg:h-7xl" />
+              )}
           <div className="grid grid-cols-1 xs:grid-cols-2 gap-6 h-full place-items-center">
+              
             {/* Tarjeta de Productos */}
             <button
               onClick={() => { setActiveTab('products'); setShowMainMenu(false); }}
               className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700"
             >
+
               <Package size={48} className="lg:text-7xl" />
               <span className="mt-3 text-xl font-semibold text-center">Productos</span>
             </button>
@@ -704,6 +727,7 @@ export default function InventoryManager() {
               onClick={() => { setActiveTab('sales'); setShowMainMenu(false); }}
               className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700"
             >
+
               <ShoppingCart size={48} className="lg:text-7xl" />
               <span className="mt-3 text-xl font-semibold text-center">Ventas</span>
             </button>
@@ -713,6 +737,7 @@ export default function InventoryManager() {
               onClick={() => { setActiveTab('dashboard'); setShowMainMenu(false); }}
               className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700"
             >
+
               <Bell size={48} className="lg:text-7xl" />
               <span className="mt-3 text-xl font-semibold text-center">Datos Estadísticos</span>
             </button>
@@ -725,6 +750,7 @@ export default function InventoryManager() {
               <Users size={48} className="lg:text-7xl" />
               <span className="mt-3 text-xl font-semibold text-center">Contactar Proveedores</span>
             </button>
+          </div>
           </div>
         ) : (
           <>
@@ -835,6 +861,7 @@ export default function InventoryManager() {
         setNewSupplier={setNewSupplier}
         handleAddSupplier={handleAddOrUpdateSupplier}
         editingSupplier={editingSupplier}
+        clearForm={clearAddSupplierForm}
       />
 
       <AddProductModal
@@ -845,6 +872,7 @@ export default function InventoryManager() {
         handleAddProduct={handleAddOrUpdateProduct}
         suppliers={suppliers}
         editingProduct={editingProduct}
+        clearForm={clearAddProductForm}
       />
 
         <ScanProductModal
