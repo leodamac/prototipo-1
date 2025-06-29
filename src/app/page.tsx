@@ -899,7 +899,7 @@ export default function InventoryManager() {
 
       <CameraScanModal
         //showModal={showCameraScanModal}
-        showModal={showCameraScanModal}
+        showModal={showManageStockModal}
         setShowModal={setShowCameraScanModal}
         products={products}
         suppliers={suppliers}
