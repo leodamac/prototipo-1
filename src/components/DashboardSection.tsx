@@ -581,7 +581,7 @@ export function DashboardSection({
       {showFilters && (
         <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros Globales</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="flex flex-wrap gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Período
@@ -942,7 +942,7 @@ export function DashboardSection({
                       <ShoppingCart size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
                       Últimas Ventas
                     </h3>
-                    <div className="max-h-96">
+                    <div className="max-h-96 overflow-x-auto">
                       <table className="table-auto w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                         <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                           <tr>
@@ -982,7 +982,7 @@ export function DashboardSection({
                       <AlertTriangle size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
                       Productos con Stock Bajo
                     </h3>
-                    <div className="max-h-96">
+                    <div className="max-h-96 overflow-x-auto">
                       <table className="table-auto w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                         <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                           <tr>
@@ -1024,7 +1024,7 @@ export function DashboardSection({
                       <Calendar size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
                       Productos Próximos a Caducar
                     </h3>
-                    <div className="max-h-96">
+                    <div className="max-h-96 overflow-x-auto">
                       <table className="table-auto w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
                         <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
                           <tr>

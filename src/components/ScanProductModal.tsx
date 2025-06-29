@@ -9,6 +9,7 @@ interface ScanProductModalProps {
   showScanModal: boolean;
   setShowScanModal: (show: boolean) => void;
   scannedProduct: Product | null;
+  products: Product[]; // Added products prop
   suppliers: Supplier[];
   
   onProductNotFound: (scannedCode: string) => void; // New prop
@@ -21,6 +22,7 @@ export function ScanProductModal({
   showScanModal,
   setShowScanModal,
   scannedProduct,
+  products, // Destructure products
   suppliers,
   
   onProductNotFound,
@@ -61,7 +63,7 @@ export function ScanProductModal({
       console.log("Scanned text (image):", decodedText);
       console.log("Suppliers data (image):");
       console.log("Products from suppliers:", suppliers.flatMap(s => s.Product || []));
-      const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
+      const foundProduct = products.find(p => p.qrCode === decodedText || p.barcode === decodedText);
       if (foundProduct) {
         setInternalProduct(foundProduct);
         setIsScanning(false);

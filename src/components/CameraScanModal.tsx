@@ -7,6 +7,7 @@ import { ProductScanResult } from './ProductScanResult';
 interface CameraScanModalProps {
   showModal: boolean;
   setShowModal: (show: boolean) => void;
+  products: Product[]; // Added products prop
   suppliers: Supplier[];
   onProductScanned: (product: Product) => void;
   onUpdateProduct: (product: Product) => void;
@@ -18,6 +19,7 @@ interface CameraScanModalProps {
 export function CameraScanModal({
   showModal,
   setShowModal,
+  products, // Destructure products
   suppliers,
   onProductScanned,
   onUpdateProduct,
@@ -103,7 +105,7 @@ export function CameraScanModal({
         setScanMessage(null); // Clear previous messages
         setScannedCode(null); // Clear previous scanned code
 
-        const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
+        const foundProduct = products.find(p => p.qrCode === decodedText || p.barcode === decodedText);
         if (foundProduct) {
           setScannedProduct(foundProduct);
           onProductScanned(foundProduct);

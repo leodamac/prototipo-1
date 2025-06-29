@@ -20,7 +20,7 @@ export function SalesSection({
       </h2>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="hidden md:block">
+        <div className="overflow-x-auto hidden md:block">
           <table className="table-auto w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
             <thead className="bg-gray-200 dark:bg-gray-700">
               <tr>

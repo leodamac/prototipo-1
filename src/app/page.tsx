@@ -668,7 +668,7 @@ export default function InventoryManager() {
         </div>
       </header>
 
-      <main className={`flex-grow p-4 lg:p-6 xl:p-8 max-w-[2000px] mx-auto w-full ${showMainMenu ? 'flex flex-col justify-center items-center' : ''}`}>
+      <main className={`flex-grow p-4 lg:p-6 xl:p-8 max-w-[2000px] mx-auto w-full ${showMainMenu ? 'flex flex-col justify-center items-center' : 'overflow-y-auto'}`}>
         {showMainMenu ? (
           <div className="flex flex-col items-center justify-center gap-6 h-full">
           {darkMode ? (
@@ -887,6 +887,7 @@ export default function InventoryManager() {
           showScanModal={showScanModal}
           setShowScanModal={setShowScanModal}
           scannedProduct={scannedProduct}
+          products={products}
           suppliers={suppliers}
 
           onProductNotFound={handleProductNotFound}
@@ -898,6 +899,7 @@ export default function InventoryManager() {
       <CameraScanModal
         showModal={showCameraScanModal}
         setShowModal={setShowCameraScanModal}
+        products={products}
         suppliers={suppliers}
         onProductScanned={setScannedProduct}
         onUpdateProduct={handleProductUpdated}
