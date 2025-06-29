@@ -52,7 +52,7 @@ export function ScanProductModal({
 
       const onScanSuccess = (decodedText: string, decodedResult: any) => {
         console.log(`Code matched = ${decodedText}`, decodedResult);
-        const foundProduct = suppliers.flatMap(s => s.products).find(p => p.qrCode === decodedText || p.barcode === decodedText);
+        const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
         if (foundProduct) {
           setEditedProduct(foundProduct);
           setIsScanning(false); // Stop scanning

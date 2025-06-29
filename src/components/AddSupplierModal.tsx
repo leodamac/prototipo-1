@@ -25,7 +25,7 @@ export function AddSupplierModal({
     if (showAddSupplierModal) {
       setValidationError(null); // Reset error when modal opens
       if (!editingSupplier) {
-        setNewSupplier({ name: '', phone: '', email: '', products: [] }); // Reset form for new supplier
+        setNewSupplier({ name: '', phone: '', email: '', Product: [] }); // Reset form for new supplier
       }
     }
   }, [showAddSupplierModal, editingSupplier, setNewSupplier]);

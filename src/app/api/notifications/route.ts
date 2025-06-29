@@ -18,16 +18,21 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { data: newNotification, error } = await supabase
+    const { data, error } = await supabase
       .from('Notification')
       .insert({
         ...body,
         date: new Date(body.date),
       })
-      .single();
+      .select();
 
     if (error) throw error;
-    return NextResponse.json(newNotification, { status: 201 });
+
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
+    }
+
+    return NextResponse.json(data[0], { status: 201 });
   } catch (error) {
     console.error('Error creating notification:', error);
     return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });

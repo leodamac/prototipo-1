@@ -285,40 +285,58 @@ export default function InventoryManager() {
     name: '',
     phone: '',
     email: '',
-    products: [],
+    Product: [],
   });
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [supplierValidationError, setSupplierValidationError] = useState<string | null>(null);
 
   const handleAddOrUpdateSupplier = async () => {
+    setSupplierValidationError(null);
+
+    const name = newSupplier.name?.trim();
+    const phone = newSupplier.phone?.trim();
+    const email = newSupplier.email?.trim();
+
+    if (!name) {
+      setSupplierValidationError('El nombre del proveedor no puede estar vacío.');
+      return;
+    }
+    if (!phone && !email) {
+      setSupplierValidationError('Debe proporcionar al menos un teléfono o un correo electrónico.');
+      return;
+    }
+
     try {
+      const supplierData = { name, phone, email };
+
       if (editingSupplier) {
-        // Update existing supplier
         const res = await fetch(`/api/suppliers/${editingSupplier.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newSupplier),
+          body: JSON.stringify(supplierData),
         });
         if (!res.ok) throw new Error('Failed to update supplier');
         const updatedSupplier = await res.json();
+        updatedSupplier.Product = editingSupplier.Product;
         setSuppliers(prev => prev.map(s => (s.id === updatedSupplier.id ? updatedSupplier : s)));
-        console.log('Proveedor actualizado:', updatedSupplier);
       } else {
-        // Add new supplier
         const res = await fetch('/api/suppliers', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newSupplier),
+          body: JSON.stringify(supplierData),
         });
         if (!res.ok) throw new Error('Failed to add supplier');
         const addedSupplier = await res.json();
         setSuppliers(prev => [...prev, addedSupplier]);
-        console.log('Proveedor añadido:', addedSupplier);
       }
+
       setShowAddSupplierModal(false);
-      setNewSupplier({ name: '', phone: '', email: '', products: [] });
-      setEditingSupplier(null); // Clear editing state
+      setNewSupplier({ name: '', phone: '', email: '', Product: [] });
+      setEditingSupplier(null);
+
     } catch (error) {
       console.error('Error al guardar proveedor:', error);
+      setSupplierValidationError('Error al guardar el proveedor. Intente de nuevo.');
     }
   };
 

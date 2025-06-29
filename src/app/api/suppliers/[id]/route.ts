@@ -5,15 +5,27 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const { id } = params;
   try {
     const body = await request.json();
-    const { products, ...supplierData } = body; // Exclude relations
-    const { data: updatedSupplier, error } = await supabase
+    const { name, phone, email } = body;
+    const supplierData = { name, phone, email };
+
+    console.log('PUT supplier', { id, supplierData });
+
+    const { data, error } = await supabase
       .from('Supplier')
       .update(supplierData)
-      .eq('id', id)
-      .single();
+      .eq('id', Number(id)) // <-- fuerza a número si tu id es numérico
+      .select();
 
-    if (error) throw error;
-    return NextResponse.json(updatedSupplier);
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: 'Supplier not found or no changes made' }, { status: 404 });
+    }
+
+    return NextResponse.json(data[0]);
   } catch (error) {
     console.error('Error updating supplier:', error);
     return NextResponse.json({ error: 'Failed to update supplier' }, { status: 500 });

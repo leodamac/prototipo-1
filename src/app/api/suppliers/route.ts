@@ -18,14 +18,24 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { products, ...supplierData } = body; // Destructure to exclude products
-    const { data: newSupplier, error } = await supabase
+    const { name, phone, email } = body;
+    const supplierData = { name, phone, email };
+
+    const { data, error } = await supabase
       .from('Supplier')
       .insert(supplierData)
-      .single();
+      .select();
 
-    if (error) throw error;
-    return NextResponse.json(newSupplier, { status: 201 });
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: 'Failed to create supplier' }, { status: 500 });
+    }
+
+    return NextResponse.json(data[0], { status: 201 });
   } catch (error) {
     console.error('Error creating supplier:', error);
     return NextResponse.json({ error: 'Failed to create supplier' }, { status: 500 });

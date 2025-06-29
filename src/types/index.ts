@@ -27,7 +27,7 @@ export interface Supplier {
   name: string;
   phone: string | null;
   email: string | null;
-  products: Product[];
+  Product?: Product[];
 }
 
 export interface Notification {

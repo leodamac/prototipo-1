@@ -19,17 +19,22 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { supplier, sales, ...productData } = body; // Exclude relations
-    const { data: newProduct, error } = await supabase
+    const { data, error } = await supabase
       .from('Product')
       .insert({
         ...productData,
         entryDate: new Date(productData.entryDate),
         expirationDate: new Date(productData.expirationDate),
       })
-      .single();
+      .select();
 
     if (error) throw error;
-    return NextResponse.json(newProduct, { status: 201 });
+
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
+    }
+
+    return NextResponse.json(data[0], { status: 201 });
   } catch (error) {
     console.error('Error creating product:', error);
     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });

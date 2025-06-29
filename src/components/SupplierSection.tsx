@@ -85,7 +85,7 @@ export function SupplierSection({
                     ) : 'N/A'}
                   </td>
                   <td className="p-2 text-gray-900 dark:text-gray-100 break-words">
-                    {(s.products || []).length} producto{(s.products || []).length !== 1 ? 's' : ''}
+                    {(s.Product || []).length} producto{(s.Product || []).length !== 1 ? 's' : ''}
                   </td>
                   <td className="p-2 text-gray-900 dark:text-gray-100 text-center break-words">
                     <div className="flex gap-2">
@@ -146,7 +146,7 @@ export function SupplierSection({
                     {s.email}
                   </a>
                 ) : 'N/A'}</div>
-                <p className="text-gray-900 dark:text-gray-100"><span className="font-medium">Productos:</span> {(s.products || []).length} producto{(s.products || []).length !== 1 ? 's' : ''}</p>
+                <p className="text-gray-900 dark:text-gray-100"><span className="font-medium">Productos:</span> {(s.Product || []).length} producto{(s.Product || []).length !== 1 ? 's' : ''}</p>
                 
                 <div className="flex justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
                   <button
