@@ -69,6 +69,16 @@ export function ProductSection({
     setOpenMenuId(openMenuId === productId ? null : productId);
   };
 
+  const isValidUrl = (url: string | null | undefined) => {
+    if (!url) return false;
+    try {
+      new URL(url);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   return (
     <section className="space-y-6">
       {/* Cabecera y Controles */}
@@ -173,8 +183,8 @@ export function ProductSection({
                   <tr key={p.id} className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                     <th scope="row" className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                       <div className="flex items-center gap-3">
-                        {p.image ? (
-                          <Image src={p.image} alt={p.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
+                        {isValidUrl(p.image) ? (
+                          <Image src={p.image!} alt={p.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                             <Package size={20} className="text-gray-500" />
@@ -272,8 +282,8 @@ export function ProductSection({
               return (
                 <div key={p.id} className="bg-white dark:bg-gray-700 rounded-lg shadow p-4 space-y-2 border border-gray-200 dark:border-gray-600">
                   <div className="flex items-center gap-3">
-                    {p.image ? (
-                      <Image src={p.image} alt={p.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
+                    {isValidUrl(p.image) ? (
+                      <Image src={p.image!} alt={p.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
                         <Package size={20} className="text-gray-500" />

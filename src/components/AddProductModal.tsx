@@ -80,8 +80,8 @@ export function AddProductModal({
                 </label>
                 <input
                   type="number"
-                  value={newProduct.price}
-                  onChange={e => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+                  value={newProduct.price || ''}
+                  onChange={e => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) || 0 })}
                   className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="0.00"
                   step="0.01"
@@ -94,8 +94,8 @@ export function AddProductModal({
                 </label>
                 <input
                   type="number"
-                  value={newProduct.stock}
-                  onChange={e => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })}
+                  value={newProduct.stock || ''}
+                  onChange={e => setNewProduct({ ...newProduct, stock: parseInt(e.target.value, 10) || 0 })}
                   className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="0"
                 />
@@ -107,8 +107,8 @@ export function AddProductModal({
                 </label>
                 <input
                   type="number"
-                  value={newProduct.maxStock}
-                  onChange={e => setNewProduct({ ...newProduct, maxStock: parseInt(e.target.value) })}
+                  value={newProduct.maxStock || ''}
+                  onChange={e => setNewProduct({ ...newProduct, maxStock: parseInt(e.target.value, 10) || 0 })}
                   className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="100"
                 />
@@ -120,7 +120,7 @@ export function AddProductModal({
                 </label>
                 <select
                   value={newProduct.supplierId || ''}
-                  onChange={e => setNewProduct({ ...newProduct, supplierId: e.target.value })}
+                  onChange={e => setNewProduct({ ...newProduct, supplierId: e.target.value || null })}
                   className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   title="Seleccionar proveedor">
                   <option value="">Seleccionar Proveedor</option>

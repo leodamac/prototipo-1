@@ -195,11 +195,14 @@ export default function InventoryManager() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...newProduct,
-            price: parseFloat(newProduct.price as any),
-            stock: parseInt(newProduct.stock as any),
-            maxStock: newProduct.maxStock ? parseInt(newProduct.maxStock as any) : defaultMaxStock,
+            price: parseFloat(String(newProduct.price)),
+            stock: parseInt(String(newProduct.stock), 10),
+            maxStock: newProduct.maxStock ? parseInt(String(newProduct.maxStock), 10) : defaultMaxStock,
             entryDate: newProduct.entryDate ? new Date(newProduct.entryDate) : new Date(),
-            expirationDate: newProduct.expirationDate ? new Date(newProduct.expirationDate) : null,
+            expirationDate: newProduct.expirationDate ? new Date(newProduct.expirationDate) : new Date(new Date().setDate(new Date().getDate() + 30)),
+            qrCode: newProduct.qrCode || null,
+            barcode: newProduct.barcode || null,
+            image: newProduct.image || null,
           }),
         });
         if (!res.ok) throw new Error('Failed to update product');
@@ -213,11 +216,14 @@ export default function InventoryManager() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...newProduct,
-            price: parseFloat(newProduct.price as any),
-            stock: parseInt(newProduct.stock as any),
-            maxStock: newProduct.maxStock ? parseInt(newProduct.maxStock as any) : defaultMaxStock,
+            price: parseFloat(String(newProduct.price)),
+            stock: parseInt(String(newProduct.stock), 10),
+            maxStock: newProduct.maxStock ? parseInt(String(newProduct.maxStock), 10) : defaultMaxStock,
             entryDate: newProduct.entryDate ? new Date(newProduct.entryDate) : new Date(),
-            expirationDate: newProduct.expirationDate ? new Date(newProduct.expirationDate) : null,
+            expirationDate: newProduct.expirationDate ? new Date(newProduct.expirationDate) : new Date(new Date().setDate(new Date().getDate() + 30)),
+            qrCode: newProduct.qrCode || null,
+            barcode: newProduct.barcode || null,
+            image: newProduct.image || null,
           }),
         });
         if (!res.ok) throw new Error('Failed to add product');
@@ -363,7 +369,7 @@ export default function InventoryManager() {
     }
   };
 
-  const manejarAccionProducto = async (actionType: 'sell' | 'dispose' | 'restock') => {
+  const manejarAccionProducto = async (actionType: 'sale' | 'dispose' | 'restock') => {
     if (!scannedProduct) return;
 
     let updatedProduct: Product = { ...scannedProduct };
@@ -372,7 +378,7 @@ export default function InventoryManager() {
     try {
       if (actionType === 'restock') {
         updatedProduct.stock += actionQuantity;
-      } else if (actionType === 'sell') {
+      } else if (actionType === 'sale') {
         if (scannedProduct.stock < actionQuantity) {
           console.error('Not enough stock for this sale.');
           // Optionally, show a user-facing error
@@ -383,6 +389,7 @@ export default function InventoryManager() {
           productId: scannedProduct.id,
           quantity: actionQuantity,
           date: new Date(),
+          type: actionType,
         };
       } else if (actionType === 'dispose') {
         if (scannedProduct.stock < actionQuantity) {
@@ -404,7 +411,7 @@ export default function InventoryManager() {
       console.log(`Stock de ${updatedProduct.name} actualizado a ${updatedProduct.stock}`);
 
       // Record sale if applicable
-      if (actionType === 'sell') {
+      if (actionType === 'sale') {
         const resSale = await fetch('/api/sales', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -438,7 +445,7 @@ export default function InventoryManager() {
     price: 0,
     stock: 0,
     maxStock: defaultMaxStock, // Usar el valor por defecto configurable
-    supplierId: '',
+    supplierId: null,
     image: '',
     qrCode: '',
     barcode: '',

@@ -10,7 +10,7 @@ interface ScanProductModalProps {
   scannedProduct: Product | null;
   actionQuantity: number;
   setActionQuantity: (quantity: number) => void;
-  manejarAccionProducto: (actionType: 'sell' | 'dispose' | 'restock') => void;
+  manejarAccionProducto: (actionType: 'sale' | 'dispose' | 'restock') => void;
   modalRef: React.RefObject<HTMLDivElement | null>;
   suppliers: Supplier[]; // Añadir suppliers para el selector
   onUpdateProduct: (product: Product) => void; // Nueva prop para actualizar producto
@@ -115,172 +115,182 @@ export function ScanProductModal({
         ) : (
           editedProduct ? (
             <>
-              {/* Sección de Edición de Producto (contenido actual) */}
-              <div className="space-y-3 mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">
+              <div className="flex justify-between items-center mb-2">
                 <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Editar Producto</h4>
-                <div>
-                  <label htmlFor="product-name" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Nombre</label>
-                  <input
-                    id="product-name"
-                    type="text"
-                    value={editedProduct.name}
-                    onChange={e => setEditedProduct({ ...editedProduct, name: e.target.value })}
-                    className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Nombre del producto"
-                    title="Nombre del producto"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="product-type" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Tipo</label>
-                  <input
-                    id="product-type"
-                    type="text"
-                    value={editedProduct.type}
-                    onChange={e => setEditedProduct({ ...editedProduct, type: e.target.value })}
-                    className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Tipo de producto"
-                    title="Tipo de producto"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <div>
-                    <label htmlFor="product-price" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Precio</label>
-                    <input
-                      id="product-price"
-                      type="number"
-                      value={editedProduct.price}
-                      onChange={e => setEditedProduct({ ...editedProduct, price: parseFloat(e.target.value) })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      step="0.01"
-                      placeholder="0.00"
-                      title="Precio del producto"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="product-stock" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Stock</label>
-                    <input
-                      id="product-stock"
-                      type="number"
-                      value={editedProduct.stock}
-                      onChange={e => setEditedProduct({ ...editedProduct, stock: parseInt(e.target.value) })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="Cantidad en stock"
-                      title="Cantidad de stock"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="product-max-stock" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Cap. Máx.</label>
-                    <input
-                      id="product-max-stock"
-                      type="number"
-                      value={editedProduct.maxStock || ''}
-                      onChange={e => setEditedProduct({ ...editedProduct, maxStock: parseInt(e.target.value) })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="Capacidad máxima de stock"
-                      title="Capacidad máxima de stock"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="product-supplier" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Proveedor</label>
-                  <select
-                    id="product-supplier"
-                    value={editedProduct.supplierId || ''}
-                    onChange={e => setEditedProduct({ ...editedProduct, supplierId: e.target.value || null })}
-                    className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    title="Seleccionar proveedor"
-                  >
-                    <option value="">Seleccionar Proveedor</option>
-                    {suppliers.map(supplier => (
-                      <option key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <div>
-                    <label htmlFor="product-entry-date" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">F. Entrada</label>
-                    <input
-                      id="product-entry-date"
-                      type="date"
-                      value={editedProduct.entryDate ? format(new Date(editedProduct.entryDate), 'yyyy-MM-dd') : ''}
-                      onChange={e => setEditedProduct({ ...editedProduct, entryDate: new Date(e.target.value) })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      title="Fecha de entrada"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="product-expiration-date" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">F. Expiración</label>
-                    <input
-                      id="product-expiration-date"
-                      type="date"
-                      value={editedProduct.expirationDate ? format(new Date(editedProduct.expirationDate), 'yyyy-MM-dd') : ''}
-                      onChange={e => setEditedProduct({ ...editedProduct, expirationDate: new Date(e.target.value) })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      title="Fecha de expiración"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="product-image-url" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">URL Imagen</label>
-                  <input
-                    id="product-image-url"
-                    type="text"
-                    value={editedProduct.image || ''}
-                    onChange={e => setEditedProduct({ ...editedProduct, image: e.target.value })}
-                    className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="URL de la imagen del producto"
-                    title="URL de la imagen del producto"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                  <div>
-                    <label htmlFor="product-qr-code" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Código QR</label>
-                    <input
-                      id="product-qr-code"
-                      type="text"
-                      value={editedProduct.qrCode || ''}
-                      onChange={e => setEditedProduct({ ...editedProduct, qrCode: e.target.value })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="Código QR del producto"
-                      title="Código QR del producto"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="product-barcode" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Código Barras</label>
-                    <input
-                      id="product-barcode"
-                      type="text"
-                      value={editedProduct.barcode || ''}
-                      onChange={e => setEditedProduct({ ...editedProduct, barcode: e.target.value })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="Código de barras del producto"
-                      title="Código de barras del producto"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-2 justify-end">
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors"
-                  >
-                    Guardar Cambios
-                  </button>
-                </div>
+                <button 
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {isEditing ? 'Ocultar' : 'Ver/Ocultar'}
+                </button>
               </div>
+
+              {isEditing && (
+                <div className="space-y-3 mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">
+                  <div>
+                    <label htmlFor="product-name" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Nombre</label>
+                    <input
+                      id="product-name"
+                      type="text"
+                      value={editedProduct.name}
+                      onChange={e => setEditedProduct({ ...editedProduct, name: e.target.value })}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      placeholder="Nombre del producto"
+                      title="Nombre del producto"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="product-type" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Tipo</label>
+                    <input
+                      id="product-type"
+                      type="text"
+                      value={editedProduct.type}
+                      onChange={e => setEditedProduct({ ...editedProduct, type: e.target.value })}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      placeholder="Tipo de producto"
+                      title="Tipo de producto"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                    <div>
+                      <label htmlFor="product-price" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Precio</label>
+                      <input
+                        id="product-price"
+                        type="number"
+                        value={editedProduct.price}
+                        onChange={e => setEditedProduct({ ...editedProduct, price: parseFloat(e.target.value) })}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        step="0.01"
+                        placeholder="0.00"
+                        title="Precio del producto"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="product-stock" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Stock</label>
+                      <input
+                        id="product-stock"
+                        type="number"
+                        value={editedProduct.stock}
+                        onChange={e => setEditedProduct({ ...editedProduct, stock: parseInt(e.target.value) })}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        placeholder="Cantidad en stock"
+                        title="Cantidad de stock"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="product-max-stock" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Cap. Máx.</label>
+                      <input
+                        id="product-max-stock"
+                        type="number"
+                        value={editedProduct.maxStock || ''}
+                        onChange={e => setEditedProduct({ ...editedProduct, maxStock: parseInt(e.target.value) })}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        placeholder="Capacidad máxima de stock"
+                        title="Capacidad máxima de stock"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="product-supplier" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Proveedor</label>
+                    <select
+                      id="product-supplier"
+                      value={editedProduct.supplierId || ''}
+                      onChange={e => setEditedProduct({ ...editedProduct, supplierId: e.target.value || null })}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      title="Seleccionar proveedor"
+                    >
+                      <option value="">Seleccionar Proveedor</option>
+                      {suppliers.map(supplier => (
+                        <option key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                    <div>
+                      <label htmlFor="product-entry-date" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">F. Entrada</label>
+                      <input
+                        id="product-entry-date"
+                        type="date"
+                        value={editedProduct.entryDate ? format(new Date(editedProduct.entryDate), 'yyyy-MM-dd') : ''}
+                        onChange={e => setEditedProduct({ ...editedProduct, entryDate: new Date(e.target.value) })}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        title="Fecha de entrada"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="product-expiration-date" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">F. Expiración</label>
+                      <input
+                        id="product-expiration-date"
+                        type="date"
+                        value={editedProduct.expirationDate ? format(new Date(editedProduct.expirationDate), 'yyyy-MM-dd') : ''}
+                        onChange={e => setEditedProduct({ ...editedProduct, expirationDate: new Date(e.target.value) })}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        title="Fecha de expiración"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="product-image-url" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">URL Imagen</label>
+                    <input
+                      id="product-image-url"
+                      type="text"
+                      value={editedProduct.image || ''}
+                      onChange={e => setEditedProduct({ ...editedProduct, image: e.target.value })}
+                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      placeholder="URL de la imagen del producto"
+                      title="URL de la imagen del producto"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                    <div>
+                      <label htmlFor="product-qr-code" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Código QR</label>
+                      <input
+                        id="product-qr-code"
+                        type="text"
+                        value={editedProduct.qrCode || ''}
+                        onChange={e => setEditedProduct({ ...editedProduct, qrCode: e.target.value })}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        placeholder="Código QR del producto"
+                        title="Código QR del producto"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="product-barcode" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Código Barras</label>
+                      <input
+                        id="product-barcode"
+                        type="text"
+                        value={editedProduct.barcode || ''}
+                        onChange={e => setEditedProduct({ ...editedProduct, barcode: e.target.value })}
+                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        placeholder="Código de barras del producto"
+                        title="Código de barras del producto"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors"
+                    >
+                      Guardar Cambios
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             <div className="text-center p-4">
@@ -298,7 +308,7 @@ export function ScanProductModal({
         {/* Sección de Acciones de Stock */}
         {editedProduct && (
           <div className="space-y-3">
-            <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Acciones de Stock</h4>
+            <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Gestionar Stock</h4>
             <div>
               <label htmlFor="action-quantity" className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
                 Cantidad
@@ -314,7 +324,7 @@ export function ScanProductModal({
             </div>
             <div className="flex flex-wrap gap-2 justify-end">
               <button
-                onClick={() => manejarAccionProducto('sell')}
+                onClick={() => manejarAccionProducto('sale')}
                 className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
               >
                 Vender
