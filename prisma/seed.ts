@@ -2,8 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { addDays, subDays } from 'date-fns';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://mnnufiqlxnvrmfbkyzcz.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function main() {

@@ -1,0 +1,13 @@
+feat: Migrate API routes and seeding to Supabase
+
+This commit migrates the application's API routes from using Prisma to directly interacting with Supabase.
+It also updates the `prisma/seed.ts` script to populate the Supabase database with initial data.
+
+Key changes include:
+- Replaced Prisma client with Supabase client in all API route handlers.
+- Modified `prisma/seed.ts` to use Supabase for data insertion and deletion, including UUID generation for Sale IDs.
+- Configured `prisma/schema.prisma` to use PostgreSQL for Supabase schema management.
+- Added necessary dependencies: `@supabase/supabase-js`, `cross-env`, `dotenv`, `uuid`.
+- Updated `package.json` scripts for `seed` and `db:push-supabase` to support Supabase integration.
+- Created `src/lib/supabase.ts` for centralized Supabase client initialization.
+- Ensured type safety for environment variables in Supabase client initialization.
