@@ -941,7 +941,7 @@ export default function InventoryManager() {
       />
 
       {scannedProduct && (
-        <Modal isOpen={!!scannedProduct} onClose={() => setScannedProduct(null)} className="max-w-2xl mx-auto">
+        <Modal isOpen={!!scannedProduct} onClose={() => setScannedProduct(null)}>
         <ProductScanResult
           product={scannedProduct}
           suppliers={suppliers}
