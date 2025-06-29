@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Product, Supplier } from '../types';
+import { Product, Sale, Supplier } from '../types';
 import Image from 'next/image';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Modal } from './common/Modal';
@@ -14,6 +14,7 @@ interface ScanProductModalProps {
   onProductNotFound: (scannedCode: string) => void; // New prop
   onManageStock: (product: Product) => void;
   onUpdateProduct: (product: Product) => void;
+  onSaleCreated: (sale: Sale) => void; // Add this line
 }
 
 export function ScanProductModal({
@@ -25,12 +26,18 @@ export function ScanProductModal({
   onProductNotFound,
   onManageStock,
   onUpdateProduct,
+  onSaleCreated, // Add this line
 }: ScanProductModalProps) {
   const [internalProduct, setInternalProduct] = useState<Product | null>(scannedProduct);
   const [isScanning, setIsScanning] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const [scannedCode, setScannedCode] = useState<string | null>(null);
+
+  const handleUpdateProduct = (updatedProduct: Product) => {
+    setInternalProduct(updatedProduct);
+    onUpdateProduct(updatedProduct);
+  };
 
   useEffect(() => {
     setInternalProduct(scannedProduct);
@@ -148,7 +155,8 @@ export function ScanProductModal({
           product={internalProduct}
           suppliers={suppliers}
           onManageStock={onManageStock}
-          onUpdateProduct={onUpdateProduct}
+          onUpdateProduct={handleUpdateProduct}
+          onSaleCreated={onSaleCreated}
         />
       ) : (
         <div className="text-center p-4">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Product, Supplier } from '../types';
+import { Product, Sale, Supplier } from '../types';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Modal } from './common/Modal';
 import { ProductScanResult } from './ProductScanResult';
@@ -12,6 +12,7 @@ interface CameraScanModalProps {
   onUpdateProduct: (product: Product) => void;
   onProductNotFound: (scannedCode: string) => void; // New prop
   onManageStock: (product: Product) => void;
+  onSaleCreated: (sale: Sale) => void; // Add this line
 }
 
 export function CameraScanModal({
@@ -21,7 +22,8 @@ export function CameraScanModal({
   onProductScanned,
   onUpdateProduct,
   onProductNotFound,
-  onManageStock
+  onManageStock,
+  onSaleCreated, // Add this line
 }: CameraScanModalProps) {
   const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -175,6 +177,7 @@ export function CameraScanModal({
           suppliers={suppliers}
           onManageStock={onManageStock}
           onUpdateProduct={onUpdateProduct}
+          onSaleCreated={onSaleCreated}
         />
       )}
 

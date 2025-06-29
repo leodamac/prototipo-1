@@ -136,8 +136,9 @@ export function DashboardFilterPanel({
             <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-3">Filtros de Producto</h4>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de Producto</label>
+                <label htmlFor="filter-product-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de Producto</label>
                 <input
+                  id="filter-product-name"
                   type="text"
                   value={filterProductName}
                   onChange={(e) => setFilterProductName(e.target.value)}
@@ -148,8 +149,9 @@ export function DashboardFilterPanel({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Mínimo</label>
+                  <label htmlFor="filter-min-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Mínimo</label>
                   <input
+                    id="filter-min-price"
                     type="number"
                     value={filterMinPrice}
                     onChange={(e) => setFilterMinPrice(Number(e.target.value))}
@@ -158,8 +160,9 @@ export function DashboardFilterPanel({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Máximo</label>
+                  <label htmlFor="filter-max-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Máximo</label>
                   <input
+                    id="filter-max-price"
                     type="number"
                     value={filterMaxPrice}
                     onChange={(e) => setFilterMaxPrice(Number(e.target.value))}
@@ -171,8 +174,9 @@ export function DashboardFilterPanel({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Mínimo</label>
+                  <label htmlFor="filter-min-stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Mínimo</label>
                   <input
+                    id="filter-min-stock"
                     type="number"
                     value={filterMinStock}
                     onChange={(e) => setFilterMinStock(Number(e.target.value))}
@@ -181,8 +185,9 @@ export function DashboardFilterPanel({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Máximo</label>
+                  <label htmlFor="filter-max-stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Máximo</label>
                   <input
+                    id="filter-max-stock"
                     type="number"
                     value={filterMaxStock}
                     onChange={(e) => setFilterMaxStock(Number(e.target.value))}
@@ -193,8 +198,9 @@ export function DashboardFilterPanel({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Producto</label>
+                <label htmlFor="filter-product-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Producto</label>
                 <select
+                  id="filter-product-type"
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                   className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -209,8 +215,9 @@ export function DashboardFilterPanel({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Proveedor</label>
+                <label htmlFor="filter-supplier" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Proveedor</label>
                 <select
+                  id="filter-supplier"
                   value={filterSupplier}
                   onChange={(e) => setFilterSupplier(e.target.value)}
                   className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -225,8 +232,9 @@ export function DashboardFilterPanel({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Código QR / Barras</label>
+                <label htmlFor="filter-qr-barcode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Código QR / Barras</label>
                 <input
+                  id="filter-qr-barcode"
                   type="text"
                   value={filterQrBarcode}
                   onChange={(e) => setFilterQrBarcode(e.target.value)}
@@ -242,8 +250,9 @@ export function DashboardFilterPanel({
             <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-3">Fechas de Producto</h4>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Entrada (Inicio)</label>
+                <label htmlFor="filter-entry-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Entrada (Inicio)</label>
                 <input
+                  id="filter-entry-date-start"
                   type="date"
                   value={filterEntryDateStart}
                   onChange={(e) => setFilterEntryDateStart(e.target.value)}
@@ -253,8 +262,9 @@ export function DashboardFilterPanel({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Entrada (Fin)</label>
+                <label htmlFor="filter-entry-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Entrada (Fin)</label>
                 <input
+                  id="filter-entry-date-end"
                   type="date"
                   value={filterEntryDateEnd}
                   onChange={(e) => setFilterEntryDateEnd(e.target.value)}
@@ -264,8 +274,9 @@ export function DashboardFilterPanel({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Caducidad (Inicio)</label>
+                <label htmlFor="filter-expiration-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Caducidad (Inicio)</label>
                 <input
+                  id="filter-expiration-date-start"
                   type="date"
                   value={filterExpirationDateStart}
                   onChange={(e) => setFilterExpirationDateStart(e.target.value)}
@@ -275,8 +286,9 @@ export function DashboardFilterPanel({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Caducidad (Fin)</label>
+                <label htmlFor="filter-expiration-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Caducidad (Fin)</label>
                 <input
+                  id="filter-expiration-date-end"
                   type="date"
                   value={filterExpirationDateEnd}
                   onChange={(e) => setFilterExpirationDateEnd(e.target.value)}
@@ -293,18 +305,20 @@ export function DashboardFilterPanel({
             <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-3">Filtros de Venta</h4>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad Vendida (Mín.)</label>
+                <label htmlFor="filter-sale-quantity-min" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad Vendida (Mín.)</label>
                 <input
+                  id="filter-sale-quantity-min"
                   type="number"
                   value={filterSaleQuantityMin}
                   onChange={(e) => setFilterSaleQuantityMin(Number(e.target.value))}
                   className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="0"
+                    placeholder="0"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad Vendida (Máx.)</label>
+                <label htmlFor="filter-sale-quantity-max" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad Vendida (Máx.)</label>
                 <input
+                  id="filter-sale-quantity-max"
                   type="number"
                   value={filterSaleQuantityMax}
                   onChange={(e) => setFilterSaleQuantityMax(Number(e.target.value))}
@@ -314,8 +328,9 @@ export function DashboardFilterPanel({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Venta (Inicio)</label>
+                <label htmlFor="filter-sale-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Venta (Inicio)</label>
                 <input
+                  id="filter-sale-date-start"
                   type="date"
                   value={filterSaleDateStart}
                   onChange={(e) => setFilterSaleDateStart(e.target.value)}
@@ -325,8 +340,9 @@ export function DashboardFilterPanel({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Venta (Fin)</label>
+                <label htmlFor="filter-sale-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Venta (Fin)</label>
                 <input
+                  id="filter-sale-date-end"
                   type="date"
                   value={filterSaleDateEnd}
                   onChange={(e) => setFilterSaleDateEnd(e.target.value)}
@@ -336,8 +352,9 @@ export function DashboardFilterPanel({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Venta</label>
+                <label htmlFor="filter-sale-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Venta</label>
                 <select
+                  id="filter-sale-type"
                   value={filterSaleType}
                   onChange={(e) => setFilterSaleType(e.target.value)}
                   className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"

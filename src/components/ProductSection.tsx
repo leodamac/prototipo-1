@@ -3,7 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import { Package, ShoppingCart, Plus, Edit, Trash2, Search, List, LayoutGrid, MoreVertical } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
-import { Product, Supplier } from '../types';
+import { Product, Sale, Supplier } from '../types';
 
 interface ProductSectionProps {
   products: Product[];
@@ -26,6 +26,7 @@ interface ProductSectionProps {
   productDeleteSuccess: string | null;
   setProductDeleteSuccess: (success: string | null) => void;
   onManageStock: (product: Product) => void;
+  onSaleCreated: (sale: Sale) => void;
 }
 
 export function ProductSection({
@@ -49,6 +50,7 @@ export function ProductSection({
   productDeleteSuccess,
   setProductDeleteSuccess,
   onManageStock,
+  onSaleCreated,
 }: ProductSectionProps) {
 
   const productosFiltrados = React.useMemo(() => {
@@ -126,7 +128,7 @@ export function ProductSection({
 
       {/* Filtros y Búsqueda */}
       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Búsqueda */}
           <div className="relative">
             <label htmlFor="search-product" className="sr-only">Buscar producto</label>
@@ -240,8 +242,7 @@ export function ProductSection({
                               <li>
                                 <button
                                   onClick={() => {
-                                    setScannedProduct(p);
-                                    setShowScanModal(true);
+                                    onManageStock(p);
                                     toggleMenu(p.id);
                                   }}
                                   className="w-full text-left flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
@@ -265,10 +266,7 @@ export function ProductSection({
                       {/* Botones de acción para pantallas grandes */}
                       <div className="hidden md:flex items-center justify-center gap-2">
                         <button 
-                          onClick={() => {
-                            setScannedProduct(p);
-                            setShowScanModal(true);
-                          }}
+                          onClick={() => onManageStock(p)}
                           className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                           aria-label="Gestionar o vender producto"
                         >
@@ -325,10 +323,7 @@ export function ProductSection({
                   
                   <div className="flex justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
                     <button 
-                      onClick={() => {
-                        setScannedProduct(p);
-                        setShowScanModal(true);
-                      }}
+                      onClick={() => onManageStock(p)}
                       className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                       aria-label="Gestionar o vender producto"
                     >

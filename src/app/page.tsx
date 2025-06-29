@@ -17,6 +17,7 @@ import { ProductSection } from '../components/ProductSection';
 import { SalesSection } from '../components/SalesSection';
 import { SupplierSection } from '../components/SupplierSection';
 import { SettingsSection } from '../components/SettingsSection';
+import ManageStockModal from '../components/ManageStockModal';
 
 import { id } from 'date-fns/locale';
 
@@ -424,6 +425,10 @@ export default function InventoryManager() {
     setProducts(prev => prev.map(p => (p.id === updatedProduct.id ? updatedProduct : p)));
   };
 
+  const handleSaleCreated = (newSale: Sale) => {
+    setSales(prev => [newSale, ...prev]);
+  };
+
   const handleManageStock = (product: Product) => {
     setProductToManageStock(product);
     setShowManageStockModal(true);
@@ -752,6 +757,7 @@ export default function InventoryManager() {
                 productDeleteSuccess={productDeleteSuccess}
                 setProductDeleteSuccess={setProductDeleteSuccess}
                 onManageStock={handleManageStock}
+                onSaleCreated={handleSaleCreated}
               />
             )}
 
@@ -886,6 +892,7 @@ export default function InventoryManager() {
           onProductNotFound={handleProductNotFound}
           onManageStock={handleManageStock}
           onUpdateProduct={handleProductUpdated}
+          onSaleCreated={handleSaleCreated}
         />
 
       <CameraScanModal
@@ -896,7 +903,18 @@ export default function InventoryManager() {
         onUpdateProduct={handleProductUpdated}
         onProductNotFound={handleProductNotFound}
         onManageStock={handleManageStock}
+        onSaleCreated={handleSaleCreated}
       />
+
+      {showManageStockModal && productToManageStock && (
+        <ManageStockModal
+          isOpen={showManageStockModal}
+          onClose={() => setShowManageStockModal(false)}
+          product={productToManageStock}
+          onUpdateProduct={handleProductUpdated}
+          onSaleCreated={handleSaleCreated} 
+        />
+      )}
       </main>
 
       <footer className="mt-auto bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Product, Supplier } from '../types';
+import { Product, Sale, Supplier } from '../types';
 import { ProductFormFields } from './ProductFormFields';
 import ManageStockModal from './ManageStockModal';
 
@@ -8,6 +8,7 @@ interface ProductScanResultProps {
   suppliers: Supplier[];
   onManageStock: (product: Product) => void;
   onUpdateProduct: (product: Product) => void;
+  onSaleCreated: (sale: Sale) => void; 
 }
 
 export function ProductScanResult({
@@ -15,6 +16,7 @@ export function ProductScanResult({
   suppliers,
   onManageStock,
   onUpdateProduct,
+  onSaleCreated,
 }: ProductScanResultProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProduct, setEditedProduct] = useState<Product>(product);
@@ -85,6 +87,7 @@ export function ProductScanResult({
           onClose={() => setShowManageStockModal(false)}
           product={product}
           onUpdateProduct={onUpdateProduct}
+          onSaleCreated={onSaleCreated}
         />
       )}
     </>
