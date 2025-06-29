@@ -13,7 +13,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const { data, error } = await supabase
       .from('Supplier')
       .update(supplierData)
-      .eq('id', Number(id)) // <-- fuerza a número si tu id es numérico
+      .eq('id', id)
       .select();
 
     if (error) {

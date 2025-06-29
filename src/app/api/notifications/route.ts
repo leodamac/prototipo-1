@@ -18,11 +18,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const { id, ...notificationData } = body;
     const { data, error } = await supabase
       .from('Notification')
       .insert({
-        ...body,
-        date: new Date(body.date),
+        ...notificationData,
+        date: new Date(notificationData.date),
       })
       .select();
 

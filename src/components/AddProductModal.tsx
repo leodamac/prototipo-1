@@ -9,6 +9,7 @@ interface AddProductModalProps {
   setNewProduct: (product: Partial<Product>) => void;
   handleAddProduct: () => void;
   suppliers: Supplier[];
+  editingProduct: Product | null;
 }
 
 export function AddProductModal({
@@ -18,8 +19,12 @@ export function AddProductModal({
   setNewProduct,
   handleAddProduct,
   suppliers,
+  editingProduct,
 }: AddProductModalProps) {
   if (!showAddProductModal) return null;
+
+  const modalTitle = editingProduct ? 'Editar Producto' : 'Añadir Nuevo Producto';
+  const buttonText = editingProduct ? 'Guardar Cambios' : 'Añadir Producto';
 
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]">
@@ -31,7 +36,7 @@ export function AddProductModal({
           >
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Añadir Nuevo Producto
+                {modalTitle}
               </h3>
               <button
                 onClick={() => setShowAddProductModal(false)}
@@ -204,7 +209,7 @@ export function AddProductModal({
                 onClick={handleAddProduct}
                 className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
               >
-                Añadir Producto
+                {buttonText}
               </button>
             </div>
           </div>

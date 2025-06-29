@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { id } from 'date-fns/locale';
+
 
 export async function GET() {
   try {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { name, phone, email } = body;
-    const supplierData = { name, phone, email, id };
+    const supplierData = { name, phone, email};
 
     const { data, error } = await supabase
       .from('Supplier')

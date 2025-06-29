@@ -299,8 +299,6 @@ export default function InventoryManager() {
     const phone = newSupplier.phone?.trim();
     const email = newSupplier.email?.trim();
   
-    const id_supplier = editingSupplier ? editingSupplier.id : Math.floor(Math.random() * 1000000) + 1; // Generar un ID aleatorio si es nuevo
-
     if (!name) {
       setSupplierValidationError('El nombre del proveedor no puede estar vacío.');
       return;
@@ -311,7 +309,7 @@ export default function InventoryManager() {
     }
 
     try {
-      const supplierData = { name, phone, email ,id: id_supplier };
+      const supplierData = { name, phone, email};
 
       if (editingSupplier) {
         const res = await fetch(`/api/suppliers/${editingSupplier.id}`, {
@@ -830,6 +828,16 @@ export default function InventoryManager() {
         setNewSupplier={setNewSupplier}
         handleAddSupplier={handleAddOrUpdateSupplier}
         editingSupplier={editingSupplier}
+      />
+
+      <AddProductModal
+        showAddProductModal={showAddProductModal}
+        setShowAddProductModal={setShowAddProductModal}
+        newProduct={newProduct}
+        setNewProduct={setNewProduct}
+        handleAddProduct={handleAddOrUpdateProduct}
+        suppliers={suppliers}
+        editingProduct={editingProduct}
       />
 
         <ScanProductModal

@@ -18,7 +18,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { supplier, sales, ...productData } = body; // Exclude relations
+    const { id, supplier, sales, ...productData } = body; // Exclude id and relations
     const { data, error } = await supabase
       .from('Product')
       .insert({
