@@ -75,8 +75,15 @@ export function CameraScanModal({
       Html5Qrcode.getCameras().then(cameras => {
         if (cameras && cameras.length) {
           setAvailableCameras(cameras);
-          const defaultCamera = cameras[0];
-          setSelectedCameraId(defaultCamera.id); // Select the first camera by default
+          // Try to find a rear-facing camera
+          const rearCamera = cameras.find(camera =>
+            camera.label.toLowerCase().includes('back') ||
+            camera.label.toLowerCase().includes('environment') ||
+            camera.label.toLowerCase().includes('rear')
+          );
+
+          const defaultCamera = rearCamera || cameras[0]; // Use rear camera if found, otherwise first camera
+          setSelectedCameraId(defaultCamera.id);
           setIsFrontCamera(defaultCamera.label.toLowerCase().includes('front') || defaultCamera.label.toLowerCase().includes('user') || defaultCamera.label.toLowerCase().includes('facing front'));
           setCameraStatus('ready');
         } else {
