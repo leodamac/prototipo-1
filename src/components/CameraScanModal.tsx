@@ -9,9 +9,6 @@ interface CameraScanModalProps {
   setShowModal: (show: boolean) => void;
   suppliers: Supplier[];
   onProductScanned: (product: Product) => void;
-  actionQuantity: number;
-  setActionQuantity: (quantity: number) => void;
-  onManageStock: (actionType: 'sale' | 'dispose' | 'restock') => void;
   onUpdateProduct: (product: Product) => void;
   onProductNotFound: (scannedCode: string) => void; // New prop
 }
@@ -21,9 +18,6 @@ export function CameraScanModal({
   setShowModal,
   suppliers,
   onProductScanned,
-  actionQuantity,
-  setActionQuantity,
-  onManageStock,
   onUpdateProduct,
   onProductNotFound
 }: CameraScanModalProps) {
@@ -178,9 +172,6 @@ export function CameraScanModal({
           product={scannedProduct}
           suppliers={suppliers}
           onUpdateProduct={onUpdateProduct}
-          actionQuantity={actionQuantity}
-          setActionQuantity={setActionQuantity}
-          onManageStock={onManageStock}
         />
       )}
 

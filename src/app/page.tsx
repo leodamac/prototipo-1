@@ -69,6 +69,14 @@ export default function InventoryManager() {
   const [filterSupplier, setFilterSupplier] = useState('all');
   const [compactView, setCompactView] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [newSupplier, setNewSupplier] = useState<Partial<Supplier>>({
+    name: '',
+    phone: '',
+    email: '',
+    Product: [],
+  });
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [widgets, setWidgets] = useState<DashboardWidget[]>([
     { id: '1', type: 'inventory-table', visible: true },
     { id: '2', type: 'sales-trend', visible: true },
@@ -188,10 +196,12 @@ export default function InventoryManager() {
 
   
 
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [addProductError, setAddProductError] = useState<string | null>(null);
+  const [addProductSuccess, setAddProductSuccess] = useState<string | null>(null);
 
   const handleAddOrUpdateProduct = async () => {
     setAddProductError(null); // Clear previous errors
+    setAddProductSuccess(null); // Clear previous success
     try {
       if (editingProduct) {
         // Update existing product
@@ -214,6 +224,7 @@ export default function InventoryManager() {
         const updatedProduct = await res.json();
         setProducts(prev => prev.map(p => (p.id === updatedProduct.id ? updatedProduct : p)));
         console.log('Producto actualizado:', updatedProduct);
+        setAddProductSuccess('Producto actualizado con éxito!');
       } else {
         // Add new product
         const res = await fetch('/api/products', {
@@ -246,8 +257,9 @@ export default function InventoryManager() {
           expirationDate: addedProduct.expirationDate ? new Date(addedProduct.expirationDate) : undefined,
         }]);
         console.log('Producto añadido:', addedProduct);
+        setAddProductSuccess('Producto añadido con éxito!');
       }
-      setShowAddProductModal(false);
+      // No cerramos el modal aquí, se cierra desde AddProductModal después de mostrar el mensaje de éxito
       setNewProduct({
         name: '', type: '', price: 0, stock: 0, supplierId: '', image: '', qrCode: '', barcode: '',
       });
@@ -255,6 +267,7 @@ export default function InventoryManager() {
     } catch (error: any) {
       console.error('Error al guardar producto:', error);
       setAddProductError(error.message || 'Error desconocido al guardar el producto.');
+      throw error; // Re-throw to be caught by AddProductModal
     }
   };
 
@@ -296,7 +309,12 @@ export default function InventoryManager() {
     setShowAddProductModal(true);
   };
 
+  const [productDeleteError, setProductDeleteError] = useState<string | null>(null);
+  const [productDeleteSuccess, setProductDeleteSuccess] = useState<string | null>(null);
+
   const handleDeleteProduct = async (productId: string) => {
+    setProductDeleteError(null);
+    setProductDeleteSuccess(null);
     if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
       try {
         const res = await fetch(`/api/products/${productId}`, {
@@ -305,35 +323,34 @@ export default function InventoryManager() {
         if (!res.ok) throw new Error('Failed to delete product');
         setProducts(prev => prev.filter(p => p.id !== productId));
         console.log('Producto eliminado:', productId);
-      } catch (error) {
+        setProductDeleteSuccess('Producto eliminado con éxito!');
+      } catch (error: any) {
         console.error('Error al eliminar producto:', error);
+        setProductDeleteError(error.message || 'Error desconocido al eliminar el producto.');
       }
     }
   };
 
-  const [newSupplier, setNewSupplier] = useState<Partial<Supplier>>({
-    name: '',
-    phone: '',
-    email: '',
-    Product: [],
-  });
-  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [supplierValidationError, setSupplierValidationError] = useState<string | null>(null);
+  const [supplierError, setSupplierError] = useState<string | null>(null);
+  const [supplierSuccess, setSupplierSuccess] = useState<string | null>(null);
 
   const handleAddOrUpdateSupplier = async () => {
     setSupplierValidationError(null);
+    setSupplierError(null);
+    setSupplierSuccess(null);
 
     const name = newSupplier.name?.trim();
     const phone = newSupplier.phone?.trim();
     const email = newSupplier.email?.trim();
   
     if (!name) {
-      setSupplierValidationError('El nombre del proveedor no puede estar vacío.');
-      return;
+      setSupplierError('El nombre del proveedor no puede estar vacío.');
+      throw new Error('Validation Error');
     }
     if (!phone && !email) {
-      setSupplierValidationError('Debe proporcionar al menos un teléfono o un correo electrónico.');
-      return;
+      setSupplierError('Debe proporcionar al menos un teléfono o un correo electrónico.');
+      throw new Error('Validation Error');
     }
 
     try {
@@ -349,6 +366,7 @@ export default function InventoryManager() {
         const updatedSupplier = await res.json();
         updatedSupplier.Product = editingSupplier.Product;
         setSuppliers(prev => prev.map(s => (s.id === updatedSupplier.id ? updatedSupplier : s)));
+        setSupplierSuccess('Proveedor actualizado con éxito!');
       } else {
         const res = await fetch('/api/suppliers', {
           method: 'POST',
@@ -358,15 +376,19 @@ export default function InventoryManager() {
         if (!res.ok) throw new Error('Failed to add supplier');
         const addedSupplier = await res.json();
         setSuppliers(prev => [...prev, addedSupplier]);
+        setSupplierSuccess('Proveedor añadido con éxito!');
       }
 
-      setShowAddSupplierModal(false);
+      // No cerramos el modal aquí, se cierra desde AddSupplierModal después de mostrar el mensaje de éxito
       setNewSupplier({ name: '', phone: '', email: '', Product: [] });
       setEditingSupplier(null);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al guardar proveedor:', error);
-      setSupplierValidationError('Error al guardar el proveedor. Intente de nuevo.');
+      if (error.message !== 'Validation Error') {
+        setSupplierError(error.message || 'Error desconocido al guardar el proveedor.');
+      }
+      throw error; // Re-throw to be caught by AddSupplierModal
     }
   };
 
@@ -396,66 +418,8 @@ export default function InventoryManager() {
     }
   };
 
-  const manejarAccionProducto = async (actionType: 'sale' | 'dispose' | 'restock') => {
-    if (!scannedProduct) return;
-
-    let updatedProduct: Product = { ...scannedProduct };
-    let newSale: Partial<Sale> = {};
-
-    try {
-      if (actionType === 'restock') {
-        updatedProduct.stock += actionQuantity;
-      } else if (actionType === 'sale') {
-        if (scannedProduct.stock < actionQuantity) {
-          console.error('Not enough stock for this sale.');
-          // Optionally, show a user-facing error
-          return;
-        }
-        updatedProduct.stock -= actionQuantity;
-        newSale = {
-          productId: scannedProduct.id,
-          quantity: actionQuantity,
-          date: new Date(),
-          type: actionType,
-        };
-      } else if (actionType === 'dispose') {
-        if (scannedProduct.stock < actionQuantity) {
-          console.error('Not enough stock to dispose.');
-          // Optionally, show a user-facing error
-          return;
-        }
-        updatedProduct.stock -= actionQuantity;
-      }
-
-      // Update product stock
-      const resProduct = await fetch(`/api/products/${updatedProduct.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProduct),
-      });
-      if (!resProduct.ok) throw new Error('Failed to update product stock');
-      setProducts(prev => prev.map(p => (p.id === updatedProduct.id ? updatedProduct : p)));
-      console.log(`Stock de ${updatedProduct.name} actualizado a ${updatedProduct.stock}`);
-
-      // Record sale if applicable
-      if (actionType === 'sale') {
-        const resSale = await fetch('/api/sales', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newSale),
-        });
-        if (!resSale.ok) throw new Error('Failed to record sale');
-        const addedSale = await resSale.json();
-        setSales(prev => [...prev, { ...addedSale, date: new Date(addedSale.date) }]);
-        console.log(`Venta de ${actionQuantity} unidades de ${updatedProduct.name} registrada.`);
-      }
-    } catch (error) {
-      console.error('Error al manejar acción de producto:', error);
-    } finally {
-      setShowScanModal(false);
-      setScannedProduct(null);
-      setActionQuantity(1); // Reset quantity
-    }
+  const handleProductUpdated = (updatedProduct: Product) => {
+    setProducts(prev => prev.map(p => (p.id === updatedProduct.id ? updatedProduct : p)));
   };
 
   const manejarEscaneo = () => {
@@ -486,7 +450,6 @@ export default function InventoryManager() {
     entryDate: new Date(),
     expirationDate: undefined,
   });
-  const [addProductError, setAddProductError] = useState<string | null>(null);
 
   
 
@@ -777,7 +740,10 @@ export default function InventoryManager() {
                 onDeleteProduct={handleDeleteProduct}
                 setScannedProduct={setScannedProduct}
                 setShowScanModal={setShowScanModal}
-                setActionQuantity={setActionQuantity}
+                productDeleteError={productDeleteError}
+                setProductDeleteError={setProductDeleteError}
+                productDeleteSuccess={productDeleteSuccess}
+                setProductDeleteSuccess={setProductDeleteSuccess}
               />
             )}
 
@@ -882,6 +848,10 @@ export default function InventoryManager() {
         handleAddSupplier={handleAddOrUpdateSupplier}
         editingSupplier={editingSupplier}
         clearForm={clearAddSupplierForm}
+        supplierError={supplierError}
+        setSupplierError={setSupplierError}
+        supplierSuccess={supplierSuccess}
+        setSupplierSuccess={setSupplierSuccess}
       />
 
       <AddProductModal
@@ -894,17 +864,17 @@ export default function InventoryManager() {
         editingProduct={editingProduct}
         clearForm={clearAddProductForm}
         addProductError={addProductError}
+        setAddProductError={setAddProductError}
+        addProductSuccess={addProductSuccess}
+        setAddProductSuccess={setAddProductSuccess}
       />
 
         <ScanProductModal
         showScanModal={showScanModal}
         setShowScanModal={setShowScanModal}
         scannedProduct={scannedProduct}
-        actionQuantity={actionQuantity}
-        setActionQuantity={setActionQuantity}
-        manejarAccionProducto={manejarAccionProducto}
         suppliers={suppliers}
-        onUpdateProduct={handleUpdateProduct}
+        onUpdateProduct={handleProductUpdated}
         onProductNotFound={handleProductNotFound}
       />
 
@@ -913,10 +883,7 @@ export default function InventoryManager() {
         setShowModal={setShowCameraScanModal}
         suppliers={suppliers}
         onProductScanned={setScannedProduct}
-        actionQuantity={actionQuantity}
-        setActionQuantity={setActionQuantity}
-        onManageStock={manejarAccionProducto}
-        onUpdateProduct={handleUpdateProduct}
+        onUpdateProduct={handleProductUpdated}
         onProductNotFound={handleProductNotFound}
       />
       </main>

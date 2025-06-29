@@ -9,11 +9,14 @@ interface AddProductModalProps {
   setShowAddProductModal: (show: boolean) => void;
   newProduct: Partial<Product>;
   setNewProduct: (product: Partial<Product>) => void;
-  handleAddProduct: () => void;
+  handleAddProduct: () => Promise<void>; // handleAddProduct now returns a Promise<void>
   suppliers: Supplier[];
   editingProduct: Product | null;
-  clearForm: () => void; // New prop to clear the form
-  addProductError: string | null; // New prop for displaying errors
+  clearForm: () => void;
+  addProductError: string | null;
+  setAddProductError: (error: string | null) => void; // New prop to set error
+  addProductSuccess: string | null; // New prop for displaying success
+  setAddProductSuccess: (success: string | null) => void; // New prop to set success
 }
 
 export function AddProductModal({
@@ -26,6 +29,9 @@ export function AddProductModal({
   editingProduct,
   clearForm,
   addProductError,
+  setAddProductError,
+  addProductSuccess,
+  setAddProductSuccess,
 }: AddProductModalProps) {
 
   const modalTitle = editingProduct ? 'Editar Producto' : 'Añadir Nuevo Producto';
@@ -34,6 +40,21 @@ export function AddProductModal({
   const handleCloseModal = () => {
     setShowAddProductModal(false);
     clearForm();
+    setAddProductError(null); // Clear error on close
+    setAddProductSuccess(null); // Clear success on close
+  };
+
+  const handleSaveClick = async () => {
+    setAddProductError(null); // Clear previous errors
+    setAddProductSuccess(null); // Clear previous success
+    try {
+      await handleAddProduct();
+      setAddProductSuccess(editingProduct ? 'Producto actualizado con éxito!' : 'Producto añadido con éxito!');
+      // No cerramos el modal inmediatamente para que el usuario vea el mensaje de éxito
+      // El modal se cerrará después de un breve retraso o cuando el usuario lo cierre manualmente
+    } catch (error: any) {
+      setAddProductError(error.message || 'Error desconocido al guardar el producto.');
+    }
   };
 
   return (
@@ -47,6 +68,9 @@ export function AddProductModal({
       {addProductError && (
         <p className="text-red-500 text-sm text-center mb-4">{addProductError}</p>
       )}
+      {addProductSuccess && (
+        <p className="text-green-500 text-sm text-center mb-4">{addProductSuccess}</p>
+      )}
 
       <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
         <button
@@ -56,7 +80,7 @@ export function AddProductModal({
           Cancelar
         </button>
         <button
-          onClick={handleAddProduct}
+          onClick={handleSaveClick}
           className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
         >
           {buttonText}

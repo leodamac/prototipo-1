@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { Supplier } from '../types';
+import { Modal } from './common/Modal'; // Import Modal component
 
 interface AddSupplierModalProps {
   showAddSupplierModal: boolean;
   setShowAddSupplierModal: (show: boolean) => void;
   newSupplier: Partial<Supplier>;
   setNewSupplier: (supplier: Partial<Supplier>) => void;
-  handleAddSupplier: () => void;
+  handleAddSupplier: () => Promise<void>; // handleAddSupplier now returns a Promise<void>
   editingSupplier: Supplier | null;
-  clearForm: () => void; // New prop to clear the form
+  clearForm: () => void;
+  supplierError: string | null; // New prop for displaying errors
+  setSupplierError: (error: string | null) => void; // New prop to set error
+  supplierSuccess: string | null; // New prop for displaying success
+  setSupplierSuccess: (success: string | null) => void; // New prop to set success
 }
 
 export function AddSupplierModal({
@@ -20,145 +25,118 @@ export function AddSupplierModal({
   handleAddSupplier,
   editingSupplier,
   clearForm,
+  supplierError,
+  setSupplierError,
+  supplierSuccess,
+  setSupplierSuccess,
 }: AddSupplierModalProps) {
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setShowAddSupplierModal(false);
-        clearForm();
-      }
-    }
-
-    if (showAddSupplierModal) {
-      setValidationError(null); // Reset error when modal opens
-      if (!editingSupplier) {
-        setNewSupplier({ name: '', phone: '', email: '', Product: [] }); // Reset form for new supplier
-      }
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showAddSupplierModal, editingSupplier, setNewSupplier, setShowAddSupplierModal, clearForm]);
-
-  if (!showAddSupplierModal) return null;
+  const modalTitle = editingSupplier ? 'Editar Proveedor' : 'Añadir Nuevo Proveedor';
+  const buttonText = editingSupplier ? 'Guardar Cambios' : 'Añadir Proveedor';
 
   const handleCloseModal = () => {
     setShowAddSupplierModal(false);
     clearForm();
+    setSupplierError(null); // Clear error on close
+    setSupplierSuccess(null); // Clear success on close
   };
 
-  const handleAddSupplierClick = () => {
-    if (!newSupplier.name || newSupplier.name.trim() === '') {
-      setValidationError('El nombre del proveedor no puede estar vacío.');
+  const handleSaveClick = async () => {
+    setSupplierError(null); // Clear previous errors
+    setSupplierSuccess(null); // Clear previous success
+
+    const name = newSupplier.name?.trim();
+    const phone = newSupplier.phone?.trim();
+    const email = newSupplier.email?.trim();
+  
+    if (!name) {
+      setSupplierError('El nombre del proveedor no puede estar vacío.');
       return;
     }
-    if (!newSupplier.phone && !newSupplier.email) {
-      setValidationError('Debe ingresar al menos un teléfono o un correo electrónico para el proveedor.');
+    if (!phone && !email) {
+      setSupplierError('Debe proporcionar al menos un teléfono o un correo electrónico.');
       return;
     }
-    setValidationError(null);
-    handleAddSupplier();
+
+    try {
+      await handleAddSupplier();
+      setSupplierSuccess(editingSupplier ? 'Proveedor actualizado con éxito!' : 'Proveedor añadido con éxito!');
+    } catch (error: any) {
+      setSupplierError(error.message || 'Error desconocido al guardar el proveedor.');
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60]">
-      <div className="fixed inset-0 overflow-y-auto pt-16 sm:pt-20">
-        <div className="flex min-h-full items-start justify-center p-4">
-          <div
-            className="bg-white dark:bg-gray-800 w-full max-w-md rounded-lg shadow-xl"
-            ref={modalRef} // Add ref here
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                {editingSupplier ? 'Editar Proveedor' : 'Añadir Nuevo Proveedor'}
-              </h3>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                aria-label="Cerrar modal"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                  Nombre del Proveedor
-                </label>
-                <input
-                  type="text"
-                  value={newSupplier.name}
-                  onChange={e => {
-                    setNewSupplier({ ...newSupplier, name: e.target.value });
-                    setValidationError(null); // Clear error on change
-                  }}
-                  className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Nombre del proveedor"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                  Teléfono
-                </label>
-                <input
-                  type="text"
-                  value={newSupplier.phone || ''}
-                  onChange={e => {
-                    setNewSupplier({ ...newSupplier, phone: e.target.value });
-                    setValidationError(null); // Clear error on change
-                  }}
-                  className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Ej: +1234567890"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                  Correo Electrónico
-                </label>
-                <input
-                  type="email"
-                  value={newSupplier.email || ''}
-                  onChange={e => {
-                    setNewSupplier({ ...newSupplier, email: e.target.value });
-                    setValidationError(null); // Clear error on change
-                  }}
-                  className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Ej: proveedor@ejemplo.com"
-                />
-              </div>
-              {validationError && (
-                <p className="text-red-500 text-sm">{validationError}</p>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
-              <button
-                onClick={handleCloseModal}
-                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleAddSupplierClick}
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {editingSupplier ? 'Guardar Cambios' : 'Añadir Proveedor'}
-              </button>
-            </div>
-          </div>
+    <Modal isOpen={showAddSupplierModal} onClose={handleCloseModal} title={modalTitle}>
+      <div className="p-4 space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+            Nombre del Proveedor
+          </label>
+          <input
+            type="text"
+            value={newSupplier.name || ''}
+            onChange={e => {
+              setNewSupplier({ ...newSupplier, name: e.target.value });
+              setSupplierError(null); // Clear error on change
+            }}
+            className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            placeholder="Nombre del proveedor"
+          />
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+            Teléfono
+          </label>
+          <input
+            type="text"
+            value={newSupplier.phone || ''}
+            onChange={e => {
+              setNewSupplier({ ...newSupplier, phone: e.target.value });
+              setSupplierError(null); // Clear error on change
+            }}
+            className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            placeholder="Ej: +1234567890"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+            Correo Electrónico
+          </label>
+          <input
+            type="email"
+            value={newSupplier.email || ''}
+            onChange={e => {
+              setNewSupplier({ ...newSupplier, email: e.target.value });
+              setSupplierError(null); // Clear error on change
+            }}
+            className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            placeholder="Ej: proveedor@ejemplo.com"
+          />
+        </div>
+        {supplierError && (
+          <p className="text-red-500 text-sm text-center">{supplierError}</p>
+        )}
+        {supplierSuccess && (
+          <p className="text-green-500 text-sm text-center">{supplierSuccess}</p>
+        )}
       </div>
-    </div>
+
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+        <button
+          onClick={handleCloseModal}
+          className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleSaveClick}
+          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {buttonText}
+        </button>
+      </div>
+    </Modal>
   );
 }

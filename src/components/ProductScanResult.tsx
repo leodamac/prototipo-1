@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Product, Supplier } from '../types';
 import { ProductFormFields } from './ProductFormFields';
+import ManageStockModal from './ManageStockModal'; // Import the new modal
 
 interface ProductScanResultProps {
   product: Product;
   suppliers: Supplier[];
   onUpdateProduct: (product: Product) => void;
-  actionQuantity: number;
-  setActionQuantity: (quantity: number) => void;
-  onManageStock: (actionType: 'sale' | 'dispose' | 'restock') => void;
+  // actionQuantity, setActionQuantity, onManageStock are removed as they are handled by ManageStockModal
 }
 
 export function ProductScanResult({
   product,
   suppliers,
   onUpdateProduct,
-  actionQuantity,
-  setActionQuantity,
-  onManageStock
 }: ProductScanResultProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProduct, setEditedProduct] = useState<Product>(product);
+  const [showManageStockModal, setShowManageStockModal] = useState(false);
 
   // Update editedProduct when the product prop changes (e.g., new scan result)
   useEffect(() => {
@@ -31,6 +28,10 @@ export function ProductScanResult({
   const handleSave = () => {
     onUpdateProduct(editedProduct);
     setIsEditing(false);
+  };
+
+  const handleStockUpdated = (updatedProduct: Product) => {
+    onUpdateProduct(updatedProduct); // Update product in parent component
   };
 
   return (
@@ -69,40 +70,24 @@ export function ProductScanResult({
       )}
       <div className="space-y-3 mt-4">
         <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Gestionar Stock</h4>
-        <div>
-          <label htmlFor="action-quantity" className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
-            Cantidad
-          </label>
-          <input
-            id="action-quantity"
-            type="number"
-            min={1}
-            value={actionQuantity}
-            onChange={e => setActionQuantity(Number(e.target.value))}
-            className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
-        </div>
         <div className="flex flex-wrap gap-2 justify-end">
           <button
-            onClick={() => onManageStock('sale')}
+            onClick={() => setShowManageStockModal(true)}
             className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
           >
-            Vender
-          </button>
-          <button
-            onClick={() => onManageStock('dispose')}
-            className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
-          >
-            Desechar
-          </button>
-          <button
-            onClick={() => onManageStock('restock')}
-            className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
-          >
-            Reponer
+            Gestionar Stock
           </button>
         </div>
       </div>
+
+      {showManageStockModal && (
+        <ManageStockModal
+          isOpen={showManageStockModal}
+          onClose={() => setShowManageStockModal(false)}
+          product={product}
+          onStockUpdated={handleStockUpdated}
+        />
+      )}
     </>
   );
 }

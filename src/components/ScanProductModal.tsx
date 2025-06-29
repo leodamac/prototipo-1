@@ -9,9 +9,6 @@ interface ScanProductModalProps {
   showScanModal: boolean;
   setShowScanModal: (show: boolean) => void;
   scannedProduct: Product | null;
-  actionQuantity: number;
-  setActionQuantity: (quantity: number) => void;
-  manejarAccionProducto: (actionType: 'sale' | 'dispose' | 'restock') => void;
   suppliers: Supplier[];
   onUpdateProduct: (product: Product) => void;
   onProductNotFound: (scannedCode: string) => void; // New prop
@@ -21,9 +18,6 @@ export function ScanProductModal({
   showScanModal,
   setShowScanModal,
   scannedProduct,
-  actionQuantity,
-  setActionQuantity,
-  manejarAccionProducto,
   suppliers,
   onUpdateProduct,
   onProductNotFound,
@@ -150,9 +144,6 @@ export function ScanProductModal({
           product={internalProduct}
           suppliers={suppliers}
           onUpdateProduct={onUpdateProduct}
-          actionQuantity={actionQuantity}
-          setActionQuantity={setActionQuantity}
-          onManageStock={manejarAccionProducto}
         />
       ) : (
         <div className="text-center p-4">
