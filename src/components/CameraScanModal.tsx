@@ -71,6 +71,8 @@ export function CameraScanModal({
   // Effect to get cameras when modal opens
   useEffect(() => {
     if (showModal) {
+      setScanMessage(null); // Clear message on modal open
+      setScannedCode(null); // Clear scanned code on modal open
       setCameraStatus('loading');
       Html5Qrcode.getCameras().then(cameras => {
         if (cameras && cameras.length) {
@@ -154,7 +156,7 @@ export function CameraScanModal({
       {cameraStatus === 'no-camera' && <p className="text-center text-red-500">No se encontraron cámaras.</p>}
       {cameraStatus === 'error' && <p className="text-center text-red-500">Error al acceder a la cámara. Asegúrate de haber otorgado los permisos.</p>}
 
-      {scanMessage && <p className="text-center text-red-500 mt-2">{scanMessage}</p>}
+      
 
       {isScanning && availableCameras.length > 1 && (
         <div className="mt-4">
