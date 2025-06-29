@@ -1,11 +1,17 @@
-import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js'
 
-const prisma = new PrismaClient();
+const supabaseUrl = 'https://mnnufiqlxnvrmfbkyzcz.supabase.co'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function GET() {
   try {
-    const sales = await prisma.sale.findMany();
+    const { data: sales, error } = await supabase
+      .from('Sale')
+      .select('*');
+
+    if (error) throw error;
     return NextResponse.json(sales);
   } catch (error) {
     console.error('Error fetching sales:', error);
@@ -16,12 +22,15 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const newSale = await prisma.sale.create({
-      data: {
+    const { data: newSale, error } = await supabase
+      .from('Sale')
+      .insert({
         ...body,
         date: new Date(body.date),
-      },
-    });
+      })
+      .single();
+
+    if (error) throw error;
     return NextResponse.json(newSale, { status: 201 });
   } catch (error) {
     console.error('Error creating sale:', error);

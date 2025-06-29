@@ -1,27 +1,41 @@
-import { PrismaClient } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 import { addDays, subDays } from 'date-fns';
+import { createClient } from '@supabase/supabase-js';
 
-const prisma = new PrismaClient();
+const supabaseUrl = 'https://mnnufiqlxnvrmfbkyzcz.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function main() {
   console.log('Start seeding...');
 
   // Clear existing data
-  await prisma.sale.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.supplier.deleteMany({});
-  await prisma.notification.deleteMany({});
+  await supabase.from('Sale').delete().neq('id', '0');
+  await supabase.from('Product').delete().neq('id', '0');
+  await supabase.from('Supplier').delete().neq('id', '0');
+  await supabase.from('Notification').delete().neq('id', '0');
 
   // Create demo suppliers
-  const supplier1 = await prisma.supplier.create({
-    data: { id: '1', name: 'Lácteos del Valle', phone: '555-0001', email: 'lacteos@example.com' },
-  });
-  const supplier2 = await prisma.supplier.create({
-    data: { id: '2', name: 'Panadería Central', phone: '555-0002', email: 'panaderia@example.com' },
-  });
-  const supplier3 = await prisma.supplier.create({
-    data: { id: '3', name: 'Frutas Frescas', phone: '555-0003', email: 'frutas@example.com' },
-  });
+  const { error: error1 } = await supabase.from('Supplier').insert({ id: '1', name: 'Lácteos del Valle', phone: '555-0001', email: 'lacteos@example.com' });
+  if (error1) { console.error('Error inserting supplier1:', error1); throw error1; }
+  const { data: supplier1, error: fetchError1 } = await supabase.from('Supplier').select('*').eq('id', '1').single();
+  if (fetchError1) { console.error('Error fetching supplier1 after insert:', fetchError1); throw fetchError1; }
+  if (!supplier1) { console.error('Supplier1 data is null after insert and fetch.'); throw new Error('Supplier1 insert returned null data.'); }
+  console.log('Created supplier1:', supplier1);
+
+  const { error: error2 } = await supabase.from('Supplier').insert({ id: '2', name: 'Panadería Central', phone: '555-0002', email: 'panaderia@example.com' });
+  if (error2) { console.error('Error inserting supplier2:', error2); throw error2; }
+  const { data: supplier2, error: fetchError2 } = await supabase.from('Supplier').select('*').eq('id', '2').single();
+  if (fetchError2) { console.error('Error fetching supplier2 after insert:', fetchError2); throw fetchError2; }
+  if (!supplier2) { console.error('Supplier2 data is null after insert and fetch.'); throw new Error('Supplier2 insert returned null data.'); }
+  console.log('Created supplier2:', supplier2);
+
+  const { error: error3 } = await supabase.from('Supplier').insert({ id: '3', name: 'Frutas Frescas', phone: '555-0003', email: 'frutas@example.com' });
+  if (error3) { console.error('Error inserting supplier3:', error3); throw error3; }
+  const { data: supplier3, error: fetchError3 } = await supabase.from('Supplier').select('*').eq('id', '3').single();
+  if (fetchError3) { console.error('Error fetching supplier3 after insert:', fetchError3); throw fetchError3; }
+  if (!supplier3) { console.error('Supplier3 data is null after insert and fetch.'); throw new Error('Supplier3 insert returned null data.'); }
+  console.log('Created supplier3:', supplier3);
 
   // Create demo products
   const productsData = [
@@ -34,14 +48,20 @@ async function main() {
   ];
 
   for (const product of productsData) {
-    await prisma.product.create({ data: product });
+    const { error } = await supabase.from('Product').insert(product);
+    if (error) throw error;
+    console.log('Inserted product:', product.name);
   }
 
   // Create demo sales
   const demoSales = [];
-  const allProducts = await prisma.product.findMany();
+  const { data: allProducts, error: productsError } = await supabase.from('Product').select('id');
+  if (productsError) throw productsError;
+  console.log('Fetched products for sales:', allProducts);
+
   for (let i = 0; i < 30; i++) {
     demoSales.push({
+      id: uuidv4(), // Generate a unique ID for each sale
       productId: allProducts[Math.floor(Math.random() * allProducts.length)].id,
       quantity: Math.floor(Math.random() * 5) + 1,
       date: subDays(new Date(), Math.floor(Math.random() * 30)),
@@ -50,17 +70,19 @@ async function main() {
   }
 
   for (const sale of demoSales) {
-    await prisma.sale.create({ data: sale });
+    const { error } = await supabase.from('Sale').insert(sale);
+    if (error) throw error;
   }
 
+  console.log('All data operations completed.');
   console.log('Seeding finished.');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('Error during seeding:', e.message || e.code || e.details || e.hint || e);
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    // No need to disconnect Supabase client
   });

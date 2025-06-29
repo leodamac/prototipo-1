@@ -1,11 +1,17 @@
-import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js'
 
-const prisma = new PrismaClient();
+const supabaseUrl = 'https://mnnufiqlxnvrmfbkyzcz.supabase.co'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function GET() {
   try {
-    const notifications = await prisma.notification.findMany();
+    const { data: notifications, error } = await supabase
+      .from('Notification')
+      .select('*');
+
+    if (error) throw error;
     return NextResponse.json(notifications);
   } catch (error) {
     console.error('Error fetching notifications:', error);
@@ -16,12 +22,15 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const newNotification = await prisma.notification.create({
-      data: {
+    const { data: newNotification, error } = await supabase
+      .from('Notification')
+      .insert({
         ...body,
         date: new Date(body.date),
-      },
-    });
+      })
+      .single();
+
+    if (error) throw error;
     return NextResponse.json(newNotification, { status: 201 });
   } catch (error) {
     console.error('Error creating notification:', error);

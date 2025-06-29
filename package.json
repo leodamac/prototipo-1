@@ -8,13 +8,18 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "cross-env SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ubnVmaXFseG52cm1mYmt5emN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjc0OTMsImV4cCI6MjA2NjcwMzQ5M30.CMN4yq5todTQRYe9CuMbSJ92vUtzuT1QUjdGaaB5Tgs DATABASE_URL=postgresql://postgres:freshfood@db.mnnufiqlxnvrmfbkyzcz.supabase.co:5432/postgres tsx prisma/seed.ts",
+    "db:push-supabase": "set DATABASE_URL=\"postgresql://postgres:FreshCode2025+@db.mnnufiqlxnvrmfbkyzcz.supabase.co:5432/postgres\" && npx prisma db push"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@prisma/client": "^6.10.1",
+    "@supabase/supabase-js": "^2.50.2",
+    "@types/uuid": "^10.0.0",
+    "cross-env": "^7.0.3",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.0.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.30",
     "html5-qrcode": "^2.3.8",
@@ -22,7 +27,8 @@
     "next": "14.2.30",
     "react": "^18",
     "react-dom": "^18",
-    "recharts": "^2.15.3"
+    "recharts": "^2.15.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.7",
