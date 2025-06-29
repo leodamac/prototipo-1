@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Product, Supplier } from '../types';
 import { ProductFormFields } from './ProductFormFields';
-import ManageStockModal from './ManageStockModal'; // Import the new modal
+import ManageStockModal from './ManageStockModal';
 
 interface ProductScanResultProps {
   product: Product;
   suppliers: Supplier[];
+  onManageStock: (product: Product) => void;
   onUpdateProduct: (product: Product) => void;
-  // actionQuantity, setActionQuantity, onManageStock are removed as they are handled by ManageStockModal
 }
 
 export function ProductScanResult({
   product,
   suppliers,
+  onManageStock,
   onUpdateProduct,
 }: ProductScanResultProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -26,12 +27,10 @@ export function ProductScanResult({
   }, [product]);
 
   const handleSave = () => {
-    onUpdateProduct(editedProduct);
+    // This component no longer handles product updates directly.
+    // The parent component (ScanProductModal) should handle saving changes
+    // if editing is allowed and needs to persist.
     setIsEditing(false);
-  };
-
-  const handleStockUpdated = (updatedProduct: Product) => {
-    onUpdateProduct(updatedProduct); // Update product in parent component
   };
 
   return (
@@ -55,7 +54,7 @@ export function ProductScanResult({
           <div className="flex gap-2 justify-end mt-4">
             <button
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors"
             >
               Cancelar
             </button>
@@ -85,7 +84,7 @@ export function ProductScanResult({
           isOpen={showManageStockModal}
           onClose={() => setShowManageStockModal(false)}
           product={product}
-          onStockUpdated={handleStockUpdated}
+          onUpdateProduct={onUpdateProduct}
         />
       )}
     </>

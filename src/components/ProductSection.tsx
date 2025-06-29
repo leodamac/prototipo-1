@@ -25,6 +25,7 @@ interface ProductSectionProps {
   setProductDeleteError: (error: string | null) => void;
   productDeleteSuccess: string | null;
   setProductDeleteSuccess: (success: string | null) => void;
+  onManageStock: (product: Product) => void;
 }
 
 export function ProductSection({
@@ -47,6 +48,7 @@ export function ProductSection({
   setProductDeleteError,
   productDeleteSuccess,
   setProductDeleteSuccess,
+  onManageStock,
 }: ProductSectionProps) {
 
   const productosFiltrados = React.useMemo(() => {

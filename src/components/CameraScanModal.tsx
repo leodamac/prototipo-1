@@ -11,6 +11,7 @@ interface CameraScanModalProps {
   onProductScanned: (product: Product) => void;
   onUpdateProduct: (product: Product) => void;
   onProductNotFound: (scannedCode: string) => void; // New prop
+  onManageStock: (product: Product) => void;
 }
 
 export function CameraScanModal({
@@ -19,7 +20,8 @@ export function CameraScanModal({
   suppliers,
   onProductScanned,
   onUpdateProduct,
-  onProductNotFound
+  onProductNotFound,
+  onManageStock
 }: CameraScanModalProps) {
   const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -171,6 +173,7 @@ export function CameraScanModal({
         <ProductScanResult
           product={scannedProduct}
           suppliers={suppliers}
+          onManageStock={onManageStock}
           onUpdateProduct={onUpdateProduct}
         />
       )}

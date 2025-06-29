@@ -63,6 +63,8 @@ export default function InventoryManager() {
   const [showScanModal, setShowScanModal] = useState(false);
   const [showCameraScanModal, setShowCameraScanModal] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
+  const [showManageStockModal, setShowManageStockModal] = useState(false);
+  const [productToManageStock, setProductToManageStock] = useState<Product | null>(null);
   const [actionQuantity, setActionQuantity] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -422,6 +424,11 @@ export default function InventoryManager() {
     setProducts(prev => prev.map(p => (p.id === updatedProduct.id ? updatedProduct : p)));
   };
 
+  const handleManageStock = (product: Product) => {
+    setProductToManageStock(product);
+    setShowManageStockModal(true);
+  };
+
   const manejarEscaneo = () => {
     setScannedProduct(null); // Reset scanned product before opening scanner
     setShowScanModal(true);
@@ -476,7 +483,7 @@ export default function InventoryManager() {
 
   // Efecto para controlar el scroll del body cuando un modal/panel está abierto
   useEffect(() => {
-    if (showNotifications || showScanModal || showAddProductModal || showAddSupplierModal) {
+    if (showNotifications || showScanModal || showAddProductModal || showAddSupplierModal || showManageStockModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -484,7 +491,7 @@ export default function InventoryManager() {
     return () => {
       document.body.style.overflow = ''; // Limpiar al desmontar
     };
-  }, [showNotifications, showScanModal, showAddProductModal, showAddSupplierModal]);
+  }, [showNotifications, showScanModal, showAddProductModal, showAddSupplierModal, showManageStockModal]);
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
@@ -744,6 +751,7 @@ export default function InventoryManager() {
                 setProductDeleteError={setProductDeleteError}
                 productDeleteSuccess={productDeleteSuccess}
                 setProductDeleteSuccess={setProductDeleteSuccess}
+                onManageStock={handleManageStock}
               />
             )}
 
@@ -870,13 +878,15 @@ export default function InventoryManager() {
       />
 
         <ScanProductModal
-        showScanModal={showScanModal}
-        setShowScanModal={setShowScanModal}
-        scannedProduct={scannedProduct}
-        suppliers={suppliers}
-        onUpdateProduct={handleProductUpdated}
-        onProductNotFound={handleProductNotFound}
-      />
+          showScanModal={showScanModal}
+          setShowScanModal={setShowScanModal}
+          scannedProduct={scannedProduct}
+          suppliers={suppliers}
+
+          onProductNotFound={handleProductNotFound}
+          onManageStock={handleManageStock}
+          onUpdateProduct={handleProductUpdated}
+        />
 
       <CameraScanModal
         showModal={showCameraScanModal}
@@ -885,6 +895,7 @@ export default function InventoryManager() {
         onProductScanned={setScannedProduct}
         onUpdateProduct={handleProductUpdated}
         onProductNotFound={handleProductNotFound}
+        onManageStock={handleManageStock}
       />
       </main>
 

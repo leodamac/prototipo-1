@@ -10,8 +10,10 @@ interface ScanProductModalProps {
   setShowScanModal: (show: boolean) => void;
   scannedProduct: Product | null;
   suppliers: Supplier[];
-  onUpdateProduct: (product: Product) => void;
+  
   onProductNotFound: (scannedCode: string) => void; // New prop
+  onManageStock: (product: Product) => void;
+  onUpdateProduct: (product: Product) => void;
 }
 
 export function ScanProductModal({
@@ -19,8 +21,10 @@ export function ScanProductModal({
   setShowScanModal,
   scannedProduct,
   suppliers,
-  onUpdateProduct,
+  
   onProductNotFound,
+  onManageStock,
+  onUpdateProduct,
 }: ScanProductModalProps) {
   const [internalProduct, setInternalProduct] = useState<Product | null>(scannedProduct);
   const [isScanning, setIsScanning] = useState(false);
@@ -143,6 +147,7 @@ export function ScanProductModal({
         <ProductScanResult 
           product={internalProduct}
           suppliers={suppliers}
+          onManageStock={onManageStock}
           onUpdateProduct={onUpdateProduct}
         />
       ) : (
