@@ -433,7 +433,7 @@ export default function InventoryManager() {
     //setProductToManageStock(product);
     //setShowManageStockModal(true);
     setScannedProduct(product);
-    setShowCameraScanModal(true)
+    setShowManageStockModal(true)
     
   };
 
