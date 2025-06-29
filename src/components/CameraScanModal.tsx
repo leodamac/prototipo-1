@@ -1,0 +1,203 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Product, Supplier } from '../types';
+import { Html5Qrcode } from 'html5-qrcode';
+import { Modal } from './common/Modal';
+import { ProductScanResult } from './ProductScanResult';
+
+interface CameraScanModalProps {
+  showModal: boolean;
+  setShowModal: (show: boolean) => void;
+  suppliers: Supplier[];
+  onProductScanned: (product: Product) => void;
+  actionQuantity: number;
+  setActionQuantity: (quantity: number) => void;
+  onManageStock: (actionType: 'sale' | 'dispose' | 'restock') => void;
+  onUpdateProduct: (product: Product) => void;
+  onProductNotFound: (scannedCode: string) => void; // New prop
+}
+
+export function CameraScanModal({
+  showModal,
+  setShowModal,
+  suppliers,
+  onProductScanned,
+  actionQuantity,
+  setActionQuantity,
+  onManageStock,
+  onUpdateProduct,
+  onProductNotFound
+}: CameraScanModalProps) {
+  const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [availableCameras, setAvailableCameras] = useState<Array<{ id: string; label: string }>>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
+  const [cameraStatus, setCameraStatus] = useState<'idle' | 'loading' | 'ready' | 'scanning' | 'error' | 'no-camera'>('idle');
+  const [scanMessage, setScanMessage] = useState<string | null>(null);
+  const [scannedCode, setScannedCode] = useState<string | null>(null); // Store the scanned code
+  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+
+  
+
+  const handleRescan = useCallback(() => {
+    setScannedProduct(null);
+    setScanMessage(null);
+    setScannedCode(null);
+    setIsScanning(true);
+    // The useEffect will handle starting the scanner again if showModal is true and selectedCameraId is set
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setShowModal(false);
+    setScannedProduct(null);
+    setIsScanning(false);
+    setSelectedCameraId(null);
+    setAvailableCameras([]);
+    setCameraStatus('idle');
+    setScanMessage(null);
+  }, [setShowModal]);
+
+  useEffect(() => {
+    if (showModal) {
+      setCameraStatus('loading');
+      Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length) {
+          setAvailableCameras(cameras);
+          setSelectedCameraId(cameras[0].id); // Select the first camera by default
+          setCameraStatus('ready');
+        } else {
+          setCameraStatus('no-camera');
+        }
+      }).catch(err => {
+        console.error("Error getting cameras:", err);
+        setCameraStatus('error');
+      });
+    } else {
+      // When modal closes, ensure scanner is stopped via cleanup function of the other useEffect
+    }
+
+    return () => {
+      // No direct stopScanner call here, handled by the other useEffect's cleanup
+    };
+  }, [showModal]);
+
+  useEffect(() => {
+    let html5QrCode: Html5Qrcode | null = null;
+
+    if (showModal && selectedCameraId && cameraStatus === 'ready' && !scannedProduct && isScanning) {
+      const qrCodeReaderId = "qr-camera-reader";
+      html5QrCode = new Html5Qrcode(qrCodeReaderId);
+      html5QrCodeRef.current = html5QrCode; // Store the current instance
+
+      const qrCodeSuccessCallback = (decodedText: string) => {
+        setScanMessage(null); // Clear previous messages
+        setScannedCode(null); // Clear previous scanned code
+
+        const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
+        if (foundProduct) {
+          setScannedProduct(foundProduct);
+          onProductScanned(foundProduct);
+          setIsScanning(false);
+        } else {
+          setScannedCode(decodedText);
+          setScanMessage(`Producto con código "${decodedText}" no encontrado.`);
+          setIsScanning(false);
+        }
+      };
+
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+      html5QrCode.start(
+        selectedCameraId,
+        config,
+        qrCodeSuccessCallback,
+        (errorMessage) => {
+          // This callback is for continuous scanning errors, not for product not found
+          // console.warn("QR Code scanning error: ", errorMessage);
+        }
+      ).catch(err => {
+        console.error("Failed to start scanner:", err);
+        setCameraStatus('error');
+        setIsScanning(false);
+      });
+    }
+
+    return () => {
+      // Cleanup function: stop the scanner when the effect re-runs or component unmounts
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().catch(err => console.error("Cleanup: Failed to stop scanner", err));
+      }
+      html5QrCodeRef.current = null; // Clear the ref
+    };
+  }, [showModal, selectedCameraId, cameraStatus, suppliers, onProductScanned, scannedProduct, isScanning]);
+
+  return (
+    <Modal isOpen={showModal} onClose={handleClose} title={scannedProduct ? "Producto Encontrado" : "Escanear con Cámara"}>
+      <div id="qr-camera-reader" className={`w-full ${!isScanning ? 'hidden' : ''}`}></div>
+
+      {cameraStatus === 'loading' && <p className="text-center text-gray-500 dark:text-gray-400">Cargando cámaras...</p>}
+      {cameraStatus === 'no-camera' && <p className="text-center text-red-500">No se encontraron cámaras.</p>}
+      {cameraStatus === 'error' && <p className="text-center text-red-500">Error al acceder a la cámara. Asegúrate de haber otorgado los permisos.</p>}
+
+      {scanMessage && <p className="text-center text-red-500 mt-2">{scanMessage}</p>}
+
+      {isScanning && availableCameras.length > 1 && (
+        <div className="mt-4">
+          <label htmlFor="camera-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Seleccionar Cámara:</label>
+          <select
+            id="camera-select"
+            value={selectedCameraId || ''}
+            onChange={(e) => {
+              setSelectedCameraId(e.target.value);
+              setScannedProduct(null); // Reset scanned product when camera changes
+              setCameraStatus('ready'); // Set status to ready to trigger scanner restart
+              setScanMessage(null); // Clear messages on camera change
+              setScannedCode(null); // Clear scanned code on camera change
+            }}
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+          >
+            {availableCameras.map(camera => (
+              <option key={camera.id} value={camera.id}>
+                {camera.label || `Cámara ${camera.id}`}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {!isScanning && scannedProduct && (
+        <ProductScanResult
+          product={scannedProduct}
+          suppliers={suppliers}
+          onUpdateProduct={onUpdateProduct}
+          actionQuantity={actionQuantity}
+          setActionQuantity={setActionQuantity}
+          onManageStock={onManageStock}
+        />
+      )}
+
+      {!isScanning && !scannedProduct && cameraStatus !== 'loading' && cameraStatus !== 'error' && cameraStatus !== 'no-camera' && (
+        <div className="text-center p-4">
+          {scanMessage && <p className="text-red-500 mb-2">{scanMessage}</p>}
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Listo para escanear. Asegúrate de que el código esté visible.</p>
+          {scannedCode && (
+            <button
+              onClick={() => {
+                onProductNotFound(scannedCode);
+                handleClose();
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors mt-2"
+            >
+              Añadir Producto con Código {scannedCode}
+            </button>
+          )}
+          <button
+            onClick={handleRescan}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors mt-2"
+          >
+            Volver a Escanear
+          </button>
+        </div>
+      )}
+    </Modal>
+  );
+}

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Product, Supplier } from '../types';
-import { format } from 'date-fns';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import Image from 'next/image';
+import { Html5Qrcode } from 'html5-qrcode';
+import { Modal } from './common/Modal';
+import { ProductScanResult } from './ProductScanResult';
 
 interface ScanProductModalProps {
   showScanModal: boolean;
@@ -11,9 +12,9 @@ interface ScanProductModalProps {
   actionQuantity: number;
   setActionQuantity: (quantity: number) => void;
   manejarAccionProducto: (actionType: 'sale' | 'dispose' | 'restock') => void;
-  modalRef: React.RefObject<HTMLDivElement | null>;
-  suppliers: Supplier[]; // Añadir suppliers para el selector
-  onUpdateProduct: (product: Product) => void; // Nueva prop para actualizar producto
+  suppliers: Supplier[];
+  onUpdateProduct: (product: Product) => void;
+  onProductNotFound: (scannedCode: string) => void; // New prop
 }
 
 export function ScanProductModal({
@@ -23,18 +24,18 @@ export function ScanProductModal({
   actionQuantity,
   setActionQuantity,
   manejarAccionProducto,
-  modalRef,
   suppliers,
   onUpdateProduct,
+  onProductNotFound,
 }: ScanProductModalProps) {
-  const [editedProduct, setEditedProduct] = useState<Product | null>(scannedProduct);
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalProduct, setInternalProduct] = useState<Product | null>(scannedProduct);
   const [isScanning, setIsScanning] = useState(false);
-  const scannerRef = useRef<HTMLDivElement>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [scanMessage, setScanMessage] = useState<string | null>(null);
+  const [scannedCode, setScannedCode] = useState<string | null>(null);
 
   useEffect(() => {
-    setEditedProduct(scannedProduct);
-    setIsEditing(false); // Reset to view mode when product changes
+    setInternalProduct(scannedProduct);
     if (showScanModal && !scannedProduct) {
       setIsScanning(true);
     } else {
@@ -42,309 +43,125 @@ export function ScanProductModal({
     }
   }, [scannedProduct, showScanModal]);
 
-  useEffect(() => {
-    if (isScanning && scannerRef.current) {
-      const html5QrcodeScanner = new Html5QrcodeScanner(
-        "qr-reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        false
-      );
+  const handleScan = useCallback(async () => {
+    if (!selectedImage) return;
 
-      const onScanSuccess = (decodedText: string, decodedResult: any) => {
-        console.log(`Code matched = ${decodedText}`, decodedResult);
-        const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
-        if (foundProduct) {
-          setEditedProduct(foundProduct);
-          setIsScanning(false); // Stop scanning
-        } else {
-          alert("Producto no encontrado. Intente de nuevo.");
-          setIsScanning(true); // Continue scanning
-        }
-        html5QrcodeScanner.clear();
-      };
+    setScanMessage(null); // Clear previous messages
+    setScannedCode(null); // Clear previous scanned code
 
-      const onScanError = (errorMessage: string) => {
-        // console.warn(errorMessage); // Log errors for debugging, but don't show to user
-      };
-
-      html5QrcodeScanner.render(onScanSuccess, onScanError);
-
-      return () => {
-        try {
-          html5QrcodeScanner.clear();
-        } catch (error) {
-          console.error("Error clearing scanner: ", error);
-        }
-      };
+    const html5QrCode = new Html5Qrcode("qr-reader", { verbose: false });
+    try {
+      const result = await html5QrCode.scanFileV2(selectedImage, false);
+      const decodedText = result.decodedText;
+      const foundProduct = suppliers.flatMap(s => s.Product || []).find(p => p.qrCode === decodedText || p.barcode === decodedText);
+      if (foundProduct) {
+        setInternalProduct(foundProduct);
+        setIsScanning(false);
+        setScanMessage("Producto encontrado!");
+      } else {
+        setScannedCode(decodedText);
+        setScanMessage(`Producto con código "${decodedText}" no encontrado.`);
+        setIsScanning(false);
+      }
+    } catch (err) {
+      console.error("Error during image scan:", err);
+      setScanMessage("No se pudo escanear la imagen. Asegúrate de que el código sea claro y visible.");
+    } finally {
+      setSelectedImage(null);
     }
-  }, [isScanning, suppliers, setShowScanModal]);
+  }, [selectedImage, suppliers]);
 
-  if (!showScanModal) return null;
-
-  const handleSave = () => {
-    if (editedProduct) {
-      onUpdateProduct(editedProduct);
-      setIsEditing(false); // Go back to view mode after saving
-    }
-  };
+  const handleRescan = useCallback(() => {
+    setInternalProduct(null);
+    setScanMessage(null);
+    setScannedCode(null);
+    setIsScanning(true);
+    setSelectedImage(null);
+  }, []);
 
   const handleCloseModal = () => {
     setShowScanModal(false);
-    setEditedProduct(null);
-    setIsEditing(false);
+    setInternalProduct(null);
     setIsScanning(false);
+    setSelectedImage(null);
+    setScanMessage(null);
+    setScannedCode(null);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center">
-      <div ref={modalRef} className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full p-4 overflow-y-auto max-h-[90vh]">
-        <div className="flex justify-end items-center mb-4">
-          <button
-            onClick={handleCloseModal}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            aria-label="Cerrar modal"
+    <Modal isOpen={showScanModal} onClose={handleCloseModal} title={isScanning ? "Escanear Producto" : "Detalles del Producto"}>
+      <div id="qr-reader" className="hidden"></div>
+      {isScanning ? (
+        <div className="flex flex-col items-center justify-center">
+          {selectedImage ? (
+            <div className="w-full min-h-[50vh] bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 rounded-lg mb-4">
+              <Image src={URL.createObjectURL(selectedImage)} alt="Selected for scan" width={500} height={500} className="max-w-full max-h-full object-contain" />
+            </div>
+          ) : (
+            <div className="w-full min-h-[50vh] bg-gray-200 dark:bg-gray-700 flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 rounded-lg mb-4 p-4">
+              <p>Haga clic en el botón de abajo para seleccionar una imagen y escanear un código de barras o QR.</p>
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setSelectedImage(e.target.files ? e.target.files[0] : null)}
+            className="hidden"
+            id="image-upload"
+          />
+          <label
+            htmlFor="image-upload"
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow-md hover:bg-gray-700 transition-colors cursor-pointer mt-2"
           >
-            <X size={24} />
+            {selectedImage ? 'Cambiar Imagen' : 'Escanear desde Imagen'}
+          </label>
+          {selectedImage && (
+            <button
+              onClick={handleScan}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors mt-2"
+            >
+              Procesar Imagen
+            </button>
+          )}
+          {scanMessage && <p className="text-center text-red-500 mt-2">{scanMessage}</p>}
+          {scannedCode && !internalProduct && (
+            <button
+              onClick={() => {
+                onProductNotFound(scannedCode);
+                handleCloseModal();
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors mt-2"
+            >
+              Añadir Producto con Código {scannedCode}
+            </button>
+          )}
+          <button
+            onClick={handleRescan}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors mt-2"
+          >
+            Volver a Escanear
           </button>
         </div>
-
-        {isScanning ? (
-          <div id="qr-reader" ref={scannerRef} className="w-full h-64 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 rounded-lg">
-            Cargando escáner...
-          </div>
-        ) : (
-          editedProduct ? (
-            <>
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Editar Producto</h4>
-                <button 
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  {isEditing ? 'Ocultar' : 'Ver/Ocultar'}
-                </button>
-              </div>
-
-              {isEditing && (
-                <div className="space-y-3 mb-6 border-b pb-4 border-gray-200 dark:border-gray-700">
-                  <div>
-                    <label htmlFor="product-name" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Nombre</label>
-                    <input
-                      id="product-name"
-                      type="text"
-                      value={editedProduct.name}
-                      onChange={e => setEditedProduct({ ...editedProduct, name: e.target.value })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="Nombre del producto"
-                      title="Nombre del producto"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="product-type" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Tipo</label>
-                    <input
-                      id="product-type"
-                      type="text"
-                      value={editedProduct.type}
-                      onChange={e => setEditedProduct({ ...editedProduct, type: e.target.value })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="Tipo de producto"
-                      title="Tipo de producto"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                    <div>
-                      <label htmlFor="product-price" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Precio</label>
-                      <input
-                        id="product-price"
-                        type="number"
-                        value={editedProduct.price}
-                        onChange={e => setEditedProduct({ ...editedProduct, price: parseFloat(e.target.value) })}
-                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        step="0.01"
-                        placeholder="0.00"
-                        title="Precio del producto"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="product-stock" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Stock</label>
-                      <input
-                        id="product-stock"
-                        type="number"
-                        value={editedProduct.stock}
-                        onChange={e => setEditedProduct({ ...editedProduct, stock: parseInt(e.target.value) })}
-                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        placeholder="Cantidad en stock"
-                        title="Cantidad de stock"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="product-max-stock" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Cap. Máx.</label>
-                      <input
-                        id="product-max-stock"
-                        type="number"
-                        value={editedProduct.maxStock || ''}
-                        onChange={e => setEditedProduct({ ...editedProduct, maxStock: parseInt(e.target.value) })}
-                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        placeholder="Capacidad máxima de stock"
-                        title="Capacidad máxima de stock"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="product-supplier" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Proveedor</label>
-                    <select
-                      id="product-supplier"
-                      value={editedProduct.supplierId || ''}
-                      onChange={e => setEditedProduct({ ...editedProduct, supplierId: e.target.value || null })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      title="Seleccionar proveedor"
-                    >
-                      <option value="">Seleccionar Proveedor</option>
-                      {suppliers.map(supplier => (
-                        <option key={supplier.id} value={supplier.id}>
-                          {supplier.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                    <div>
-                      <label htmlFor="product-entry-date" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">F. Entrada</label>
-                      <input
-                        id="product-entry-date"
-                        type="date"
-                        value={editedProduct.entryDate ? format(new Date(editedProduct.entryDate), 'yyyy-MM-dd') : ''}
-                        onChange={e => setEditedProduct({ ...editedProduct, entryDate: new Date(e.target.value) })}
-                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        title="Fecha de entrada"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="product-expiration-date" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">F. Expiración</label>
-                      <input
-                        id="product-expiration-date"
-                        type="date"
-                        value={editedProduct.expirationDate ? format(new Date(editedProduct.expirationDate), 'yyyy-MM-dd') : ''}
-                        onChange={e => setEditedProduct({ ...editedProduct, expirationDate: new Date(e.target.value) })}
-                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        title="Fecha de expiración"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="product-image-url" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">URL Imagen</label>
-                    <input
-                      id="product-image-url"
-                      type="text"
-                      value={editedProduct.image || ''}
-                      onChange={e => setEditedProduct({ ...editedProduct, image: e.target.value })}
-                      className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="URL de la imagen del producto"
-                      title="URL de la imagen del producto"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                    <div>
-                      <label htmlFor="product-qr-code" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Código QR</label>
-                      <input
-                        id="product-qr-code"
-                        type="text"
-                        value={editedProduct.qrCode || ''}
-                        onChange={e => setEditedProduct({ ...editedProduct, qrCode: e.target.value })}
-                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        placeholder="Código QR del producto"
-                        title="Código QR del producto"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="product-barcode" className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Código Barras</label>
-                      <input
-                        id="product-barcode"
-                        type="text"
-                        value={editedProduct.barcode || ''}
-                        onChange={e => setEditedProduct({ ...editedProduct, barcode: e.target.value })}
-                        className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        placeholder="Código de barras del producto"
-                        title="Código de barras del producto"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 justify-end">
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors"
-                    >
-                      Guardar Cambios
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center p-4">
-              <p className="text-gray-500 dark:text-gray-400 mb-4">Escanee un código QR o de barras para ver los detalles del producto.</p>
-              <button
-                onClick={() => setIsScanning(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors"
-              >
-                Reintentar Escaneo
-              </button>
-            </div>
-          )
-        )}
-
-        {/* Sección de Acciones de Stock */}
-        {editedProduct && (
-          <div className="space-y-3">
-            <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Gestionar Stock</h4>
-            <div>
-              <label htmlFor="action-quantity" className="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">
-                Cantidad
-              </label>
-              <input
-                id="action-quantity"
-                type="number"
-                min={1}
-                value={actionQuantity}
-                onChange={e => setActionQuantity(Number(e.target.value))}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              />
-            </div>
-            <div className="flex flex-wrap gap-2 justify-end">
-              <button
-                onClick={() => manejarAccionProducto('sale')}
-                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-              >
-                Vender
-              </button>
-              <button
-                onClick={() => manejarAccionProducto('dispose')}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
-              >
-                Desechar
-              </button>
-              <button
-                onClick={() => manejarAccionProducto('restock')}
-                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
-              >
-                Reponer
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+      ) : internalProduct ? (
+        <ProductScanResult 
+          product={internalProduct}
+          suppliers={suppliers}
+          onUpdateProduct={onUpdateProduct}
+          actionQuantity={actionQuantity}
+          setActionQuantity={setActionQuantity}
+          onManageStock={manejarAccionProducto}
+        />
+      ) : (
+        <div className="text-center p-4">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Escanee un código QR o de barras para ver los detalles del producto.</p>
+          <button
+            onClick={() => setIsScanning(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+          >
+            Reintentar Escaneo
+          </button>
+        </div>
+      )}
+    </Modal>
   );
 }

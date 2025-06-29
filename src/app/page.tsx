@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, Bell, Scan, Moon, Sun, Menu, ShoppingCart, Users } from 'lucide-react';
+import { Package, Bell, Scan, Moon, Sun, Menu, ShoppingCart, Users, Camera, Image as ImageIcon, X } from 'lucide-react';
 import Image from 'next/image';
 import { differenceInDays } from 'date-fns';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -10,6 +10,7 @@ import { Product, Sale, Supplier, Notification, DashboardWidget } from '../types
 import { AddProductModal } from '../components/AddProductModal';
 import { AddSupplierModal } from '../components/AddSupplierModal';
 import { ScanProductModal } from '../components/ScanProductModal';
+import { CameraScanModal } from '../components/CameraScanModal';
 import { NotificationPanel } from '../components/NotificationPanel';
 import { DashboardSection } from '../components/DashboardSection';
 import { ProductSection } from '../components/ProductSection';
@@ -58,7 +59,9 @@ export default function InventoryManager() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [scanError, setScanError] = useState(1);
+  const [showScanMenu, setShowScanMenu] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
+  const [showCameraScanModal, setShowCameraScanModal] = useState(false);
   const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
   const [actionQuantity, setActionQuantity] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -452,6 +455,13 @@ export default function InventoryManager() {
     setActionQuantity(1); // Reset quantity
   };
 
+  const handleProductNotFound = (scannedCode: string) => {
+    setShowScanModal(false);
+    setShowCameraScanModal(false);
+    setNewProduct(prev => ({ ...prev, qrCode: scannedCode, barcode: scannedCode }));
+    setShowAddProductModal(true);
+  };
+
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
@@ -488,37 +498,8 @@ export default function InventoryManager() {
   };
 
   const notificationsRef = useRef<HTMLDivElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (modalRef.current && 
-          !modalRef.current.contains(event.target as Node) && 
-          showScanModal) {
-        setShowScanModal(false);
-        setScannedProduct(null);
-      }
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        if (showNotifications) {
-          setShowNotifications(false);
-        }
-        if (showScanModal) {
-          setShowScanModal(false);
-          setScannedProduct(null);
-        }
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [showScanModal, showNotifications]);
+  
 
   // Efecto para controlar el scroll del body cuando un modal/panel está abierto
   useEffect(() => {
@@ -706,9 +687,9 @@ export default function InventoryManager() {
         {showMainMenu ? (
           <div className="flex flex-col items-center justify-center gap-6 h-full">
           {darkMode ? (
-                <Image src="/images/logo_dark.png" alt="Productos Icon Dark" width={512} height={512} className="lg:w-7xl lg:h-7xl" />
+                <Image src="/images/logo_dark.png" alt="Productos Icon Dark" width={512} height={512} className="lg:w-7xl lg:h-7xl" priority />
               ) : (
-                <Image src="/images/logo_light.png" alt="Productos Icon Light" width={512} height={512} className="lg:w-7xl lg:h-7xl" />
+                <Image src="/images/logo_light.png" alt="Productos Icon Light" width={512} height={512} className="lg:w-7xl lg:h-7xl" priority />
               )}
           <div className="grid grid-cols-1 xs:grid-cols-2 gap-6 h-full place-items-center">
               
@@ -817,40 +798,69 @@ export default function InventoryManager() {
           </>
         )}
 
-        {/* Botón de escaneo QR más prominente (siempre visible) */}
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
+        {/* Speed Dial para Escaneo */}
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-4">
+          {showScanMenu && (
+            <div className="flex flex-col items-center gap-4 mb-2 transition-all duration-300">
+              {/* Opción Escanear con Cámara */}
+              <div className="flex items-center gap-2">
+                <span className="bg-white dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 px-3 py-1 rounded-md shadow-lg">Escanear con Cámara</span>
+                <button 
+                  onClick={() => {
+                    setShowCameraScanModal(true);
+                    setShowScanMenu(false);
+                  }} 
+                  className="bg-green-600 hover:bg-green-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all"
+                  aria-label="Escanear con cámara">
+                  <Camera size={24} aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Opción Escanear desde Imagen */}
+              <div className="flex items-center gap-2">
+                <span className="bg-white dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 px-3 py-1 rounded-md shadow-lg">Escanear desde Imagen</span>
+                <button 
+                  onClick={() => {
+                    manejarEscaneo();
+                    setShowScanMenu(false);
+                  }} 
+                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all"
+                  aria-label="Escanear desde imagen">
+                                    <ImageIcon size={24} aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Botón Principal del Speed Dial */}
           <button 
-            onClick={manejarEscaneo} 
+            onClick={() => setShowScanMenu(!showScanMenu)} 
             className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-            aria-label="Escanear producto">
-            <Scan size={32} aria-hidden="true" />
-            <span className="sr-only">Escanear producto</span>
+            aria-label={showScanMenu ? "Cerrar menú de escaneo" : "Abrir menú de escaneo"}>
+            {showScanMenu ? <X size={32} /> : <Scan size={32} />}
+          </button>
+        </div>
+
+        {/* Botones de Notificaciones y Tema (solo en móvil) */}
+        <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-4 md:hidden">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative"
+            aria-label="Ver notificaciones">
+            <Bell size={24} aria-hidden="true" />
+            {notificacionesNoLeidas > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-600 dark:bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                {notificacionesNoLeidas}
+              </span>
+            )}
           </button>
 
-          {/* Botón de notificaciones en móvil (siempre visible) */}
-          <div className="md:hidden">
-            <button 
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative"
-              aria-label="Ver notificaciones">
-              <Bell size={24} aria-hidden="true" />
-              {notificacionesNoLeidas > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 dark:bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
-                  {notificacionesNoLeidas}
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* Botón de tema */}
-          <div className="md:hidden">
-            <button 
-              onClick={() => setDarkMode(!darkMode)}
-              className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              aria-label="Cambiar tema">
-              {darkMode ? <Sun size={24} aria-hidden="true" /> : <Moon size={24} aria-hidden="true" />}
-            </button>
-          </div>
+          <button 
+            onClick={() => setDarkMode(!darkMode)}
+            className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+            aria-label="Cambiar tema">
+            {darkMode ? <Sun size={24} aria-hidden="true" /> : <Moon size={24} aria-hidden="true" />}
+          </button>
         </div>
 
         {/* Modal para añadir proveedor */}
@@ -882,9 +892,21 @@ export default function InventoryManager() {
         actionQuantity={actionQuantity}
         setActionQuantity={setActionQuantity}
         manejarAccionProducto={manejarAccionProducto}
-        modalRef={modalRef}
         suppliers={suppliers}
         onUpdateProduct={handleUpdateProduct}
+        onProductNotFound={handleProductNotFound}
+      />
+
+      <CameraScanModal
+        showModal={showCameraScanModal}
+        setShowModal={setShowCameraScanModal}
+        suppliers={suppliers}
+        onProductScanned={setScannedProduct}
+        actionQuantity={actionQuantity}
+        setActionQuantity={setActionQuantity}
+        onManageStock={manejarAccionProducto}
+        onUpdateProduct={handleUpdateProduct}
+        onProductNotFound={handleProductNotFound}
       />
       </main>
 
