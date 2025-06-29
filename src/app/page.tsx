@@ -16,6 +16,8 @@ import { SalesSection } from '../components/SalesSection';
 import { SupplierSection } from '../components/SupplierSection';
 import { SettingsSection } from '../components/SettingsSection';
 
+import { id } from 'date-fns/locale';
+
 export default function InventoryManager() {
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
@@ -296,6 +298,8 @@ export default function InventoryManager() {
     const name = newSupplier.name?.trim();
     const phone = newSupplier.phone?.trim();
     const email = newSupplier.email?.trim();
+  
+    const id_supplier = editingSupplier ? editingSupplier.id : Math.floor(Math.random() * 1000000) + 1; // Generar un ID aleatorio si es nuevo
 
     if (!name) {
       setSupplierValidationError('El nombre del proveedor no puede estar vacío.');
@@ -307,7 +311,7 @@ export default function InventoryManager() {
     }
 
     try {
-      const supplierData = { name, phone, email };
+      const supplierData = { name, phone, email ,id: id_supplier };
 
       if (editingSupplier) {
         const res = await fetch(`/api/suppliers/${editingSupplier.id}`, {
