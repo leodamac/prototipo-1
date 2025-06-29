@@ -18,9 +18,10 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const { products, ...supplierData } = body; // Destructure to exclude products
     const { data: newSupplier, error } = await supabase
       .from('Supplier')
-      .insert(body)
+      .insert(supplierData)
       .single();
 
     if (error) throw error;

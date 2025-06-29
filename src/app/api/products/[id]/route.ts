@@ -5,9 +5,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   const { id } = params;
   try {
     const body = await request.json();
+    const { supplier, sales, ...productData } = body; // Exclude relations
     const { data: updatedProduct, error } = await supabase
       .from('Product')
-      .update(body)
+      .update(productData)
       .eq('id', id)
       .single();
 

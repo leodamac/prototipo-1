@@ -18,11 +18,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const { product, ...saleData } = body; // Exclude relation
     const { data: newSale, error } = await supabase
       .from('Sale')
       .insert({
-        ...body,
-        date: new Date(body.date),
+        ...saleData,
+        date: new Date(saleData.date),
       })
       .single();
 
