@@ -430,8 +430,10 @@ export default function InventoryManager() {
   };
 
   const handleManageStock = (product: Product) => {
-    setProductToManageStock(product);
-    setShowManageStockModal(true);
+    //setProductToManageStock(product);
+    //setShowManageStockModal(true);
+    setScannedProduct(product);
+    setShowCameraScanModal(true)
     
   };
 
@@ -885,8 +887,10 @@ export default function InventoryManager() {
       />
 
         <ScanProductModal
-          showScanModal={showScanModal}
-          setShowScanModal={setShowScanModal}
+          showScanModal={showManageStockModal}
+          setShowScanModal={setShowCameraScanModal}
+          //showScanModal={showScanModal}
+          //setShowScanModal={setShowScanModal}
           scannedProduct={scannedProduct}
           products={products}
           suppliers={suppliers}
@@ -899,8 +903,9 @@ export default function InventoryManager() {
 
       <CameraScanModal
         //showModal={showCameraScanModal}
+        //setShowModal={setShowCameraScanModal}
         showModal={showManageStockModal}
-        setShowModal={setShowCameraScanModal}
+        setShowModal={setShowManageStockModal}
         products={products}
         suppliers={suppliers}
         onProductScanned={setScannedProduct}

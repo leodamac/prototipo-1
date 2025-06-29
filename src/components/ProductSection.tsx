@@ -167,7 +167,7 @@ export function ProductSection({
             ))}
           </select>
         </div>
-        {/* Controles de Vista */}
+        {/* Controles de Vista 
         <div className="flex items-center justify-end gap-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">Vista:</span>
             <button onClick={() => setCompactView(false)} className={`p-2 rounded-md ${!compactView ? 'bg-blue-100 dark:bg-blue-900 text-blue-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`} aria-label="Vista de lista">
@@ -176,7 +176,7 @@ export function ProductSection({
             <button onClick={() => setCompactView(true)} className={`p-2 rounded-md ${compactView ? 'bg-blue-100 dark:bg-blue-900 text-blue-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`} aria-label="Vista de cuadrícula">
                 <LayoutGrid size={20} />
             </button>
-        </div>
+        </div>*/}
       </div>
 
       {/* Tabla de Productos */}
