@@ -432,6 +432,7 @@ export default function InventoryManager() {
   const handleManageStock = (product: Product) => {
     setProductToManageStock(product);
     setShowManageStockModal(true);
+    
   };
 
   const manejarEscaneo = () => {
@@ -897,6 +898,7 @@ export default function InventoryManager() {
         />
 
       <CameraScanModal
+        //showModal={showCameraScanModal}
         showModal={showCameraScanModal}
         setShowModal={setShowCameraScanModal}
         products={products}
