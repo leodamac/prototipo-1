@@ -20,7 +20,6 @@ export function ProductScanResult({
 }: ProductScanResultProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProduct, setEditedProduct] = useState<Product>(product);
-  const [showManageStockModal, setShowManageStockModal] = useState(false);
 
   // Update editedProduct when the product prop changes (e.g., new scan result)
   useEffect(() => {
@@ -73,7 +72,7 @@ export function ProductScanResult({
         <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Gestionar Stock</h4>
         <div className="flex flex-wrap gap-2 justify-end">
           <button
-            onClick={() => setShowManageStockModal(true)}
+            onClick={() => onManageStock(product)}
             className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
           >
             Gestionar Stock
@@ -81,15 +80,7 @@ export function ProductScanResult({
         </div>
       </div>
 
-      {showManageStockModal && (
-        <ManageStockModal
-          isOpen={showManageStockModal}
-          onClose={() => setShowManageStockModal(false)}
-          product={product}
-          onUpdateProduct={onUpdateProduct}
-          onSaleCreated={onSaleCreated}
-        />
-      )}
+      
     </>
   );
 }

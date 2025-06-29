@@ -67,6 +67,8 @@ export default function InventoryManager() {
   const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
   const [showManageStockModal, setShowManageStockModal] = useState(false);
   const [productToManageStock, setProductToManageStock] = useState<Product | null>(null);
+  const [productToShowDetails, setProductToShowDetails] = useState<Product | null>(null);
+  const [showProductDetailsModal, setShowProductDetailsModal] = useState(false);
   const [actionQuantity, setActionQuantity] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -431,15 +433,24 @@ export default function InventoryManager() {
   };
 
   const handleManageStock = (product: Product) => {
-    setProductToManageStock(product);
-    setShowManageStockModal(true)
-    
+    setProductToShowDetails(product);
+    setShowProductDetailsModal(true);
   };
 
   const manejarEscaneo = () => {
     setScannedProduct(null); // Reset scanned product before opening scanner
     setShowScanModal(true);
     setActionQuantity(1); // Reset quantity
+  };
+
+  const handleProductScannedAndShowDetails = (product: Product, sourceModal: 'scan' | 'camera') => {
+    setProductToShowDetails(product);
+    setShowProductDetailsModal(true);
+    if (sourceModal === 'scan') {
+      setShowScanModal(false);
+    } else if (sourceModal === 'camera') {
+      setShowCameraScanModal(false);
+    }
   };
 
   const handleProductNotFound = (scannedCode: string) => {
@@ -892,12 +903,10 @@ export default function InventoryManager() {
           setShowScanModal={setShowScanModal}
           products={products}
           suppliers={suppliers}
-
           onProductNotFound={handleProductNotFound}
-          onManageStock={handleManageStock}
           onUpdateProduct={handleProductUpdated}
           onSaleCreated={handleSaleCreated}
-        />
+          onManageStock={handleManageStock }        />
 
       <CameraScanModal
         showModal={showCameraScanModal}
@@ -906,7 +915,7 @@ export default function InventoryManager() {
         suppliers={suppliers}
         onUpdateProduct={handleProductUpdated}
         onProductNotFound={handleProductNotFound}
-        onManageStock={handleManageStock}
+        onManageStock={ handleManageStock }
         onSaleCreated={handleSaleCreated}
       />
 
@@ -918,6 +927,26 @@ export default function InventoryManager() {
           onUpdateProduct={handleProductUpdated}
           onSaleCreated={handleSaleCreated} 
         />
+      )}
+
+      {showProductDetailsModal && productToShowDetails && (
+        <Modal
+          isOpen={showProductDetailsModal}
+          onClose={() => setShowProductDetailsModal(false)}
+          title="Detalles del Producto"
+        >
+          <ProductScanResult
+            product={productToShowDetails}
+            suppliers={suppliers}
+            onManageStock={(product) => {
+              setProductToManageStock(product);
+              setShowManageStockModal(true);
+              setShowProductDetailsModal(false); // Close details modal when opening manage stock
+            }}
+            onUpdateProduct={handleProductUpdated}
+            onSaleCreated={handleSaleCreated}
+          />
+        </Modal>
       )}
       </main>
 
