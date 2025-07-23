@@ -1,11 +1,11 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, Bell, Scan, Moon, Sun, Menu, ShoppingCart, Users, Camera, Image as ImageIcon, X } from 'lucide-react';
+import { Package, Bell, Scan, Moon, Sun, Menu, ShoppingCart, Users, Camera, Image as ImageIcon, X, Link } from 'lucide-react';
 import Image from 'next/image';
 import { differenceInDays } from 'date-fns';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Product, Sale, Supplier, Notification, DashboardWidget } from '../types';
+import { Product, Sale, Supplier, Notification, DashboardWidget, ChallengeSession } from '../types';
 
 import { AddProductModal } from '../components/AddProductModal';
 import { AddSupplierModal } from '../components/AddSupplierModal';
@@ -18,6 +18,7 @@ import { SalesSection } from '../components/SalesSection';
 import { SupplierSection } from '../components/SupplierSection';
 import { SettingsSection } from '../components/SettingsSection';
 import ManageStockModal from '../components/ManageStockModal';
+import { FinishChallengeModal } from '@/components/FinishChallengeModal';
 
 import { ProductScanResult } from '@/components/ProductScanResult';
 import { Modal } from '@/components/common/Modal';
@@ -101,6 +102,16 @@ export default function InventoryManager() {
     }
     return 100;
   });
+
+  const [challengeSession, setChallengeSession] = useState<ChallengeSession | null>(null);
+  const [showFinishChallengeModal, setShowFinishChallengeModal] = useState(false);
+
+  useEffect(() => {
+    const savedSession = localStorage.getItem('challengeSession');
+    if (savedSession) {
+      setChallengeSession(JSON.parse(savedSession));
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("defaultMaxStock", String(defaultMaxStock));
@@ -730,6 +741,9 @@ export default function InventoryManager() {
               <span className="mt-3 text-xl font-semibold text-center">Contactar Proveedores</span>
             </button>
           </div>
+            <Link href="/challenge" className="mt-8 text-lg font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+              Ir al Desafío de la Feria
+            </Link>
           </div>
         ) : (
           <>
@@ -868,6 +882,18 @@ export default function InventoryManager() {
           </button>
         </div>
 
+        {challengeSession && (
+          <div className="fixed bottom-24 right-6 z-50">
+            <button
+              onClick={() => setShowFinishChallengeModal(true)}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              aria-label="Finalizar Desafío"
+            >
+              <X size={32} />
+            </button>
+          </div>
+        )}
+
         {/* Modal para añadir proveedor */}
         <AddSupplierModal
         showAddSupplierModal={showAddSupplierModal}
@@ -947,6 +973,14 @@ export default function InventoryManager() {
             onSaleCreated={handleSaleCreated}
           />
         </Modal>
+      )}
+
+      {challengeSession && showFinishChallengeModal && (
+        <FinishChallengeModal
+          isOpen={showFinishChallengeModal}
+          onClose={() => setShowFinishChallengeModal(false)}
+          sessionId={challengeSession.id}
+        />
       )}
       </main>
 

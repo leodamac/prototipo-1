@@ -43,3 +43,12 @@ export interface DashboardWidget {
   type: 'sales-trend' | 'inventory-by-type' | 'recent-sales' | 'low-stock' | 'expiring-soon' | 'inventory-table';
   visible: boolean;
 }
+
+export interface ChallengeSession {
+  id: string;
+  participantName: string;
+  mode: 'manual' | 'app';
+  startTime: Date;
+  endTime?: Date;
+  comments?: string;
+}
