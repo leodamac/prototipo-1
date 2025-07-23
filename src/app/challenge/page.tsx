@@ -28,9 +28,10 @@ export default function ChallengePage() {
       if (!res.ok) {
         throw new Error('Failed to start challenge session');
       }
-
+      console.log('Challenge session started successfully');
       const session: ChallengeSession = await res.json();
-
+      console.log('Session data:', session);
+      
       // Store session in local storage to manage state across pages
       localStorage.setItem('challengeSession', JSON.stringify(session));
 

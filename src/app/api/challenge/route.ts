@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { participantName, mode } = body;
-
+    const { participantName, mode, mail, telephone, identification} = body;
+    console.log('Received data:', { participantName, mode });
     if (!participantName || !mode) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -16,6 +16,12 @@ export async function POST(request: Request) {
       .insert({
         participantName,
         mode,
+        mail,
+        telephone,
+        identification,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+
       })
       .select()
       .single();
@@ -24,6 +30,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
+    console.error('Error creating challenge session:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error creating challenge session:', errorMessage);
     return NextResponse.json({ error: 'Failed to create challenge session', details: errorMessage }, { status: 500 });
