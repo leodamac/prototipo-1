@@ -850,9 +850,9 @@ export default function InventoryManager() {
         <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-4 md:hidden">
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
-            className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative"
+            className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative ${notificacionesNoLeidas > 0 ? 'bg-red-200 dark:bg-red-900/50 text-red-700 dark:text-red-300' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
             aria-label="Ver notificaciones">
-            <Bell size={24} aria-hidden="true" />
+                        <Bell size={24} aria-hidden="true" className={`${(notificacionesNoLeidas>0)?"text-amber-400":"text-gray-600 dark:text-gray-300"}`} />
             {notificacionesNoLeidas > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-600 dark:bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
                 {notificacionesNoLeidas}
