@@ -1,16 +1,15 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Product, Supplier } from '../types';
 import { Modal } from './common/Modal';
 import { ProductFormFields } from './ProductFormFields';
-import { uploadProductImage } from '../lib/supabase-storage';
 
 interface AddProductModalProps {
   showAddProductModal: boolean;
   setShowAddProductModal: (show: boolean) => void;
   newProduct: Partial<Product>;
   setNewProduct: (product: Partial<Product>) => void;
-  handleAddProduct: (imageUrl: string | null) => Promise<void>; // handleAddProduct now accepts imageUrl
+  handleAddProduct: () => Promise<void>; // handleAddProduct now returns a Promise<void>
   suppliers: Supplier[];
   editingProduct: Product | null;
   clearForm: () => void;
@@ -34,7 +33,6 @@ export function AddProductModal({
   addProductSuccess,
   setAddProductSuccess,
 }: AddProductModalProps) {
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
 
   const modalTitle = editingProduct ? 'Editar Producto' : 'Añadir Nuevo Producto';
   const buttonText = editingProduct ? 'Guardar Cambios' : 'Añadir Producto';
@@ -44,22 +42,14 @@ export function AddProductModal({
     clearForm();
     setAddProductError(null); // Clear error on close
     setAddProductSuccess(null); // Clear success on close
-    setSelectedImageFile(null); // Clear selected image file on close
   };
 
   const handleSaveClick = async () => {
     setAddProductError(null); // Clear previous errors
     setAddProductSuccess(null); // Clear previous success
     try {
-      let imageUrl: string | null = newProduct.image || null;
-
-      if (selectedImageFile) {
-        imageUrl = await uploadProductImage(selectedImageFile);
-      }
-
-      await handleAddProduct(imageUrl);
+      await handleAddProduct();
       setAddProductSuccess(editingProduct ? 'Producto actualizado con éxito!' : 'Producto añadido con éxito!');
-      setSelectedImageFile(null); // Clear selected file after successful upload
       // No cerramos el modal inmediatamente para que el usuario vea el mensaje de éxito
       // El modal se cerrará después de un breve retraso o cuando el usuario lo cierre manualmente
     } catch (error: any) {
@@ -73,7 +63,6 @@ export function AddProductModal({
         product={newProduct}
         setProduct={setNewProduct}
         suppliers={suppliers}
-        onImageSelected={setSelectedImageFile}
       />
 
       {addProductError && (
