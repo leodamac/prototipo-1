@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { participantName, mode, mail, telephone, identification} = body;
-    console.log('Received data:', { participantName, mode });
+    const { participantName, participantLastName, participantRole, mail, telephone, mode } = body;
+    console.log('Received data:', { participantName, participantLastName, participantRole, mail, telephone, mode });
     if (!participantName || !mode) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -15,13 +15,13 @@ export async function POST(request: Request) {
       .from('ChallengeSession')
       .insert({
         participantName,
-        mode,
+        participantLastName,
+        participantRole,
         mail,
         telephone,
-        identification,
+        mode,
         createdAt: new Date(),
         updatedAt: new Date(),
-
       })
       .select()
       .single();

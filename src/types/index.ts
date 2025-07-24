@@ -47,6 +47,10 @@ export interface DashboardWidget {
 export interface ChallengeSession {
   id: string;
   participantName: string;
+  participantLastName?: string;
+  participantRole?: string;
+  mail?: string;
+  telephone?: string;
   mode: 'manual' | 'app';
   startTime: Date;
   endTime?: Date;

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal } from '@/components/common/Modal';
+import Image from 'next/image';
 
 interface FinishChallengeModalProps {
   isOpen: boolean;
@@ -45,11 +46,12 @@ export function FinishChallengeModal({ isOpen, onClose, sessionId }: FinishChall
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Finalizar Desafío">
-      <div className="p-4 space-y-4">
+
         <p className="text-gray-700 dark:text-gray-300">¿Estás seguro de que quieres finalizar el desafío? Esta acción no se puede deshacer.</p>
-        
+              <div className="flex flex-col place-content-center  p-4 space-y-4">
+
 <div className="flex flex-col space-y-2">
-  <div className="flex justify-start space-x-4">
+  <div className="flex justify-center space-x-4">
     <button
       type="button"
       onClick={() => setType('apoyo')}
@@ -74,7 +76,7 @@ export function FinishChallengeModal({ isOpen, onClose, sessionId }: FinishChall
     </button>
   </div>
   <label htmlFor="comments" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-    {type === 'apoyo' ? 'Palabras de apoyo' : 'Retroalimentación'}
+Retroalimentación
   </label>
   <textarea
     id="comments"
@@ -88,7 +90,7 @@ export function FinishChallengeModal({ isOpen, onClose, sessionId }: FinishChall
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-center gap-2">
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"

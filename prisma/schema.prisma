@@ -55,6 +55,10 @@ model Notification {
 model ChallengeSession {
   id                String    @id @default(cuid())
   participantName   String
+  participantLastName String?
+  participantRole   String?
+  mail              String?
+  telephone         String?
   mode              String // "manual" or "app"
   startTime         DateTime  @default(now())
   endTime           DateTime?
