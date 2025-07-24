@@ -26,13 +26,13 @@ export function SortableWidget({ widget, children }: SortableWidgetProps) {
         transform: CSS.Transform.toString(transform),
       }}
       className={`
-        relative bg-white dark:bg-gray-800 rounded shadow-lg dark:shadow-gray-900/30 p-4
+        relative bg-gray-800 rounded shadow-gray-900/30 p-4
         transition-all duration-200
         ${isDragging ? 'opacity-50' : 'opacity-100'}
       `}
     >
       <div className="absolute top-2 right-2 cursor-move z-10" {...attributes} {...listeners}>
-        <GripVertical size={20} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Mover widget" />
+        <GripVertical size={20} className="text-gray-400 hover:text-gray-300" aria-label="Mover widget" />
       </div>
       {children}
     </div>

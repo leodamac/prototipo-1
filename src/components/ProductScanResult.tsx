@@ -37,10 +37,10 @@ export function ProductScanResult({
   return (
     <>
       <div className="flex justify-between items-center mb-2">
-        <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Editar Producto</h4>
+        <h4 className="text-md font-semibold text-gray-100">Editar Producto</h4>
         <button
           onClick={() => setIsEditing(!isEditing)}
-          className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          className="text-sm text-blue-400 hover:underline"
         >
           {isEditing ? 'Ocultar' : 'Ver/Ocultar'}
         </button>
@@ -55,7 +55,7 @@ export function ProductScanResult({
           <div className="flex gap-2 justify-end mt-4">
             <button
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors"
+              className="px-4 py-2 bg-gray-600 text-gray-800 rounded-md hover:bg-gray-700 transition-colors"
             >
               Cancelar
             </button>
@@ -69,7 +69,7 @@ export function ProductScanResult({
         </>
       )}
       <div className="space-y-3 mt-4">
-        <h4 className="text-md font-semibold text-gray-900 dark:text-gray-100">Gestionar Stock</h4>
+        <h4 className="text-md font-semibold text-gray-100">Gestionar Stock</h4>
         <div className="flex flex-wrap gap-2 justify-end">
           <button
             onClick={() => onManageStock(product)}

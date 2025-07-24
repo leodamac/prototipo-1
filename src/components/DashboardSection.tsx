@@ -569,7 +569,7 @@ export function DashboardSection({
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Resumen del Panel</h2>
+        <h2 className="text-3xl font-bold text-white">Resumen del Panel</h2>
         <button
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200"
@@ -579,11 +579,11 @@ export function DashboardSection({
       </div>
 
       {showFilters && (
-        <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros Globales</h2>
+        <div className="mb-6 bg-gray-800 rounded-lg shadow p-4">
+          <h2 className="text-lg font-semibold text-gray-100 mb-4">Filtros Globales</h2>
           <div className="flex flex-wrap gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 Período
               </label>
               <label htmlFor="dashboard-date-range" className="sr-only">Período</label>
@@ -591,7 +591,7 @@ export function DashboardSection({
                 id="dashboard-date-range"
                 value={filterState.dateRange}
                 onChange={(e) => dispatch({ type: 'SET_DATE_RANGE', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               >
                 <option value="7d">Últimos 7 días</option>
                 <option value="30d">Últimos 30 días</option>
@@ -603,7 +603,7 @@ export function DashboardSection({
 
             {filterState.dateRange === 'year' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Año
                 </label>
                 <label htmlFor="dashboard-year-select" className="sr-only">Año</label>
@@ -611,8 +611,9 @@ export function DashboardSection({
                   id="dashboard-year-select"
                   value={filterState.selectedYear}
                   onChange={(e) => dispatch({ type: 'SET_SELECTED_YEAR', payload: Number(e.target.value) })}
-                  className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 >
+
                   {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
                     <option key={year} value={year}>{year}</option>
                   ))}
@@ -621,7 +622,7 @@ export function DashboardSection({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 Tipo de Producto
               </label>
               <label htmlFor="filter-type-select" className="sr-only">Tipo de Producto</label>
@@ -629,7 +630,7 @@ export function DashboardSection({
                 id="filter-type-select"
                 value={filterState.filterType}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_TYPE', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               >
                 <option value="all">Todos los tipos</option>
                 {Array.from(new Set(products.map(p => p.type))).map(type => (
@@ -639,7 +640,7 @@ export function DashboardSection({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 Proveedor
               </label>
               <label htmlFor="filter-supplier-select" className="sr-only">Proveedor</label>
@@ -647,7 +648,7 @@ export function DashboardSection({
                 id="filter-supplier-select"
                 value={filterState.filterSupplier}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_SUPPLIER', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               >
                 <option value="all">Todos los proveedores</option>
                 {suppliers.map(s => (
@@ -658,168 +659,168 @@ export function DashboardSection({
 
             {/* New Filters */}
             <div className="lg:col-span-2">
-              <label htmlFor="filter-product-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del Producto</label>
+              <label htmlFor="filter-product-name" className="block text-sm font-medium text-gray-300 mb-1">Nombre del Producto</label>
               <input
                 type="text"
                 id="filter-product-name"
                 value={filterState.filterProductName}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_PRODUCT_NAME', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 placeholder="Buscar por nombre"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-min-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Mínimo</label>
+              <label htmlFor="filter-min-price" className="block text-sm font-medium text-gray-300 mb-1">Precio Mínimo</label>
               <input
                 type="number"
                 id="filter-min-price"
                 value={filterState.filterMinPrice}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_MIN_PRICE', payload: Number(e.target.value) })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 placeholder="0"
               />
             </div>
             <div>
-              <label htmlFor="filter-max-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio Máximo</label>
+              <label htmlFor="filter-max-price" className="block text-sm font-medium text-gray-300 mb-1">Precio Máximo</label>
               <input
                 type="number"
                 id="filter-max-price"
                 value={filterState.filterMaxPrice}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_MAX_PRICE', payload: Number(e.target.value) })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 placeholder="1000"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-min-stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Mínimo</label>
+              <label htmlFor="filter-min-stock" className="block text-sm font-medium text-gray-300 mb-1">Stock Mínimo</label>
               <input
                 type="number"
                 id="filter-min-stock"
                 value={filterState.filterMinStock}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_MIN_STOCK', payload: Number(e.target.value) })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 placeholder="0"
               />
             </div>
             <div>
-              <label htmlFor="filter-max-stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock Máximo</label>
+              <label htmlFor="filter-max-stock" className="block text-sm font-medium text-gray-300 mb-1">Stock Máximo</label>
               <input
                 type="number"
                 id="filter-max-stock"
                 value={filterState.filterMaxStock}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_MAX_STOCK', payload: Number(e.target.value) })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 placeholder="1000"
               />
             </div>
 
             <div className="lg:col-span-2">
-              <label htmlFor="filter-qr-barcode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">QR / Código de Barras</label>
+              <label htmlFor="filter-qr-barcode" className="block text-sm font-medium text-gray-300 mb-1">QR / Código de Barras</label>
               <input
                 type="text"
                 id="filter-qr-barcode"
                 value={filterState.filterQrBarcode}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_QR_BARCODE', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 placeholder="Buscar por QR o Código de Barras"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-entry-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Entrada (Inicio)</label>
+              <label htmlFor="filter-entry-date-start" className="block text-sm font-medium text-gray-300 mb-1">Fecha de Entrada (Inicio)</label>
               <input
                 type="date"
                 id="filter-entry-date-start"
                 value={filterState.filterEntryDateStart}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_ENTRY_DATE_START', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               />
             </div>
             <div>
-              <label htmlFor="filter-entry-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Entrada (Fin)</label>
+              <label htmlFor="filter-entry-date-end" className="block text-sm font-medium text-gray-300 mb-1">Fecha de Entrada (Fin)</label>
               <input
                 type="date"
                 id="filter-entry-date-end"
                 value={filterState.filterEntryDateEnd}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_ENTRY_DATE_END', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-expiration-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Caducidad (Inicio)</label>
+              <label htmlFor="filter-expiration-date-start" className="block text-sm font-medium text-gray-300 mb-1">Fecha de Caducidad (Inicio)</label>
               <input
                 type="date"
                 id="filter-expiration-date-start"
                 value={filterState.filterExpirationDateStart}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_EXPIRATION_DATE_START', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               />
             </div>
             <div>
-              <label htmlFor="filter-expiration-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Caducidad (Fin)</label>
+              <label htmlFor="filter-expiration-date-end" className="block text-sm font-medium text-gray-300 mb-1">Fecha de Caducidad (Fin)</label>
               <input
                 type="date"
                 id="filter-expiration-date-end"
                 value={filterState.filterExpirationDateEnd}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_EXPIRATION_DATE_END', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-sale-quantity-min" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad Vendida (Mín.)</label>
+              <label htmlFor="filter-sale-quantity-min" className="block text-sm font-medium text-gray-300 mb-1">Cantidad Vendida (Mín.)</label>
               <input
                 type="number"
                 id="filter-sale-quantity-min"
                 value={filterState.filterSaleQuantityMin}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_SALE_QUANTITY_MIN', payload: Number(e.target.value) })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 placeholder="0"
               />
             </div>
             <div>
-              <label htmlFor="filter-sale-quantity-max" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad Vendida (Máx.)</label>
+              <label htmlFor="filter-sale-quantity-max" className="block text-sm font-medium text-gray-300 mb-1">Cantidad Vendida (Máx.)</label>
               <input
                 type="number"
                 id="filter-sale-quantity-max"
                 value={filterState.filterSaleQuantityMax}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_SALE_QUANTITY_MAX', payload: Number(e.target.value) })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                 placeholder="1000"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-sale-date-start" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Venta (Inicio)</label>
+              <label htmlFor="filter-sale-date-start" className="block text-sm font-medium text-gray-300 mb-1">Fecha de Venta (Inicio)</label>
               <input
                 type="date"
                 id="filter-sale-date-start"
                 value={filterState.filterSaleDateStart}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_SALE_DATE_START', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               />
             </div>
             <div>
-              <label htmlFor="filter-sale-date-end" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Venta (Fin)</label>
+              <label htmlFor="filter-sale-date-end" className="block text-sm font-medium text-gray-300 mb-1">Fecha de Venta (Fin)</label>
               <input
                 type="date"
                 id="filter-sale-date-end"
                 value={filterState.filterSaleDateEnd}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_SALE_DATE_END', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               />
             </div>
 
             <div>
-              <label htmlFor="filter-sale-type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo de Venta</label>
+              <label htmlFor="filter-sale-type" className="block text-sm font-medium text-gray-300 mb-1">Tipo de Venta</label>
               <select
                 id="filter-sale-type"
                 value={filterState.filterSaleType}
                 onChange={(e) => dispatch({ type: 'SET_FILTER_SALE_TYPE', payload: e.target.value })}
-                className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
               >
                 <option value="all">Todos los tipos</option>
                 <option value="sale">Venta</option>
@@ -832,65 +833,65 @@ export function DashboardSection({
 
       {/* 2. Añadir el nuevo widget de KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <div className="bg-gray-800 rounded-lg shadow p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Ventas Totales</h3>
+            <h3 className="text-sm font-medium text-gray-400">Ventas Totales</h3>
             <ShoppingCart size={20} className="text-blue-500" />
           </div>
           <div className="mt-2 flex items-baseline">
-            <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-semibold text-gray-100">
               ${ventasTotales.toFixed(2)}
             </p>
-            <p className="ml-1 text-sm text-green-600 dark:text-green-400">
+            <p className="ml-1 text-sm text-green-400">
               +{porcentajeCrecimiento}%
             </p>
           </div>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-400">
             vs periodo anterior
           </p>
         </div>
 
-        <div className="bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-700 rounded-lg shadow p-4">
+        <div className="bg-red-900/20 border-red-700 rounded-lg shadow p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Productos Caducados</h3>
+            <h3 className="text-sm font-medium text-gray-400">Productos Caducados</h3>
             <AlertTriangle size={20} className="text-red-500" />
           </div>
           <div className="mt-2">
-            <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-semibold text-gray-100">
               {productosCaducados.length}
             </p>
           </div>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-400">
             Última semana
           </p>
         </div>
 
-        <div className="bg-yellow-100 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700 rounded-lg shadow p-4">
+        <div className="bg-yellow-900/20 border-yellow-700 rounded-lg shadow p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Por Caducar</h3>
+            <h3 className="text-sm font-medium text-gray-400">Por Caducar</h3>
             <Calendar size={20} className="text-yellow-500" />
           </div>
           <div className="mt-2">
-            <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-semibold text-gray-100">
               {productosPorCaducar.length}
             </p>
           </div>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-400">
             Próximos 7 días
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+        <div className="bg-gray-800 rounded-lg shadow p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Stock Bajo</h3>
+            <h3 className="text-sm font-medium text-gray-400">Stock Bajo</h3>
             <Package size={20} className="text-orange-500" />
           </div>
           <div className="mt-2">
-            <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-semibold text-gray-100">
               {productosStockBajo.length}
             </p>
           </div>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-400">
             Necesitan reposición
           </p>
         </div>
@@ -921,8 +922,8 @@ export function DashboardSection({
 
                     return (
                       <section aria-label="Medidor de inventario">
-                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                          <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" />
+                        <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-100">
+                          <Package size={20} className="text-gray-100" aria-hidden="true" />
                           {gaugeTitle}
                         </h3>
                         <InventoryGauge
@@ -938,34 +939,34 @@ export function DashboardSection({
                 {/* Widget de Ventas Recientes */}
                 {widget.type === 'recent-sales' && (
                   <section aria-label="Ventas recientes">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                      <ShoppingCart size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-100">
+                      <ShoppingCart size={20} className="text-gray-100" aria-hidden="true" /> 
                       Últimas Ventas
                     </h3>
                     <div className="max-h-96 overflow-x-auto">
-                      <table className="table-auto w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-                        <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+                      <table className="table-auto w-full text-left text-sm border border-gray-700 rounded">
+                        <thead className="bg-gray-700 sticky top-0">
                           <tr>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-center">Cantidad</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-right">Precio Unit.</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-right">Fecha</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100">Producto</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100 text-center">Cantidad</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100 text-right">Precio Unit.</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100 text-right">Fecha</th>
                           </tr>
                         </thead>
                         <tbody>
                           {ventasRecientes.length === 0 ? (
                             <tr>
-                              <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                              <td colSpan={4} className="p-4 text-center text-gray-400">
                                 No hay ventas recientes
                               </td>
                             </tr>
                           ) : (
                             ventasRecientes.map(s => (
-                              <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <td className="p-3 text-gray-900 dark:text-gray-100 break-words">{s.nombreProducto}</td>
-                                <td className="p-3 text-gray-900 dark:text-gray-100 text-center break-words">{s.quantity}</td>
-                                <td className="p-3 text-gray-900 dark:text-gray-100 text-right break-words">${s.price.toFixed(2)}</td>
-                                <td className="p-3 text-gray-900 dark:text-gray-100 text-right break-words">{format(s.date, 'dd/MM/yyyy')}</td>
+                              <tr key={s.id} className="border-b border-gray-700 hover:bg-gray-700">
+                                <td className="p-3 text-gray-100 break-words">{s.nombreProducto}</td>
+                                <td className="p-3 text-gray-100 text-center break-words">{s.quantity}</td>
+                                <td className="p-3 text-gray-100 text-right break-words">${s.price.toFixed(2)}</td>
+                                <td className="p-3 text-gray-100 text-right break-words">{format(s.date, 'dd/MM/yyyy')}</td>
                               </tr>
                             ))
                           )}
@@ -978,24 +979,24 @@ export function DashboardSection({
                 {/* Widget de Stock Bajo */}
                 {widget.type === 'low-stock' && (
                   <section aria-label="Productos con stock bajo">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                      <AlertTriangle size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-100">
+                      <AlertTriangle size={20} className="text-gray-100" aria-hidden="true" /> 
                       Productos con Stock Bajo
                     </h3>
                     <div className="max-h-96 overflow-x-auto">
-                      <table className="table-auto w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-                        <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+                      <table className="table-auto w-full text-left text-sm border border-gray-700 rounded">
+                        <thead className="bg-gray-700 sticky top-0">
                           <tr>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-center">Stock</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Tipo</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100">Producto</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100 text-center">Stock</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100">Tipo</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100">Proveedor</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody className="divide-y divide-gray-700">
                           {productosStockBajo.length === 0 && (
                             <tr>
-                              <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                              <td colSpan={4} className="p-4 text-center text-gray-400">
                                 No hay productos con stock bajo
                               </td>
                             </tr>
@@ -1003,11 +1004,11 @@ export function DashboardSection({
                           {productosStockBajo.map(p => {
                             const proveedor = suppliers.find(s => s.id === p.supplierId);
                             return (
-                              <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <td className="p-3 text-gray-900 dark:text-gray-100 break-words">{p.name}</td>
-                                <td className="p-3 text-gray-900 dark:text-gray-100 text-center break-words">{p.stock}</td>
-                                <td className="p-3 text-gray-900 dark:text-gray-100 break-words">{p.type}</td>
-                                <td className="p-3 text-gray-900 dark:text-gray-100 break-words">{proveedor?.name || 'Desconocido'}</td>
+                              <tr key={p.id} className="border-b border-gray-700 hover:bg-gray-700">
+                                <td className="p-3 text-gray-100 break-words">{p.name}</td>
+                                <td className="p-3 text-gray-100 text-center break-words">{p.stock}</td>
+                                <td className="p-3 text-gray-100 break-words">{p.type}</td>
+                                <td className="p-3 text-gray-100 break-words">{proveedor?.name || 'Desconocido'}</td>
                               </tr>
                             );
                           })}
@@ -1020,24 +1021,24 @@ export function DashboardSection({
                 {/* Widget de Productos por Caducar */}
                 {widget.type === 'expiring-soon' && (
                   <section aria-label="Productos próximos a caducar">
-                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                      <Calendar size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-100">
+                      <Calendar size={20} className="text-gray-100" aria-hidden="true" /> 
                       Productos Próximos a Caducar
                     </h3>
                     <div className="max-h-96 overflow-x-auto">
-                      <table className="table-auto w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-                        <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0">
+                      <table className="table-auto w-full text-left text-sm border border-gray-700 rounded">
+                        <thead className="bg-gray-700 sticky top-0">
                           <tr>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Producto</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-center">Días para caducar</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-center">Stock</th>
-                            <th className="p-3 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Proveedor</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100">Producto</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100 text-center">Días para caducar</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100 text-center">Stock</th>
+                            <th className="p-3 border-b border-gray-600 text-gray-100">Proveedor</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody className="divide-y divide-gray-700">
                           {productosProximosCaducar.length === 0 ? (
                             <tr>
-                              <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                              <td colSpan={4} className="p-4 text-center text-gray-400">
                                 No hay productos próximos a caducar
                               </td>
                             </tr>
@@ -1046,19 +1047,19 @@ export function DashboardSection({
                               const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
                               const proveedor = suppliers.find(s => s.id === p.supplierId);
                               return (
-                                <tr key={p.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                  <td className="p-3 text-gray-900 dark:text-gray-100 break-words">{p.name}</td>
+                                <tr key={p.id} className="border-b border-gray-700 hover:bg-gray-700">
+                                  <td className="p-3 text-gray-100 break-words">{p.name}</td>
                                   <td className={`p-3 text-center break-words ${
                                     diasParaCaducar <= 1 
-                                      ? 'text-red-600 dark:text-red-400 font-bold' 
+                                      ? 'text-red-400 font-bold' 
                                       : diasParaCaducar <= 3 
-                                      ? 'text-yellow-600 dark:text-yellow-400 font-semibold' 
-                                      : 'text-gray-900 dark:text-gray-100'
+                                      ? 'text-yellow-400 font-semibold' 
+                                      : 'text-gray-100'
                                   }`}>
                                     {diasParaCaducar >= 0 ? `${diasParaCaducar} día${diasParaCaducar !== 1 ? 's' : ''}` : 'Caducado'}
                                   </td>
-                                  <td className="p-3 text-gray-900 dark:text-gray-100 text-center break-words">{p.stock}</td>
-                                  <td className="p-3 text-gray-900 dark:text-gray-100 break-words">{proveedor?.name || 'Desconocido'}</td>
+                                  <td className="p-3 text-gray-100 text-center break-words">{p.stock}</td>
+                                  <td className="p-3 text-gray-100 break-words">{proveedor?.name || 'Desconocido'}</td>
                                 </tr>
                               );
                             })
@@ -1073,8 +1074,8 @@ export function DashboardSection({
                 {widget.type === 'sales-trend' && isClient && (
                   <section aria-label="Tendencia de ventas">
                     <div className="flex flex-col gap-4">
-                      <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                        <TrendingUp size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                      <h3 className="font-semibold flex items-center gap-2 text-gray-100">
+                        <TrendingUp size={20} className="text-gray-100" aria-hidden="true" /> 
                         Tendencia de Ventas
                       </h3>
 
@@ -1085,7 +1086,7 @@ export function DashboardSection({
                           id="dashboard-date-range"
                           value={filterState.dateRange}
                           onChange={(e) => dispatch({ type: 'SET_DATE_RANGE', payload: e.target.value })}
-                          className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          className="rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                         >
                           <option value="7d">Últimos 7 días</option>
                           <option value="30d">Últimos 30 días</option>
@@ -1102,7 +1103,7 @@ export function DashboardSection({
                               aria-label="Año"
                               value={filterState.selectedYear}
                               onChange={(e) => dispatch({ type: 'SET_SELECTED_YEAR', payload: Number(e.target.value) })}
-                              className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                              className="rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                             >
                               {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -1116,7 +1117,7 @@ export function DashboardSection({
                           id="sales-trend-filter-type"
                           value={filterState.filterType}
                           onChange={(e) => dispatch({ type: 'SET_FILTER_TYPE', payload: e.target.value })}
-                          className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          className="rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                         >
                           <option value="all">Todos los tipos</option>
                           {Array.from(new Set(products.map(p => p.type))).map(type => (
@@ -1129,7 +1130,7 @@ export function DashboardSection({
                           id="inventory-by-type-filter-supplier"
                           value={filterState.filterSupplier}
                           onChange={(e) => dispatch({ type: 'SET_FILTER_SUPPLIER', payload: e.target.value })}
-                          className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          className="rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                         >
                           <option value="all">Todos los proveedores</option>
                           {suppliers.map(s => (
@@ -1145,13 +1146,13 @@ export function DashboardSection({
                             data={datosTendenciaVentas}
                             margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-600" />
                             <XAxis 
                               dataKey="fecha" 
-                              className="text-gray-900 dark:text-gray-100" 
+                              className="text-gray-100" 
                             />
                             <YAxis 
-                              className="text-gray-900 dark:text-gray-100"
+                              className="text-gray-100"
                             />
                             <Tooltip
                               contentStyle={{
@@ -1176,8 +1177,8 @@ export function DashboardSection({
                 {widget.type === 'inventory-by-type' && isClient && (
                   <section aria-label="Inventario por tipo">
                     <div className="flex flex-col gap-4">
-                      <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                        <Package size={20} className="text-gray-900 dark:text-gray-100" aria-hidden="true" /> 
+                      <h3 className="font-semibold flex items-center gap-2 text-gray-100">
+                        <Package size={20} className="text-gray-100" aria-hidden="true" /> 
                         Inventario por Tipo
                       </h3>
 
@@ -1188,7 +1189,7 @@ export function DashboardSection({
                           id="inventory-by-type-filter-supplier"
                           value={filterState.filterSupplier}
                           onChange={(e) => dispatch({ type: 'SET_FILTER_SUPPLIER', payload: e.target.value })}
-                          className="rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          className="rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
                         >
                           <option value="all">Todos los proveedores</option>
                           {suppliers.map(s => (
@@ -1201,13 +1202,13 @@ export function DashboardSection({
                       <div className="w-full h-[300px] sm:h-[400px] lg:h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={inventarioPorTipo}>
-                            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-600" />
                             <XAxis 
                               dataKey="tipo" 
-                              className="text-gray-900 dark:text-gray-100"
+                              className="text-gray-100"
                             />
                             <YAxis 
-                              className="text-gray-900 dark:text-gray-100"
+                              className="text-gray-100"
                             />
                             <Tooltip 
                               contentStyle={{ 

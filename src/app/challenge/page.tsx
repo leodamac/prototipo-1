@@ -66,13 +66,13 @@ export default function ChallengePage() {
   };
 
   return (
-    <div className='flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900'>
+    <div className='flex flex-col min-h-screen bg-gray-900'>
 
     <div className="flex w-full max-w-screen-xl mx-auto m-2 p-2">
-        <div className="w-full max-w-sm mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 space-y-2">
-            <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white">Desafío Prototipo en Acción</h1>
+        <div className="w-full max-w-sm mx-auto bg-gray-800 rounded-2xl shadow-xl p-4 space-y-2">
+            <h1 className="text-3xl font-bold text-center text-white">Desafío Prototipo en Acción</h1>
             <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Modo de Desafío</label>
+                <label className="text-sm font-medium text-gray-300">Modo de Desafío</label>
                 <div className="mt-2 flex rounded-md shadow-sm">
                     <button
                         onClick={() => setMode('app')}
@@ -86,14 +86,14 @@ export default function ChallengePage() {
                     </button>
                 </div>
             </div>
-                            <div className="text-center p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-md flex items-center justify-center"> 
+                            <div className="text-center p-4 border border-dashed border-gray-600 rounded-md flex items-center justify-center"> 
                   <Image src="/images/llama.png" alt="Llama" width={150} height={112} className="mt-8 max-w-[150px] sm:max-w-[200px] h-auto" />
                     {mode === null ? (
-                        <p className="text-gray-600 dark:text-gray-400">Selecciona un modo para comenzar el desafío.</p>
+                        <p className="text-gray-400">Selecciona un modo para comenzar el desafío.</p>
                     ) : mode === 'app' ? (
-                        <p className="text-gray-600 dark:text-gray-400">Al iniciar, serás redirigido a la aplicación para completar el inventario. ¡Mucha suerte!</p>
+                        <p className="text-gray-400">Al iniciar, serás redirigido a la aplicación para completar el inventario. ¡Mucha suerte!</p>
                     ) : (
-                        <p className="text-gray-600 dark:text-gray-400">Al iniciar, se activará el cronómetro. Deberás usar el cuaderno y presionar Finalizar cuando termines.</p>
+                        <p className="text-gray-400">Al iniciar, se activará el cronómetro. Deberás usar el cuaderno y presionar Finalizar cuando termines.</p>
                     )}
                 </div>
 
@@ -102,61 +102,61 @@ export default function ChallengePage() {
                     <div>
                         <div className='flex flex-col md:flex-row items-center justify-center gap-4'>
                             <div className="flex-1 w-full">
-                                <label htmlFor="participantName" className="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+                                <label htmlFor="participantName" className="text-sm font-medium text-gray-300">Nombre</label>
                                 <input
                                     id="participantName"
                                     type="text"
                                     value={participantName}
                                     onChange={(e) => setParticipantName(e.target.value)}
-                                    className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+                                    className="mt-1 block w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-100"
                                     placeholder="Tu nombre"
                                 />
                             </div>
 
                             <div className="flex-1 w-full">
-                                <label htmlFor="participantLastName" className="text-sm font-medium text-gray-700 dark:text-gray-300">Apellido</label>
+                                <label htmlFor="participantLastName" className="text-sm font-medium text-gray-300">Apellido</label>
                                 <input
                                     id="participantLastName"
                                     type="text"
                                     value={participantLastName}
                                     onChange={(e) => setParticipantLastName(e.target.value)}
-                                    className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+                                    className="mt-1 block w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-100"
                                     placeholder="Tu apellido"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label htmlFor="participantRole" className="text-sm font-medium text-gray-700 dark:text-gray-300">Rol en ESPOL</label>
+                            <label htmlFor="participantRole" className="text-sm font-medium text-gray-300">Rol en ESPOL</label>
                             <input
                                 id="participantRole"
                                 type="text"
                                 value={participantRole}
                                 onChange={(e) => setParticipantRole(e.target.value)}
-                                className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+                                className="mt-1 block w-full px-4 py-2 bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-100"
                                 placeholder="Tu rol en la ESPOL (estudiante, docente, etc.)"
                             />
                         </div>
 
                         <div>
-                            <label htmlFor="participantEmail" className="text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
+                            <label htmlFor="participantEmail" className="text-sm font-medium text-gray-300">Correo Electrónico</label>
                             <input
                                 id="participantEmail"
                                 type="email"
                                 value={participantEmail}
                                 onChange={(e) => setParticipantEmail(e.target.value)}
-                                className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+                                className="mt-1 block w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-100"
                                 placeholder="Tu correo electrónico"
                             />
                         </div>
                         <div>
-                            <label htmlFor="participantPhone" className="text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+                            <label htmlFor="participantPhone" className="text-sm font-medium text-gray-300">Teléfono</label>
                             <input
                                 id="participantPhone"
                                 type="tel"
                                 value={participantPhone}
                                 onChange={(e) => setParticipantPhone(e.target.value)}
-                                className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+                                className="mt-1 block w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-100"
                                 placeholder="Tu número de teléfono"
                             />
                         </div>

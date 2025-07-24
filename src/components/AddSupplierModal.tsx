@@ -69,7 +69,7 @@ export function AddSupplierModal({
     <Modal isOpen={showAddSupplierModal} onClose={handleCloseModal} title={modalTitle}>
       <div className="p-4 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+          <label className="block text-sm font-medium text-gray-100 mb-1">
             Nombre del Proveedor
           </label>
           <input
@@ -79,13 +79,13 @@ export function AddSupplierModal({
               setNewSupplier({ ...newSupplier, name: e.target.value });
               setSupplierError(null); // Clear error on change
             }}
-            className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
             placeholder="Nombre del proveedor"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+          <label className="block text-sm font-medium text-gray-100 mb-1">
             Teléfono
           </label>
           <input
@@ -95,13 +95,13 @@ export function AddSupplierModal({
               setNewSupplier({ ...newSupplier, phone: e.target.value });
               setSupplierError(null); // Clear error on change
             }}
-            className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
             placeholder="Ej: +1234567890"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
+          <label className="block text-sm font-medium text-gray-100 mb-1">
             Correo Electrónico
           </label>
           <input
@@ -111,7 +111,7 @@ export function AddSupplierModal({
               setNewSupplier({ ...newSupplier, email: e.target.value });
               setSupplierError(null); // Clear error on change
             }}
-            className="w-full rounded border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
             placeholder="Ej: proveedor@ejemplo.com"
           />
         </div>
@@ -123,10 +123,10 @@ export function AddSupplierModal({
         )}
       </div>
 
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+      <div className="p-4 border-t border-gray-700 flex justify-end gap-2">
         <button
           onClick={handleCloseModal}
-          className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700"
         >
           Cancelar
         </button>

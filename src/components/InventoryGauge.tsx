@@ -17,8 +17,8 @@ const getPathColor = (percentage: number) => {
 export function InventoryGauge({ currentStock, maxStock, isClient }: InventoryGaugeProps) {
   if (!isClient) {
     return (
-      <div className="w-full h-[200px] flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
-        <p className="text-gray-500 dark:text-gray-400">Cargando gráfico...</p>
+      <div className="w-full h-[200px] flex items-center justify-center bg-gray-800 rounded-lg">
+        <p className="text-gray-400">Cargando gráfico...</p>
       </div>
     );
   }
@@ -53,13 +53,13 @@ export function InventoryGauge({ currentStock, maxStock, isClient }: InventoryGa
               value={`${percentage.toFixed(0)}%`}
               position="center"
               dy={-10}
-              className="text-3xl font-bold fill-gray-900 dark:fill-gray-100"
+              className="text-3xl font-bold fill-gray-100"
             />
             <Label
               value="Capacidad Total"
               position="center"
               dy={20}
-              className="text-sm fill-gray-500 dark:fill-gray-400"
+              className="text-sm fill-gray-400"
             />
           </Pie>
         </PieChart>

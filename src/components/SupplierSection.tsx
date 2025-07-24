@@ -18,8 +18,8 @@ export function SupplierSection({
   return (
     <section>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-        <h2 className="text-2xl font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-          <Users size={28} className="text-gray-900 dark:text-gray-100" aria-hidden="true" />
+        <h2 className="text-2xl font-semibold flex items-center gap-2 text-gray-100">
+          <Users size={28} className="text-gray-100" aria-hidden="true" />
           Proveedores
         </h2>
 
@@ -31,35 +31,35 @@ export function SupplierSection({
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="bg-gray-800 rounded-lg shadow">
         <div className="overflow-x-auto hidden md:block">
-          <table className="table-auto w-full text-left text-sm border border-gray-300 dark:border-gray-700 rounded">
-            <thead className="bg-gray-200 dark:bg-gray-700">
+          <table className="table-auto w-full text-left text-sm border border-gray-700 rounded">
+            <thead className="bg-gray-700">
               <tr>
-                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Nombre</th>
-                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Teléfono</th>
-                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Email</th>
-                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">Productos</th>
-                <th className="p-2 border-b border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-center">Acciones</th>
+                <th className="p-2 border-b border-gray-600 text-gray-100">Nombre</th>
+                <th className="p-2 border-b border-gray-600 text-gray-100">Teléfono</th>
+                <th className="p-2 border-b border-gray-600 text-gray-100">Email</th>
+                <th className="p-2 border-b border-gray-600 text-gray-100">Productos</th>
+                <th className="p-2 border-b border-gray-600 text-gray-100 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
             {suppliers.length === 0 ? (
               <tr>
-                <td colSpan={4} className="p-4 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={4} className="p-4 text-center text-gray-400">
                   No hay proveedores registrados
                 </td>
               </tr>
             ) : (
               suppliers.map(s => (
-                <tr key={s.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
-                  <td className="p-2 text-gray-900 dark:text-gray-100 break-words">
+                <tr key={s.id} className="border-b border-gray-700 hover:bg-gray-700">
+                  <td className="p-2 text-gray-100 break-words">
                     <div className="flex items-center gap-2">
-                      <Users size={20} className="text-gray-500 dark:text-gray-400" aria-hidden="true" />
+                      <Users size={20} className="text-gray-400" aria-hidden="true" />
                       {s.name}
                     </div>
                   </td>
-                  <td className="p-2 text-gray-900 dark:text-gray-100 break-words">
+                  <td className="p-2 text-gray-100 break-words">
                     {s.phone ? (
                       <div className="flex items-center gap-2">
                         <a href={`tel:${s.phone}`} className="text-blue-600 hover:underline">
@@ -77,28 +77,28 @@ export function SupplierSection({
                       </div>
                     ) : 'N/A'}
                   </td>
-                  <td className="p-2 text-gray-900 dark:text-gray-100 break-words">
+                  <td className="p-2 text-gray-100 break-words">
                     {s.email ? (
                       <a href={`mailto:${s.email}`} className="text-blue-600 hover:underline">
                         {s.email}
                       </a>
                     ) : 'N/A'}
                   </td>
-                  <td className="p-2 text-gray-900 dark:text-gray-100 break-words">
+                  <td className="p-2 text-gray-100 break-words">
                     {(s.Product || []).length} producto{(s.Product || []).length !== 1 ? 's' : ''}
                   </td>
-                  <td className="p-2 text-gray-900 dark:text-gray-100 text-center break-words">
+                  <td className="p-2 text-gray-100 text-center break-words">
                     <div className="flex gap-2">
                       <button
                         onClick={() => onEditSupplier(s)}
-                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                        className="text-blue-400 hover:text-blue-200"
                         aria-label="Editar proveedor"
                       >
                         <Edit size={20} />
                       </button>
                       <button
                         onClick={() => onDeleteSupplier(s.id)}
-                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                        className="text-red-400 hover:text-red-200"
                         aria-label="Eliminar proveedor"
                       >
                         <Trash2 size={20} />
@@ -115,17 +115,17 @@ export function SupplierSection({
         {/* Mobile View (Cards) */}
         <div className="md:hidden space-y-4 p-4">
           {suppliers.length === 0 ? (
-            <p className="p-4 text-center text-gray-500 dark:text-gray-400">
+            <p className="p-4 text-center text-gray-400">
               No hay proveedores registrados
             </p>
           ) : (
             suppliers.map(s => (
-              <div key={s.id} className="bg-white dark:bg-gray-700 rounded-lg shadow p-4 space-y-2 border border-gray-200 dark:border-gray-600">
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                  <Users size={20} className="text-gray-500 dark:text-gray-400" aria-hidden="true" />
+              <div key={s.id} className="bg-gray-700 rounded-lg shadow p-4 space-y-2 border border-gray-600">
+                <h3 className="font-semibold text-gray-100 flex items-center gap-2">
+                  <Users size={20} className="text-gray-400" aria-hidden="true" />
                   {s.name}
                 </h3>
-                <div className="text-gray-900 dark:text-gray-100"><span className="font-medium">Teléfono:</span> {s.phone ? (
+                <div className="text-gray-100"><span className="font-medium">Teléfono:</span> {s.phone ? (
                   <div className="inline-flex items-center gap-2">
                     <a href={`tel:${s.phone}`} className="text-blue-600 hover:underline">
                       {s.phone}
@@ -141,24 +141,24 @@ export function SupplierSection({
                     </a>
                   </div>
                 ) : 'N/A'}</div>
-                <div className="text-gray-900 dark:text-gray-100"><span className="font-medium">Email:</span> {s.email ? (
+                <div className="text-gray-100"><span className="font-medium">Email:</span> {s.email ? (
                   <a href={`mailto:${s.email}`} className="text-blue-600 hover:underline">
                     {s.email}
                   </a>
                 ) : 'N/A'}</div>
-                <p className="text-gray-900 dark:text-gray-100"><span className="font-medium">Productos:</span> {(s.Product || []).length} producto{(s.Product || []).length !== 1 ? 's' : ''}</p>
+                <p className="text-gray-100"><span className="font-medium">Productos:</span> {(s.Product || []).length} producto{(s.Product || []).length !== 1 ? 's' : ''}</p>
                 
-                <div className="flex justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                <div className="flex justify-end gap-2 pt-2 border-t border-gray-600">
                   <button
                     onClick={() => onEditSupplier(s)}
-                    className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                    className="p-2 text-blue-400 hover:text-blue-200"
                     aria-label="Editar proveedor"
                   >
                     <Edit size={20} />
                   </button>
                   <button
                     onClick={() => onDeleteSupplier(s.id)}
-                    className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+                    className="p-2 text-red-400 hover:text-red-200"
                     aria-label="Eliminar proveedor"
                   >
                     <Trash2 size={20} />

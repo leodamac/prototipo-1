@@ -32,13 +32,13 @@ function ManualChallengeComponent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center dark:bg-gray-900 p-4">
-      <div className="max-w-md flex flex-col items-center justify-center dark:bg-gray-800 rounded-2xl shadow-xl">
-        <div className='flex flex-row items-center bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-8 text-center'>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-4">
+      <div className="max-w-md flex flex-col items-center justify-center bg-gray-800 rounded-2xl shadow-xl">
+        <div className='flex flex-row items-center bg-gray-800 rounded-2xl shadow-xl p-8 space-y-8 text-center'>
         <div className="w-full h-full max-w-md mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 dark:text-white">Modo Manual</h1>
-        <p className="text-gray-600 dark:text-gray-400">Estás realizando el inventario con cuaderno y lápiz. El tiempo corre.</p>
-        <div className="text-6xl font-mono font-bold text-blue-600 dark:text-blue-400 bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+        <h1 className="text-4xl font-bold text-white">Modo Manual</h1>
+        <p className="text-gray-400">Estás realizando el inventario con cuaderno y lápiz. El tiempo corre.</p>
+        <div className="text-6xl font-mono font-bold text-blue-400 bg-gray-700 rounded-lg p-4">
           {formatTime(time)}
         </div>
         

@@ -72,10 +72,10 @@ export function AddProductModal({
         <p className="text-green-500 text-sm text-center mb-4">{addProductSuccess}</p>
       )}
 
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
+      <div className="p-4 border-t border-gray-700 flex justify-end gap-2">
         <button
           onClick={handleCloseModal}
-          className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="px-4 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700"
         >
           Cancelar
         </button>

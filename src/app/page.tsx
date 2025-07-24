@@ -500,20 +500,20 @@ export default function InventoryManager() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow sticky top-0 z-50">
+    <div className="min-h-screen flex flex-col bg-gray-900">
+      <header className="bg-gray-800 shadow sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo y título */}
-            <h1 className="text-xl font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400">
-              <Package size={24} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
+            <h1 className="text-xl font-bold flex items-center gap-2 text-blue-400">
+              <Package size={24} className="text-blue-400" aria-hidden="true" />
               FreshCode
             </h1>
 
@@ -521,7 +521,7 @@ export default function InventoryManager() {
             {!showMainMenu && (
               <button
                 onClick={() => setShowMainMenu(true)}
-                className="px-3 py-1 rounded transition-colors text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700"
+                className="px-3 py-1 rounded transition-colors text-blue-400 hover:bg-gray-700"
               >
                 Volver al Menú
               </button>
@@ -533,7 +533,7 @@ export default function InventoryManager() {
               {!showMainMenu && (
                 <button 
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="md:hidden p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                  className="md:hidden p-2 rounded hover:bg-gray-700 text-gray-300"
                   aria-label="Menú principal">
                   <Menu size={24} aria-hidden="true" />
                 </button>
@@ -546,11 +546,11 @@ export default function InventoryManager() {
                 <div className="relative">
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                    className="p-2 rounded hover:bg-gray-700 text-gray-300"
                     aria-label="Mostrar notificaciones">
                     <Bell size={20} aria-hidden="true" />
                     {notificacionesNoLeidas > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-600 dark:bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
                         {notificacionesNoLeidas}
                       </span>
                     )}
@@ -562,44 +562,44 @@ export default function InventoryManager() {
 
           {/* Navegación Desktop (visible solo si no estamos en el menú principal) */}
           {!showMainMenu && (
-            <nav className="hidden md:flex items-center gap-2 mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <nav className="hidden md:flex items-center gap-2 mt-4 border-t border-gray-700 pt-4">
               <button onClick={() => setActiveTab('dashboard')} 
                 className={`px-3 py-1 rounded transition-colors ${
                   activeTab === 'dashboard' 
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-blue-400 hover:bg-gray-700'
                 }`}>
                 Panel
               </button>
               <button onClick={() => setActiveTab('products')} 
                 className={`px-3 py-1 rounded transition-colors ${
                   activeTab === 'products' 
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-blue-400 hover:bg-gray-700'
                 }`}>
                 Productos
               </button>
               <button onClick={() => setActiveTab('sales')} 
                 className={`px-3 py-1 rounded transition-colors ${
                   activeTab === 'sales' 
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-blue-400 hover:bg-gray-700'
                 }`}>
                 Ventas
               </button>
               <button onClick={() => setActiveTab('suppliers')} 
                 className={`px-3 py-1 rounded transition-colors ${
                   activeTab === 'suppliers' 
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-blue-400 hover:bg-gray-700'
                 }`}>
                 Proveedores
               </button>
               <button onClick={() => setActiveTab('settings')} 
                 className={`px-3 py-1 rounded transition-colors ${
                   activeTab === 'settings' 
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-blue-400 hover:bg-gray-700'
                 }`}>
                 Configuración
               </button>
@@ -608,46 +608,46 @@ export default function InventoryManager() {
 
           {/* Menú móvil (visible solo si no estamos en el menú principal) */}
           {isMobileMenuOpen && !showMainMenu && (
-            <nav className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+            <nav className="md:hidden py-4 border-t border-gray-700 mt-4">
               <div className="flex flex-col gap-2">
                 {/* Enlaces de navegación */}
                 <button onClick={() => {setActiveTab('dashboard'); setIsMobileMenuOpen(false);}} 
                   className={`px-3 py-2 rounded transition-colors ${
                     activeTab === 'dashboard' 
-                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-blue-400 hover:bg-gray-700'
                   }`}>
                   Panel
                 </button>
                 <button onClick={() => {setActiveTab('products'); setIsMobileMenuOpen(false);}} 
                   className={`px-3 py-2 rounded transition-colors ${
                     activeTab === 'products' 
-                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-blue-400 hover:bg-gray-700'
                   }`}>
                   Productos
                 </button>
                 <button onClick={() => {setActiveTab('sales'); setIsMobileMenuOpen(false);}} 
                   className={`px-3 py-2 rounded transition-colors ${
                     activeTab === 'sales' 
-                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-blue-400 hover:bg-gray-700'
                   }`}>
                   Ventas
                 </button>
                 <button onClick={() => {setActiveTab('suppliers'); setIsMobileMenuOpen(false);}} 
                   className={`px-3 py-2 rounded transition-colors ${
                     activeTab === 'suppliers' 
-                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-blue-400 hover:bg-gray-700'
                   }`}>
                   Proveedores
                 </button>
                 <button onClick={() => {setActiveTab('settings'); setIsMobileMenuOpen(false);}} 
                   className={`px-3 py-2 rounded transition-colors ${
                     activeTab === 'settings' 
-                      ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700'
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-blue-400 hover:bg-gray-700'
                   }`}>
                   Configuración
                 </button>
@@ -666,7 +666,7 @@ export default function InventoryManager() {
             {/* Tarjeta de Productos */}
             <button
               onClick={() => { setActiveTab('products'); setShowMainMenu(false); }}
-              className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700"
+              className="flex flex-col items-center justify-center p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-blue-600 hover:bg-gray-700"
             >
 
               <Package size={48} className="lg:text-7xl" />
@@ -676,7 +676,7 @@ export default function InventoryManager() {
             {/* Tarjeta de Ventas */}
             <button
               onClick={() => { setActiveTab('sales'); setShowMainMenu(false); }}
-              className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700"
+              className="flex flex-col items-center justify-center p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-green-600 hover:bg-gray-700"
             >
 
               <ShoppingCart size={48} className="lg:text-7xl" />
@@ -686,7 +686,7 @@ export default function InventoryManager() {
             {/* Tarjeta de Datos Estadísticos (Dashboard) */}
             <button
               onClick={() => { setActiveTab('dashboard'); setShowMainMenu(false); }}
-              className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700"
+              className="flex flex-col items-center justify-center p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-purple-600 hover:bg-gray-700"
             >
 
               <Bell size={48} className="lg:text-7xl" />
@@ -696,13 +696,13 @@ export default function InventoryManager() {
             {/* Tarjeta de Contactar Proveedores */}
             <button
               onClick={() => { setActiveTab('suppliers'); setShowMainMenu(false); }}
-              className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-gray-700"
+              className="flex flex-col items-center justify-center p-6 bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-full text-orange-600 hover:bg-gray-700"
             >
               <Users size={48} className="lg:text-7xl" />
               <span className="mt-3 text-xl font-semibold text-center">Contactar Proveedores</span>
             </button>
           </div>
-            <Link href="/challenge" className="mt-8 text-lg font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+            <Link href="/challenge" className="mt-8 text-lg font-semibold text-blue-600 hover:underline">
               Ir al Desafío de la Feria
             </Link>
           </div>
@@ -784,7 +784,7 @@ export default function InventoryManager() {
             <div className="flex flex-col items-center gap-4 mb-2 transition-all duration-300">
               {/* Opción Escanear con Cámara */}
               <div className="flex items-center gap-2">
-                <span className="bg-white dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 px-3 py-1 rounded-md shadow-lg">Escanear con Cámara</span>
+                <span className="bg-gray-700 text-sm text-gray-200 px-3 py-1 rounded-md shadow-lg">Escanear con Cámara</span>
                 <button 
                   onClick={() => {
                     setShowCameraScanModal(true);
@@ -798,7 +798,7 @@ export default function InventoryManager() {
 
               {/* Opción Escanear desde Imagen */}
               <div className="flex items-center gap-2">
-                <span className="bg-white dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 px-3 py-1 rounded-md shadow-lg">Escanear desde Imagen</span>
+                <span className="bg-gray-700 text-sm text-gray-200 px-3 py-1 rounded-md shadow-lg">Escanear desde Imagen</span>
                 <button 
                   onClick={() => {
                     manejarEscaneo();
@@ -825,11 +825,11 @@ export default function InventoryManager() {
         <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-4 md:hidden">
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative ${notificacionesNoLeidas > 0 ? 'bg-red-200 dark:bg-red-900/50 text-red-700 dark:text-red-300' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+            className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative ${notificacionesNoLeidas > 0 ? 'bg-red-900/50 text-red-300' : 'bg-gray-800 text-gray-300'}`}
             aria-label="Ver notificaciones">
-                        <Bell size={24} aria-hidden="true" className={`${(notificacionesNoLeidas>0)?"text-amber-400":"text-gray-600 dark:text-gray-300"}`} />
+                        <Bell size={24} aria-hidden="true" className={`${(notificacionesNoLeidas>0)?"text-amber-400":"text-gray-300"}`} />
             {notificacionesNoLeidas > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 dark:bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+              <span className="absolute -top-1 -right-1bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
                 {notificacionesNoLeidas}
               </span>
             )}
@@ -940,9 +940,9 @@ export default function InventoryManager() {
       )}
       </main>
 
-      <footer className="mt-auto bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <footer className="mt-auto bg-gray-800 border-t border-gray-700">
         <div className="max-w-7xl mx-auto px-4 py-4 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-400">
             © {new Date().getFullYear()} Gestor de Inventario - Prototipo
           </p>
         </div>

@@ -148,7 +148,7 @@ export function CameraScanModal({
     <Modal isOpen={showModal} onClose={handleClose} title="Escanear con Cámara">
       <div id="qr-camera-reader" style={{ width: "100%", display: isScanning ? 'block' : 'none', transform: isFrontCamera ? 'scaleX(-1)' : 'none' }}></div>
 
-      {cameraStatus === 'loading' && <p className="text-center text-gray-500 dark:text-gray-400">Cargando cámaras...</p>}
+      {cameraStatus === 'loading' && <p className="text-center text-gray-400">Cargando cámaras...</p>}
       {cameraStatus === 'no-camera' && <p className="text-center text-red-500">No se encontraron cámaras.</p>}
       {cameraStatus === 'error' && <p className="text-center text-red-500">Error al acceder a la cámara. Asegúrate de haber otorgado los permisos.</p>}
 
@@ -156,7 +156,7 @@ export function CameraScanModal({
 
       {isScanning && availableCameras.length > 1 && (
         <div className="mt-4">
-          <label htmlFor="camera-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cámara Actual: {availableCameras.find(c => c.id === selectedCameraId)?.label || 'N/A'}</label>
+          <label htmlFor="camera-select" className="block text-sm font-medium text-gray-300">Cámara Actual: {availableCameras.find(c => c.id === selectedCameraId)?.label || 'N/A'}</label>
           <button
             onClick={async () => {
               await stopHtml5Qrcode(); // Stop current scanner before changing camera
@@ -170,7 +170,7 @@ export function CameraScanModal({
               setScanMessage(null); // Clear messages on camera change
               setScannedCode(null); // Clear scanned code on camera change
             }}
-            className="mt-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="mt-1 px-4 py-2 bg-gray-700 text-gray-200 rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Cambiar Cámara
           </button>
@@ -180,7 +180,7 @@ export function CameraScanModal({
       {!isScanning && cameraStatus !== 'loading' && cameraStatus !== 'error' && cameraStatus !== 'no-camera' && (
         <div className="text-center p-4">
           {scanMessage && <p className="text-red-500 mb-2">{scanMessage}</p>}
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Listo para escanear. Asegúrate de que el código esté visible.</p>
+          <p className="text-gray-400 mb-4">Listo para escanear. Asegúrate de que el código esté visible.</p>
           {scannedCode && (
             <button
               onClick={() => {

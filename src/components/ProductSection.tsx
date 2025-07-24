@@ -93,7 +93,7 @@ export function ProductSection({
     <section className="space-y-6">
       {/* Cabecera y Controles */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-100">
           <Package size={28} />
           Gestión de Productos
         </h2>
@@ -127,7 +127,7 @@ export function ProductSection({
       )}
 
       {/* Filtros y Búsqueda */}
-      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-4">
+      <div className="p-4 bg-gray-800 rounded-lg shadow space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Búsqueda */}
           <div className="relative">
@@ -139,14 +139,14 @@ export function ProductSection({
               placeholder="Buscar por nombre, QR o código de barras..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-100 focus:ring-2 focus:ring-blue-500"
             />
           </div>
           {/* Filtro por Tipo */}
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-100 focus:ring-2 focus:ring-blue-500"
             title="Filtrar por tipo de producto"
           >
             <option value="all">Todos los Tipos</option>
@@ -158,7 +158,7 @@ export function ProductSection({
           <select
             value={filterSupplier}
             onChange={(e) => setFilterSupplier(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-100 focus:ring-2 focus:ring-blue-500"
             title="Filtrar por proveedor"
           >
             <option value="all">Todos los Proveedores</option>
@@ -169,21 +169,21 @@ export function ProductSection({
         </div>
         {/* Controles de Vista 
         <div className="flex items-center justify-end gap-2">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Vista:</span>
-            <button onClick={() => setCompactView(false)} className={`p-2 rounded-md ${!compactView ? 'bg-blue-100 dark:bg-blue-900 text-blue-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`} aria-label="Vista de lista">
+            <span className="text-sm text-gray-400">Vista:</span>
+            <button onClick={() => setCompactView(false)} className={`p-2 rounded-md ${!compactView ? 'bg-blue-900 text-blue-600' : 'text-gray-500 hover:bg-gray-700'}`} aria-label="Vista de lista">
                 <List size={20} />
             </button>
-            <button onClick={() => setCompactView(true)} className={`p-2 rounded-md ${compactView ? 'bg-blue-100 dark:bg-blue-900 text-blue-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}`} aria-label="Vista de cuadrícula">
+            <button onClick={() => setCompactView(true)} className={`p-2 rounded-md ${compactView ? 'bg-blue-900 text-blue-600' : 'text-gray-500 hover:bg-gray-700'}`} aria-label="Vista de cuadrícula">
                 <LayoutGrid size={20} />
             </button>
         </div>*/}
       </div>
 
       {/* Tabla de Productos */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="bg-gray-800 rounded-lg shadow">
         <div className="overflow-x-auto hidden md:block">
-          <table className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <table className="table-auto w-full text-sm text-left text-gray-400">
+            <thead className="text-xs text-gray-400 uppercase bg-gray-700">
               <tr>
                 <th scope="col" className="px-6 py-3">Producto</th>
                 {!compactView && <th scope="col" className="px-6 py-3">Tipo</th>}
@@ -197,7 +197,7 @@ export function ProductSection({
             <tbody>
             {productosFiltrados.length === 0 ? (
               <tr>
-                <td colSpan={compactView ? 5 : 7} className="py-8 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={compactView ? 5 : 7} className="py-8 text-center text-gray-400">
                   No se encontraron productos que coincidan con los filtros.
                 </td>
               </tr>
@@ -207,45 +207,45 @@ export function ProductSection({
                 const caducidadColor = 
                   diasParaCaducar < 0 ? 'text-red-500 font-bold' :
                   diasParaCaducar <= 3 ? 'text-yellow-500 font-semibold' :
-                  'text-gray-900 dark:text-gray-100';
+                  'text-gray-100';
 
                 return (
-                  <tr key={p.id} className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                  <tr key={p.id} className="bg-gray-800 border-b border-gray-700 hover:bg-gray-700">
+                    <th scope="row" className="px-6 py-4 font-medium text-white">
                       <div className="flex items-center gap-3">
                         {isValidUrl(p.image) ? (
                           <Image src={p.image!} alt={p.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
                             <Package size={20} className="text-gray-500" />
                           </div>
                         )}
                         {p.name}
                       </div>
                     </th>
-                    {!compactView && <td className="px-6 py-4 break-words">{p.type}</td>}
-                    <td className="px-6 py-4 break-words">{p.stock} / {p.maxStock || 100}</td>
-                    <td className="px-6 py-4 break-words">${p.price.toFixed(2)}</td>
-                    {!compactView && <td className="px-6 py-4 break-words">{getSupplierName(p.supplierId)}</td>}
+                    {!compactView && <td className="px-6 py-4 break-words text-gray-100">{p.type}</td>}
+                    <td className="px-6 py-4 break-words text-gray-100">{p.stock} / {p.maxStock || 100}</td>
+                    <td className="px-6 py-4 break-words text-gray-100">${p.price.toFixed(2)}</td>
+                    {!compactView && <td className="px-6 py-4 break-words text-gray-100">{getSupplierName(p.supplierId)}</td>}
                     <td className={`px-6 py-4 break-words ${caducidadColor}`}>
                       {diasParaCaducar < 0 ? 'Caducado' : `${diasParaCaducar} días`}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {/* Menú de acciones para pantallas pequeñas */}
                       <div className="md:hidden relative">
-                        <button onClick={() => toggleMenu(p.id)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Opciones del producto">
+                        <button onClick={() => toggleMenu(p.id)} className="p-2 rounded-full hover:bg-gray-700" aria-label="Opciones del producto">
                           <MoreVertical size={20} />
                         </button>
                         {openMenuId === p.id && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-                            <ul className="py-1 text-sm text-gray-700 dark:text-gray-200">
+                          <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg z-10 border border-gray-700">
+                            <ul className="py-1 text-sm text-gray-200">
                               <li>
                                 <button
                                   onClick={() => {
                                     onManageStock(p);
                                     toggleMenu(p.id);
                                   }}
-                                  className="w-full text-left flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                  className="w-full text-left flex items-center gap-2 px-4 py-2 hover:bg-gray-600"
                                 >
                                   <ShoppingCart size={16} /> Gestionar/Vender
                                 </button>
@@ -253,7 +253,7 @@ export function ProductSection({
                               <li>
                                 <button
                                   onClick={() => { onDeleteProduct(p.id); toggleMenu(p.id); }}
-                                  className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/50"
+                                  className="w-full text-left flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-900/50"
                                 >
                                   <Trash2 size={16} /> Eliminar
                                 </button>
@@ -267,14 +267,14 @@ export function ProductSection({
                       <div className="hidden md:flex items-center justify-center gap-2">
                         <button 
                           onClick={() => onManageStock(p)}
-                          className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="p-2 text-blue-400 hover:text-blue-300"
                           aria-label="Gestionar o vender producto"
                         >
                           <ShoppingCart size={18} />
                         </button>
                         <button 
                           onClick={() => onDeleteProduct(p.id)} 
-                          className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          className="p-2 text-red-400 hover:text-red-300"
                           aria-label="Eliminar producto"
                         >
                           <Trash2 size={18} />
@@ -292,7 +292,7 @@ export function ProductSection({
         {/* Mobile View (Cards) */}
         <div className="md:hidden space-y-4 p-4">
           {productosFiltrados.length === 0 ? (
-            <p className="text-center text-gray-500 dark:text-gray-400">
+            <p className="text-center text-gray-400">
               No se encontraron productos que coincidan con los filtros.
             </p>
           ) : (
@@ -301,37 +301,37 @@ export function ProductSection({
               const caducidadColor =
                 diasParaCaducar < 0 ? 'text-red-500 font-bold' :
                 diasParaCaducar <= 3 ? 'text-yellow-500 font-semibold' :
-                'text-gray-900 dark:text-gray-100';
+                'text-gray-100';
 
               return (
-                <div key={p.id} className="bg-white dark:bg-gray-700 rounded-lg shadow p-4 space-y-2 border border-gray-200 dark:border-gray-600">
+                <div key={p.id} className="bg-gray-700 rounded-lg shadow p-4 space-y-2 border border-gray-600">
                   <div className="flex items-center gap-3">
                     {isValidUrl(p.image) ? (
                       <Image src={p.image!} alt={p.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
                         <Package size={20} className="text-gray-500" />
                       </div>
                     )}
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{p.name}</h3>
+                    <h3 className="font-semibold text-gray-100">{p.name}</h3>
                   </div>
-                  <p className="text-gray-900 dark:text-gray-100"><span className="font-medium">Tipo:</span> {p.type}</p>
-                  <p className="text-gray-900 dark:text-gray-100"><span className="font-medium">Stock:</span> {p.stock} / {p.maxStock || 100}</p>
-                  <p className="text-gray-900 dark:text-gray-100"><span className="font-medium">Precio:</span> ${p.price.toFixed(2)}</p>
-                  <p className="text-gray-900 dark:text-gray-100"><span className="font-medium">Proveedor:</span> {getSupplierName(p.supplierId)}</p>
-                  <p className={`text-gray-900 dark:text-gray-100 ${caducidadColor}`}><span className="font-medium">Caducidad:</span> {diasParaCaducar < 0 ? 'Caducado' : `${diasParaCaducar} días`}</p>
+                  <p className="text-gray-100"><span className="font-medium">Tipo:</span> {p.type}</p>
+                  <p className="text-gray-100"><span className="font-medium">Stock:</span> {p.stock} / {p.maxStock || 100}</p>
+                  <p className="text-gray-100"><span className="font-medium">Precio:</span> ${p.price.toFixed(2)}</p>
+                  <p className="text-gray-100"><span className="font-medium">Proveedor:</span> {getSupplierName(p.supplierId)}</p>
+                  <p className={`text-gray-100 ${caducidadColor}`}><span className="font-medium">Caducidad:</span> {diasParaCaducar < 0 ? 'Caducado' : `${diasParaCaducar} días`}</p>
                   
-                  <div className="flex justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                  <div className="flex justify-end gap-2 pt-2 border-t border-gray-600">
                     <button 
                       onClick={() => onManageStock(p)}
-                      className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                      className="p-2 text-blue-400 hover:text-blue-300"
                       aria-label="Gestionar o vender producto"
                     >
                       <ShoppingCart size={20} />
                     </button>
                     <button 
                       onClick={() => onDeleteProduct(p.id)} 
-                      className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                      className="p-2 text-red-400 hover:text-red-300"
                       aria-label="Eliminar producto"
                     >
                       <Trash2 size={20} />

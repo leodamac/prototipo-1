@@ -76,11 +76,11 @@ export function ScanProductModal({
       {isScanning ? (
         <div className="flex flex-col items-center justify-center">
           {selectedImage ? (
-            <div className="w-full min-h-[50vh] bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 rounded-lg mb-4">
+            <div className="w-full min-h-[50vh] bg-gray-700 flex items-center justify-center text-gray-400 rounded-lg mb-4">
               <Image src={URL.createObjectURL(selectedImage)} alt="Selected for scan" width={500} height={500} className="max-w-full max-h-full object-contain" />
             </div>
           ) : (
-            <div className="w-full min-h-[50vh] bg-gray-200 dark:bg-gray-700 flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 rounded-lg mb-4 p-4">
+            <div className="w-full min-h-[50vh] bg-gray-700 flex flex-col items-center justify-center text-center text-gray-400 rounded-lg mb-4 p-4">
               <p>Haga clic en el botón de abajo para seleccionar una imagen y escanear un código de barras o QR.</p>
             </div>
           )}
@@ -120,7 +120,7 @@ export function ScanProductModal({
         </div>
       ) : (
         <div className="text-center p-4">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Escanee un código QR o de barras para ver los detalles del producto.</p>
+          <p className="text-gray-400 mb-4">Escanee un código QR o de barras para ver los detalles del producto.</p>
           <button
             onClick={() => setIsScanning(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors"

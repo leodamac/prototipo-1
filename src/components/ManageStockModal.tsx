@@ -128,14 +128,14 @@ const ManageStockModal: React.FC<ManageStockModalProps> = ({ isOpen, onClose, pr
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Gestionar Stock del Producto">
       {product ? (
-        <div className="p-4 space-y-6 bg-white dark:bg-gray-800 rounded-lg">
+        <div className="p-4 space-y-6 bg-gray-800 rounded-lg">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">{product.name}</h3>
-            <p className="text-gray-600 dark:text-gray-300">Stock Actual: {product.stock} / {product.maxStock || 'N/A'}</p>
+            <h3 className="text-2xl font-bold text-gray-100 mb-2">{product.name}</h3>
+            <p className="text-gray-300">Stock Actual: {product.stock} / {product.maxStock || 'N/A'}</p>
           </div>
 
           <div className="flex flex-col items-center space-y-4">
-            <label htmlFor="quantity-input" className="text-lg font-medium text-gray-800 dark:text-gray-200">Cantidad a Modificar</label>
+            <label htmlFor="quantity-input" className="text-lg font-medium text-gray-200">Cantidad a Modificar</label>
             <div className="flex items-center space-x-4">
               <button
                 onClick={decrementQuantity}
@@ -150,7 +150,7 @@ const ManageStockModal: React.FC<ManageStockModalProps> = ({ isOpen, onClose, pr
                 type="number"
                 value={quantity}
                 onChange={handleQuantityChange}
-                className="w-32 text-center text-3xl font-bold border-2 border-gray-300 dark:border-gray-600 rounded-lg py-2 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-32 text-center text-3xl font-bold border-2 border-gray-600 rounded-lg py-2 bg-gray-700 text-gray-100 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 min="1"
                 disabled={isSubmitting}
               />
@@ -196,7 +196,7 @@ const ManageStockModal: React.FC<ManageStockModalProps> = ({ isOpen, onClose, pr
           </div>
         </div>
       ) : (
-        <p className="text-gray-700 dark:text-gray-300 text-center p-4">No se ha seleccionado ningún producto.</p>
+        <p className="text-gray-300 text-center p-4">No se ha seleccionado ningún producto.</p>
       )}
     </Modal>
   );
