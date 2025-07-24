@@ -4,6 +4,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FinishChallengeModal } from '@/components/FinishChallengeModal';
+import Image from 'next/image';
 
 function ManualChallengeComponent() {
   const [time, setTime] = useState(0);
@@ -31,22 +32,28 @@ function ManualChallengeComponent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-8 text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center dark:bg-gray-900 p-4">
+      <div className="max-w-md flex flex-col items-center justify-center dark:bg-gray-800 rounded-2xl shadow-xl">
+        <div className='flex flex-row items-center bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-8 text-center'>
+        <div className="w-full h-full max-w-md mx-auto">
         <h1 className="text-4xl font-bold text-gray-800 dark:text-white">Modo Manual</h1>
         <p className="text-gray-600 dark:text-gray-400">Estás realizando el inventario con cuaderno y lápiz. El tiempo corre.</p>
-        
         <div className="text-6xl font-mono font-bold text-blue-600 dark:text-blue-400 bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
           {formatTime(time)}
         </div>
-
+        
+        </div>
+        <div className='w-full max-w-md mx-auto'>
+        <Image src="/images/tortuga.png" alt="Tortuga" width={250} height={250} className="scale-x-[-1]" />
+        </div>
+        </div>
         <button
           onClick={handleFinish}
-          className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          className="w-full py-3 px-4 border border-transparent rounded-b-2xl shadow-sm text-lg font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
           Finalizar Desafío
         </button>
-      </div>
+      </div>            
 
       {showFinishModal && sessionId && (
         <FinishChallengeModal

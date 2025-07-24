@@ -8,6 +8,10 @@ import { ChallengeSession } from '@/types';
 
 export default function ChallengePage() {
   const [participantName, setParticipantName] = useState('');
+  const [participantLastName, setParticipantLastName] = useState('');
+  const [participantRole, setParticipantRole] = useState('');
+  const [participantEmail, setParticipantEmail] = useState('');
+  const [participantPhone, setParticipantPhone] = useState('');
   const [mode, setMode] = useState<'manual' | 'app'>('app');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -18,11 +22,25 @@ export default function ChallengePage() {
       return;
     }
 
+    if( !participantLastName.trim()) {
+      setError('Por favor, ingresa tu apellido.');
+      return;
+    }
+
+    if (!participantRole.trim()) {
+      setError('Por favor, ingresa tu rol en ESPOL.');
+      return;
+    }
+    if (!participantEmail.trim() || !/\S+@\S+\.\S+/.test(participantEmail) || participantPhone.trim() === '') {
+      setError('Por favor, ingresa al menos tu correo electrónico o telefono.');
+      return;
+    }
+
     try {
       const res = await fetch('/api/challenge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ participantName, mode }),
+        body: JSON.stringify({ participantName, participantLastName, participantRole, participantEmail, participantPhone, mode }),
       });
 
       if (!res.ok) {
@@ -48,7 +66,15 @@ export default function ChallengePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
+
+    <div className="flex flex-row items-center">
+            <div className='flex flex-col items-center justify-center m-4'>
+      <Image src="/images/logo_espol_antiguo.png" alt="Logo antiguo" width={200} height={150} className="opacity-75 brightness-200" />
+          <p className='text-white '>1985</p>
+      </div>
+
+
       <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6">
         
         <div className="flex justify-center">
@@ -56,30 +82,77 @@ export default function ChallengePage() {
         </div>
 
         <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white">Desafío Prototipo en Acción</h1>
+        <div className='flex flex-row items-center justify-center space-x-4'>
+            <div>
+              <label htmlFor="participantName" className="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+              <input
+                id="participantName"
+                type="text"
+                value={participantName}
+                onChange={(e) => setParticipantName(e.target.value)}
+                className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+                placeholder="Tu nombre"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="participantLasName" className="text-sm font-medium text-gray-700 dark:text-gray-300">Apellido</label>
+              <input
+                id="participantLastName"
+                type="text"
+                value={participantLastName}
+                onChange={(e) => setParticipantLastName(e.target.value)}
+                className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+                placeholder="Tu apellido"
+              />
+            </div>
+        </div>
 
         <div>
-          <label htmlFor="participantName" className="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre del Participante</label>
+          <label htmlFor="participantRole" className="text-sm font-medium text-gray-700 dark:text-gray-300">Rol en espol</label>
           <input
-            id="participantName"
+            id="participantRole"
             type="text"
-            value={participantName}
-            onChange={(e) => setParticipantName(e.target.value)}
+            value={participantRole}
+            onChange={(e) => setParticipantRole(e.target.value)}
             className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
-            placeholder="Tu nombre"
+            placeholder="Tu rol en la ESPOL (estudiante, docente, etc.)"
           />
         </div>
 
+        <div>
+          <label htmlFor="participantEmail" className="text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
+          <input
+            id="participantEmail"
+            type="email"
+            value={participantEmail}
+            onChange={(e) => setParticipantEmail(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+            placeholder="Tu correo electrónico"
+          />
+        </div>
+        <div>
+          <label htmlFor="participantPhone" className="text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+          <input
+            id="participantPhone"
+            type="tel"
+            value={participantPhone}
+            onChange={(e) => setParticipantPhone(e.target.value)}
+            className="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-gray-100"
+            placeholder="Tu número de teléfono"
+          />
+        </div>
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Modo de Desafío</label>
           <div className="mt-2 flex rounded-md shadow-sm">
             <button
               onClick={() => setMode('app')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-l-md transition-colors ${mode === 'app' ? 'bg-blue-600 text-white z-10 ring-2 ring-blue-500' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
+              className={`flex-1 px-4 py-2 text-sm font-medium rounded-l-md transition-colors ${mode === 'app' ? 'bg-blue-600 text-white z-10 ring-2 ring-blue-500' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
               Con la App
             </button>
             <button
               onClick={() => setMode('manual')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-r-md transition-colors ${mode === 'manual' ? 'bg-blue-600 text-white z-10 ring-2 ring-blue-500' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'}`}>
+              className={`flex-1 px-4 py-2 text-sm font-medium rounded-r-md transition-colors ${mode === 'manual' ? 'bg-blue-600 text-white z-10 ring-2 ring-blue-500' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
               Manual (Cuaderno)
             </button>
           </div>
@@ -102,6 +175,14 @@ export default function ChallengePage() {
           Iniciar Desafío
         </button>
       </div>
+      <div className='flex flex-col items-center justify-center ml-7'>
+      <Image src="/images/espol.png" alt="Llama" width={180} height={160} className="opacity-75 invert" />
+          <p className='text-white pt-2'>2025</p>
+      </div>
+      </div>
+
+      <Image src="/images/llama.png" alt="Llama" width={200} height={150} className="" />
+    
     </div>
   );
 }

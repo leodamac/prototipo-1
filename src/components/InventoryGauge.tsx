@@ -48,7 +48,7 @@ export function InventoryGauge({ currentStock, maxStock, isClient }: InventoryGa
             dataKey="value"
           >
             <Cell key="stock-cell" fill={pathColor} />
-            <Cell key="remaining-cell" fill="#e5e7eb" />
+            <Cell key="remaining-cell" fill="var(--background)" />
             <Label
               value={`${percentage.toFixed(0)}%`}
               position="center"

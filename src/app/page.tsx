@@ -24,36 +24,7 @@ import { ProductScanResult } from '@/components/ProductScanResult';
 import { Modal } from '@/components/common/Modal';
 
 export default function InventoryManager() {
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("darkMode");
-      if (saved !== null) return saved === "true";
-      return false; // Siempre claro por defecto
-    }
-    return false;
-  });
-
-  // Este efecto asegura que la clase dark solo esté si darkMode es true y la persiste
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("darkMode", String(darkMode));
-  }, [darkMode]);
-
-  // Inicializa el modo oscuro basado en localStorage al cargar el componente
-  useEffect(() => {
-    const saved = localStorage.getItem("darkMode");
-    if (saved === "true") {
-      setDarkMode(true);
-      document.documentElement.classList.add("dark");
-    } else {
-      setDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
+  
 
   const [showMainMenu, setShowMainMenu] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -570,13 +541,7 @@ export default function InventoryManager() {
 
               {/* Iconos solo en desktop */}
               <div className="hidden md:flex items-center gap-2">
-                <button 
-                  type='button' 
-                  onClick={() => setDarkMode(!darkMode)} 
-                  className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
-                  aria-label="Alternar modo oscuro">
-                  {darkMode ? <Sun size={20} aria-hidden="true" /> : <Moon size={20} aria-hidden="true" />}
-                </button>
+                
 
                 <div className="relative">
                   <button
@@ -695,11 +660,7 @@ export default function InventoryManager() {
       <main className={`flex-grow p-4 lg:p-6 xl:p-8 max-w-[2000px] mx-auto w-full ${showMainMenu ? 'flex flex-col justify-center items-center' : 'overflow-y-auto'}`}>
         {showMainMenu ? (
           <div className="flex flex-col items-center justify-center gap-6 h-full">
-          {darkMode ? (
-                <Image src="/images/logo_dark.png" alt="Productos Icon Dark" width={512} height={512} className="lg:w-7xl lg:h-7xl" priority />
-              ) : (
-                <Image src="/images/logo_light.png" alt="Productos Icon Light" width={512} height={512} className="lg:w-7xl lg:h-7xl" priority />
-              )}
+          <Image src="/images/logo_dark.png" alt="Productos Icon Dark" width={512} height={512} className="lg:w-7xl lg:h-7xl" priority />
           <div className="grid grid-cols-1 xs:grid-cols-2 gap-6 h-full place-items-center">
               
             {/* Tarjeta de Productos */}
@@ -874,12 +835,7 @@ export default function InventoryManager() {
             )}
           </button>
 
-          <button 
-            onClick={() => setDarkMode(!darkMode)}
-            className="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-            aria-label="Cambiar tema">
-            {darkMode ? <Sun size={24} aria-hidden="true" /> : <Moon size={24} aria-hidden="true" />}
-          </button>
+          
         </div>
 
         {challengeSession && (

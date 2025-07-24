@@ -55,8 +55,8 @@ export function FinishChallengeModal({ isOpen, onClose, sessionId }: FinishChall
       onClick={() => setType('apoyo')}
       className={`px-3 py-2 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
         type === 'apoyo'
-          ? 'bg-blue-500 text-white hover:bg-blue-700'
-          : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+          ? 'bg-blue-600 text-white hover:bg-blue-700'
+          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
       }`}
     >
       Apoyo
@@ -66,8 +66,8 @@ export function FinishChallengeModal({ isOpen, onClose, sessionId }: FinishChall
       onClick={() => setType('retroalimentacion')}
       className={`px-3 py-2 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
         type === 'retroalimentacion'
-          ? 'bg-blue-500 text-white hover:bg-blue-700'
-          : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+          ? 'bg-blue-600 text-white hover:bg-blue-700'
+          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
       }`}
     >
       Retroalimentación
