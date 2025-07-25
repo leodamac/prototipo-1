@@ -54,7 +54,7 @@ export default function ChallengePage() {
       localStorage.setItem('challengeSession', JSON.stringify(session));
 
       if (mode === 'app') {
-        router.push('/'); // Redirect to the main app
+        router.push('/?challenge_mode=true'); // Redirect to the main app
       } else {
         // For manual mode, we stay on a simplified page
         router.push(`/challenge/manual?session_id=${session.id}`);

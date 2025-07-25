@@ -1,12 +1,11 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, Bell, Scan, Moon, Sun, Menu, ShoppingCart, Users, Camera, Image as ImageIcon, X, Link } from 'lucide-react';
+import { Package, Bell, Scan, Menu, ShoppingCart, Users, Camera, Image as ImageIcon, X} from 'lucide-react';
 import Image from 'next/image';
 import { differenceInDays } from 'date-fns';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Product, Sale, Supplier, Notification, DashboardWidget, ChallengeSession } from '../types';
-
 import { AddProductModal } from '../components/AddProductModal';
 import { AddSupplierModal } from '../components/AddSupplierModal';
 import { ScanProductModal } from '../components/ScanProductModal';
@@ -19,14 +18,13 @@ import { SupplierSection } from '../components/SupplierSection';
 import { SettingsSection } from '../components/SettingsSection';
 import ManageStockModal from '../components/ManageStockModal';
 import { FinishChallengeModal } from '@/components/FinishChallengeModal';
-
 import { ProductScanResult } from '@/components/ProductScanResult';
 import { Modal } from '@/components/common/Modal';
+import {  useSearchParams } from 'next/navigation';
+import { se } from 'date-fns/locale';
 
 export default function InventoryManager() {
-  
-
-  const [showMainMenu, setShowMainMenu] = useState(true);
+    const [showMainMenu, setShowMainMenu] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
@@ -75,12 +73,18 @@ export default function InventoryManager() {
   });
 
   const [challengeSession, setChallengeSession] = useState<ChallengeSession | null>(null);
+  const searchParams = useSearchParams();
+
   const [showFinishChallengeModal, setShowFinishChallengeModal] = useState(false);
+  const [isChallengeMode, setIsChallengeMode] = useState(false);
 
   useEffect(() => {
     const savedSession = localStorage.getItem('challengeSession');
     if (savedSession) {
       setChallengeSession(JSON.parse(savedSession));
+      const isChallenge = searchParams.get('challenge_mode');
+      setIsChallengeMode(isChallenge === 'true');
+      console.log('Challenge mode:', isChallengeMode);
     }
   }, []);
 
@@ -173,12 +177,6 @@ export default function InventoryManager() {
       generateNotifications();
     }
   }, [products]);
-
-  
-
-  
-
-  
 
   const [addProductError, setAddProductError] = useState<string | null>(null);
   const [addProductSuccess, setAddProductSuccess] = useState<string | null>(null);
@@ -281,13 +279,6 @@ export default function InventoryManager() {
       setProducts(prev => prev.map(p => (p.id === data.id ? data : p)));
     } catch (error) {
     }
-  };
-
-  const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
-    setNewProduct(product);
-    handleUpdateProduct(product);
-    setShowAddProductModal(false);
   };
 
   const [productDeleteError, setProductDeleteError] = useState<string | null>(null);
@@ -413,9 +404,9 @@ export default function InventoryManager() {
   };
 
   const manejarEscaneo = () => {
-    setScannedProduct(null); // Reset scanned product before opening scanner
+    setScannedProduct(null);
     setShowScanModal(true);
-    setActionQuantity(1); // Reset quantity
+    setActionQuantity(1);
   };
 
   const handleProductScannedAndShowDetails = (product: Product, sourceModal: 'scan' | 'camera') => {
@@ -451,10 +442,6 @@ export default function InventoryManager() {
     expirationDate: undefined,
   });
 
-  
-
-  
-
   const marcarNotificacionesLeidas = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
@@ -472,9 +459,6 @@ export default function InventoryManager() {
 
   const notificationsRef = useRef<HTMLDivElement>(null);
 
-  
-
-  // Efecto para controlar el scroll del body cuando un modal/panel está abierto
   useEffect(() => {
     if (showNotifications || showScanModal || showAddProductModal || showAddSupplierModal || showManageStockModal) {
       document.body.style.overflow = 'hidden';
@@ -826,7 +810,7 @@ export default function InventoryManager() {
           
         </div>
 
-        {challengeSession && (
+        {challengeSession && isChallengeMode && (
 <div className="hover group relative">
   <div className="fixed bottom-24 md:bottom-6 left-7 z-50">
     <button
@@ -929,7 +913,7 @@ export default function InventoryManager() {
         </Modal>
       )}
 
-      {challengeSession && showFinishChallengeModal && (
+      {challengeSession && showFinishChallengeModal && isChallengeMode && (
         <FinishChallengeModal
           isOpen={showFinishChallengeModal}
           onClose={() => setShowFinishChallengeModal(false)}

@@ -35,7 +35,7 @@ export function FinishChallengeModal({ isOpen, onClose, sessionId }: FinishChall
 
       localStorage.removeItem('challengeSession');
       onClose();
-      router.push('/challenge/thankyou'); // Redirect to a thank you page
+      router.push('/challenge/thankyou');
 
     } catch (err) {
       setError('No se pudo finalizar el desafío. Inténtalo de nuevo.');

@@ -2,14 +2,13 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import {  useSearchParams } from 'next/navigation';
 import { FinishChallengeModal } from '@/components/FinishChallengeModal';
 import Image from 'next/image';
 
 function ManualChallengeComponent() {
   const [time, setTime] = useState(0);
   const [showFinishModal, setShowFinishModal] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
 
