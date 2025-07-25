@@ -80,13 +80,12 @@ export default function InventoryManager() {
 
   useEffect(() => {
     const savedSession = localStorage.getItem('challengeSession');
-    if (savedSession) {
+    if (savedSession && searchParams) {
       setChallengeSession(JSON.parse(savedSession));
       const isChallenge = searchParams.get('challenge_mode');
       setIsChallengeMode(isChallenge === 'true');
-      console.log('Challenge mode:', isChallengeMode);
     }
-  }, []);
+  }, [isChallengeMode, searchParams]);
 
   useEffect(() => {
     localStorage.setItem("defaultMaxStock", String(defaultMaxStock));
