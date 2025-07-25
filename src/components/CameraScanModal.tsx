@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Product, Sale, Supplier } from '../types';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Modal } from './common/Modal';
-import { ProductScanResult } from './ProductScanResult';
-import ManageStockModal from './ManageStockModal';
+import { ImageIcon } from 'lucide-react';
 
 interface CameraScanModalProps {
   showModal: boolean;
@@ -14,6 +13,7 @@ interface CameraScanModalProps {
   onProductNotFound: (scannedCode: string) => void;
   onManageStock: (product: Product) => void;
   onSaleCreated: (sale: Sale) => void;
+  manejarEscaneoArchivo: (show: boolean) => void;
 }
 
 export function CameraScanModal({
@@ -25,6 +25,7 @@ export function CameraScanModal({
   onProductNotFound,
   onManageStock,
   onSaleCreated,
+  manejarEscaneoArchivo
 }: CameraScanModalProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [availableCameras, setAvailableCameras] = useState<Array<{ id: string; label: string }>>([]);
@@ -188,12 +189,23 @@ export function CameraScanModal({
               Añadir Producto con Código {scannedCode}
             </button>
           )}
+          <div className='flex flex-row justify-center items-center gap-4'>
           <button
             onClick={handleRescan}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors mt-2"
           >
             Escanear
           </button>
+                <button 
+                  onClick={() => {
+                    manejarEscaneoArchivo(true);
+                    setShowModal(false);
+                  }} 
+                  className="mt-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg py-2 px-4 flex items-center justify-center shadow-lg transform hover:scale-105 transition-all"
+                  aria-label="Escanear desde imagen">
+                  <ImageIcon size={24} aria-hidden="true" />
+                </button>
+          </div>
         </div>
       )}
     </Modal>

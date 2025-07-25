@@ -36,12 +36,12 @@ export default function InventoryManager() {
   const [showScanMenu, setShowScanMenu] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
   const [showCameraScanModal, setShowCameraScanModal] = useState(false);
-  const [setScannedProduct] = useState<Product | null>(null);
+  const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
   const [showManageStockModal, setShowManageStockModal] = useState(false);
   const [productToManageStock, setProductToManageStock] = useState<Product | null>(null);
   const [productToShowDetails, setProductToShowDetails] = useState<Product | null>(null);
   const [showProductDetailsModal, setShowProductDetailsModal] = useState(false);
-  const [setActionQuantity] = useState(1);
+  const [actionQuantity, setActionQuantity] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterSupplier, setFilterSupplier] = useState('all');
@@ -798,7 +798,11 @@ export default function InventoryManager() {
 
           {/* Botón Principal del Speed Dial */}
           <button 
-            onClick={() => setShowScanMenu(!showScanMenu)} 
+            onClick={() => {//setShowScanMenu(!showScanMenu)
+                    setShowCameraScanModal(true);
+                    setShowScanMenu(false);
+                  }  
+            } 
             className="bg-blue-600 hover:bg-blue-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             aria-label={showScanMenu ? "Cerrar menú de escaneo" : "Abrir menú de escaneo"}>
             {showScanMenu ? <X size={32} /> : <Scan size={32} />}
@@ -892,6 +896,7 @@ export default function InventoryManager() {
         onProductNotFound={handleProductNotFound}
         onManageStock={ handleManageStock }
         onSaleCreated={handleSaleCreated}
+        manejarEscaneoArchivo={setShowScanModal}
       />
 
       {showManageStockModal && productToManageStock && (
