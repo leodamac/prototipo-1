@@ -52,6 +52,11 @@ export function AddProductModal({
       setAddProductSuccess(editingProduct ? 'Producto actualizado con éxito!' : 'Producto añadido con éxito!');
       // No cerramos el modal inmediatamente para que el usuario vea el mensaje de éxito
       // El modal se cerrará después de un breve retraso o cuando el usuario lo cierre manualmente
+      setTimeout(() => {
+        setShowAddProductModal(false);
+        clearForm();
+      }, 2000); // Close modal after 2 seconds
+      handleCloseModal();
     } catch (error: any) {
       setAddProductError(error.message || 'Error desconocido al guardar el producto.');
     }

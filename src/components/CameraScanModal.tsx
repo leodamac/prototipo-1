@@ -62,26 +62,25 @@ export function CameraScanModal({
     setAvailableCameras([]);
     setCameraStatus('idle');
     setScanMessage(null);
-    setScannedCode(null); // Clear scanned code on close
+    setScannedCode(null);
   }, [setShowModal, stopHtml5Qrcode]);
 
-  // Effect to get cameras when modal opens
   useEffect(() => {
     if (showModal) {
-      setScanMessage(null); // Clear message on modal open
-      setScannedCode(null); // Clear scanned code on modal open
+      setScanMessage(null);
+      setScannedCode(null);
       setCameraStatus('loading');
       Html5Qrcode.getCameras().then(cameras => {
         if (cameras && cameras.length) {
           setAvailableCameras(cameras);
-          // Try to find a rear-facing camera
           const rearCamera = cameras.find(camera =>
+            camera.label.toLowerCase().includes('trasera') ||
             camera.label.toLowerCase().includes('back') ||
             camera.label.toLowerCase().includes('environment') ||
             camera.label.toLowerCase().includes('rear')
           );
 
-          const defaultCamera = rearCamera || cameras[0]; // Use rear camera if found, otherwise first camera
+          const defaultCamera = rearCamera || cameras[0];
           setSelectedCameraId(defaultCamera.id);
           setIsFrontCamera(defaultCamera.label.toLowerCase().includes('front') || defaultCamera.label.toLowerCase().includes('user') || defaultCamera.label.toLowerCase().includes('facing front'));
           setCameraStatus('ready');
@@ -95,12 +94,10 @@ export function CameraScanModal({
     }
   }, [showModal]);
 
-  // Effect to start/stop scanner based on state changes
   useEffect(() => {
     const qrCodeReaderId = "qr-camera-reader";
 
     if (showModal && selectedCameraId && cameraStatus === 'ready' && isScanning) {
-      // Only create a new instance if one doesn't exist or is not scanning
       if (!html5QrCodeRef.current || !html5QrCodeRef.current.isScanning) {
         html5QrCodeRef.current = new Html5Qrcode(qrCodeReaderId);
       }
@@ -108,13 +105,13 @@ export function CameraScanModal({
       const qrCodeSuccessCallback = (decodedText: string) => {
         console.log("Scanned text:", decodedText);
         console.log("Suppliers data:", suppliers);
-        setScanMessage(null); // Clear previous messages
-        setScannedCode(null); // Clear previous scanned code
+        setScanMessage(null);
+        setScannedCode(null);
 
         const foundProduct = products.find(p => p.qrCode === decodedText || p.barcode === decodedText);
         if (foundProduct) {
           onManageStock(foundProduct);
-          handleClose(); // Close the scan modal
+          handleClose();
         } else {
           setScannedCode(decodedText);
           setScanMessage(`Producto con código "${decodedText}" no encontrado.`);
@@ -129,7 +126,7 @@ export function CameraScanModal({
         config,
         qrCodeSuccessCallback,
         (errorMessage) => {
-          // console.warn("QR Code scanning error: ", errorMessage);
+          console.warn("QR Code scanning error: ", errorMessage);
         }
       ).catch(err => {
         console.error("Failed to start scanner:", err);
@@ -139,7 +136,6 @@ export function CameraScanModal({
     }
 
     return () => {
-      // Cleanup function: stop the scanner when the effect re-runs or component unmounts
       stopHtml5Qrcode();
     };
   }, [showModal, selectedCameraId, cameraStatus, suppliers, isScanning, stopHtml5Qrcode, products, onManageStock, handleClose]);
@@ -155,20 +151,20 @@ export function CameraScanModal({
       
 
       {isScanning && availableCameras.length > 1 && (
-        <div className="mt-4">
+        <div className="flex flex-col mt-4">
           <label htmlFor="camera-select" className="block text-sm font-medium text-gray-300">Cámara Actual: {availableCameras.find(c => c.id === selectedCameraId)?.label || 'N/A'}</label>
           <button
             onClick={async () => {
-              await stopHtml5Qrcode(); // Stop current scanner before changing camera
+              await stopHtml5Qrcode();
 
               const currentIndex = availableCameras.findIndex(c => c.id === selectedCameraId);
               const nextIndex = (currentIndex + 1) % availableCameras.length;
               const nextCamera = availableCameras[nextIndex];
               setSelectedCameraId(nextCamera.id);
               setIsFrontCamera(nextCamera.label.toLowerCase().includes('front') || nextCamera.label.toLowerCase().includes('user') || nextCamera.label.toLowerCase().includes('facing front'));
-              setCameraStatus('ready'); // Set status to ready to trigger scanner restart
-              setScanMessage(null); // Clear messages on camera change
-              setScannedCode(null); // Clear scanned code on camera change
+              setCameraStatus('ready');
+              setScanMessage(null);
+              setScannedCode(null);
             }}
             className="mt-1 px-4 py-2 bg-gray-700 text-gray-200 rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >

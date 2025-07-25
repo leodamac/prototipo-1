@@ -36,12 +36,12 @@ export default function InventoryManager() {
   const [showScanMenu, setShowScanMenu] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
   const [showCameraScanModal, setShowCameraScanModal] = useState(false);
-  const [scannedProduct, setScannedProduct] = useState<Product | null>(null);
+  const [setScannedProduct] = useState<Product | null>(null);
   const [showManageStockModal, setShowManageStockModal] = useState(false);
   const [productToManageStock, setProductToManageStock] = useState<Product | null>(null);
   const [productToShowDetails, setProductToShowDetails] = useState<Product | null>(null);
   const [showProductDetailsModal, setShowProductDetailsModal] = useState(false);
-  const [actionQuantity, setActionQuantity] = useState(1);
+  const [setActionQuantity] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterSupplier, setFilterSupplier] = useState('all');
@@ -69,7 +69,7 @@ export default function InventoryManager() {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("defaultMaxStock");
       if (saved !== null) return parseInt(saved, 10);
-      return 100; // Valor por defecto inicial
+      return 100;
     }
     return 100;
   });
@@ -87,7 +87,7 @@ export default function InventoryManager() {
   useEffect(() => {
     localStorage.setItem("defaultMaxStock", String(defaultMaxStock));
   }, [defaultMaxStock]);
-  const [dateRange, setDateRange] = useState('7d'); // '7d', '30d', '90d', '365d', 'year'
+  const [dateRange, setDateRange] = useState('7d');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const sensors = useSensors(
@@ -95,7 +95,6 @@ export default function InventoryManager() {
     useSensor(KeyboardSensor)
   );
 
-  // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -132,7 +131,6 @@ export default function InventoryManager() {
     fetchData();
   }, []);
 
-  // Revisar productos próximos a caducar y stock bajo para notificaciones
   useEffect(() => {
     const generateNotifications = async () => {
       const nuevasNotificaciones: Notification[] = [];
@@ -169,11 +167,9 @@ export default function InventoryManager() {
         }
       });
       
-      // For simplicity, we're not persisting these auto-generated notifications yet.
-      // In a real app, you'd likely have a backend process for this or persist them here.
       setNotifications(nuevasNotificaciones);
     };
-    if (products.length > 0) { // Only generate if products are loaded
+    if (products.length > 0) {
       generateNotifications();
     }
   }, [products]);
@@ -188,11 +184,10 @@ export default function InventoryManager() {
   const [addProductSuccess, setAddProductSuccess] = useState<string | null>(null);
 
   const handleAddOrUpdateProduct = async () => {
-    setAddProductError(null); // Clear previous errors
-    setAddProductSuccess(null); // Clear previous success
+    setAddProductError(null);
+    setAddProductSuccess(null);
     try {
       if (editingProduct) {
-        // Update existing product
         const res = await fetch(`/api/products/${editingProduct.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -214,7 +209,6 @@ export default function InventoryManager() {
         console.log('Producto actualizado:', updatedProduct);
         setAddProductSuccess('Producto actualizado con éxito!');
       } else {
-        // Add new product
         const res = await fetch('/api/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -285,16 +279,15 @@ export default function InventoryManager() {
       if (!res.ok) throw new Error('Failed to update product');
       const data = await res.json();
       setProducts(prev => prev.map(p => (p.id === data.id ? data : p)));
-      console.log('Producto actualizado desde modal de escaneo:', data);
     } catch (error) {
-      console.error('Error al actualizar producto desde modal de escaneo:', error);
     }
   };
 
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setNewProduct(product);
-    setShowAddProductModal(true);
+    handleUpdateProduct(product);
+    setShowAddProductModal(false);
   };
 
   const [productDeleteError, setProductDeleteError] = useState<string | null>(null);
@@ -702,9 +695,7 @@ export default function InventoryManager() {
               <span className="mt-3 text-xl font-semibold text-center">Contactar Proveedores</span>
             </button>
           </div>
-            <Link href="/challenge" className="mt-8 text-lg font-semibold text-blue-600 hover:underline">
-              Ir al Desafío de la Feria
-            </Link>
+
           </div>
         ) : (
           <>
@@ -734,21 +725,14 @@ export default function InventoryManager() {
                 filterSupplier={filterSupplier}
                 setFilterSupplier={setFilterSupplier}
                 compactView={compactView}
-                setCompactView={setCompactView}
                 setShowAddProductModal={setShowAddProductModal}
-                onEditProduct={handleEditProduct}
                 onDeleteProduct={handleDeleteProduct}
-                setScannedProduct={setScannedProduct}
-                setShowScanModal={setShowScanModal}
                 productDeleteError={productDeleteError}
                 setProductDeleteError={setProductDeleteError}
                 productDeleteSuccess={productDeleteSuccess}
                 setProductDeleteSuccess={setProductDeleteSuccess}
                 onManageStock={handleManageStock}
-                onSaleCreated={handleSaleCreated}
               />
-                  //setProductToManageStock(product);
-    //setShowManageStockModal(true);
             )}
 
             {activeTab === 'sales' && (
@@ -821,13 +805,13 @@ export default function InventoryManager() {
           </button>
         </div>
 
-        {/* Botones de Notificaciones y Tema (solo en móvil) */}
+        {/* Botones de Notificaciones */}
         <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-4 md:hidden">
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
             className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all relative ${notificacionesNoLeidas > 0 ? 'bg-red-900/50 text-red-300' : 'bg-gray-800 text-gray-300'}`}
             aria-label="Ver notificaciones">
-                        <Bell size={24} aria-hidden="true" className={`${(notificacionesNoLeidas>0)?"text-amber-400":"text-gray-300"}`} />
+            <Bell size={24} aria-hidden="true" className={`${(notificacionesNoLeidas>0)?"text-amber-400":"text-gray-300"}`} />
             {notificacionesNoLeidas > 0 && (
               <span className="absolute -top-1 -right-1bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
                 {notificacionesNoLeidas}
@@ -839,19 +823,27 @@ export default function InventoryManager() {
         </div>
 
         {challengeSession && (
-          <div className="fixed bottom-24 right-6 z-50">
-            <button
-              onClick={() => setShowFinishChallengeModal(true)}
-              className="bg-red-600 hover:bg-red-700 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-              aria-label="Finalizar Desafío"
-            >
-              <X size={32} />
-            </button>
-          </div>
+<div className="hover group relative">
+  <div className="fixed bottom-24 md:bottom-6 left-7 z-50">
+    <button
+      onClick={() => setShowFinishChallengeModal(true)}
+      className="bg-red-600 hover:bg-red-700 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+      aria-label="Finalizar Desafío"
+    >
+      <X size={32} />
+    </button>
+    <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+      <span>Terminar Desafío</span>
+      <svg className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2" width="12" height="6" viewBox="0 0 12 6">
+        <polygon points="6,0 12,6 0,6" fill="#ffffff" />
+      </svg>
+    </div>
+  </div>
+</div>
         )}
 
         {/* Modal para añadir proveedor */}
-        <AddSupplierModal
+      <AddSupplierModal
         showAddSupplierModal={showAddSupplierModal}
         setShowAddSupplierModal={setShowAddSupplierModal}
         newSupplier={newSupplier}
@@ -880,7 +872,7 @@ export default function InventoryManager() {
         setAddProductSuccess={setAddProductSuccess}
       />
 
-        <ScanProductModal
+      <ScanProductModal
           showScanModal={showScanModal}
           setShowScanModal={setShowScanModal}
           products={products}
@@ -888,7 +880,8 @@ export default function InventoryManager() {
           onProductNotFound={handleProductNotFound}
           onUpdateProduct={handleProductUpdated}
           onSaleCreated={handleSaleCreated}
-          onManageStock={handleManageStock }        />
+          onManageStock={handleManageStock }
+      />
 
       <CameraScanModal
         showModal={showCameraScanModal}

@@ -76,7 +76,7 @@ export function FinishChallengeModal({ isOpen, onClose, sessionId }: FinishChall
     </button>
   </div>
   <label htmlFor="comments" className="block text-sm font-medium text-gray-300">
-    {type === 'apoyo' ? 'Palabras de apoyo' : 'Retroalimentación'}
+    'Retroalimentación sobre la app'
   </label>
   <textarea
     id="comments"

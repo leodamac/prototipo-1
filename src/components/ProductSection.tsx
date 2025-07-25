@@ -15,18 +15,13 @@ interface ProductSectionProps {
   filterSupplier: string;
   setFilterSupplier: (supplierId: string) => void;
   compactView: boolean;
-  setCompactView: (compact: boolean) => void;
   setShowAddProductModal: (show: boolean) => void;
-  onEditProduct: (product: Product) => void;
   onDeleteProduct: (productId: string) => void;
-  setScannedProduct: (product: Product | null) => void;
-  setShowScanModal: (show: boolean) => void;
   productDeleteError: string | null;
   setProductDeleteError: (error: string | null) => void;
   productDeleteSuccess: string | null;
   setProductDeleteSuccess: (success: string | null) => void;
   onManageStock: (product: Product) => void;
-  onSaleCreated: (sale: Sale) => void;
 }
 
 export function ProductSection({
@@ -39,18 +34,13 @@ export function ProductSection({
   filterSupplier,
   setFilterSupplier,
   compactView,
-  setCompactView,
   setShowAddProductModal,
-  onEditProduct,
   onDeleteProduct,
-  setScannedProduct,
-  setShowScanModal,
   productDeleteError,
   setProductDeleteError,
   productDeleteSuccess,
   setProductDeleteSuccess,
   onManageStock,
-  onSaleCreated,
 }: ProductSectionProps) {
 
   const productosFiltrados = React.useMemo(() => {
