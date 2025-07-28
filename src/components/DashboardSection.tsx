@@ -1081,13 +1081,13 @@ export function DashboardSection({
                   </section>
                 )}
 
-                {/* Widget de Tendencia de Ventas */}
+                {/* Widget de Tendencia de Movimientos */}
                 {widget.type === 'sales-trend' && isClient && (
-                  <section aria-label="Tendencia de ventas">
+                  <section aria-label="Tendencia de Movimientos">
                     <div className="flex flex-col gap-4">
                       <h3 className="font-semibold flex items-center gap-2 text-gray-100">
                         <TrendingUp size={20} className="text-gray-100" aria-hidden="true" /> 
-                        Tendencia de Ventas
+                        Tendencia de Movimientos
                       </h3>
 
                       {/* Filtros */}

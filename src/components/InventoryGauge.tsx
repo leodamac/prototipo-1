@@ -56,7 +56,7 @@ export function InventoryGauge({ currentStock, maxStock, isClient }: InventoryGa
               className="text-3xl font-bold fill-gray-100"
             />
             <Label
-              value="Capacidad Total"
+              value={`${currentStock} / ${maxStock}`}
               position="center"
               dy={20}
               className="text-sm fill-gray-400"
