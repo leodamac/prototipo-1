@@ -53,7 +53,8 @@ type FilterAction =
   | { type: 'SET_FILTER_SALE_QUANTITY_MAX'; payload: number | '' }
   | { type: 'SET_FILTER_SALE_DATE_START'; payload: string }
   | { type: 'SET_FILTER_SALE_DATE_END'; payload: string }
-  | { type: 'SET_FILTER_SALE_TYPE'; payload: string };
+  | { type: 'SET_FILTER_SALE_TYPE'; payload: string }
+  | { type: 'RESET_FILTERS' };
 
 const filterReducer = (state: FilterState, action: FilterAction): FilterState => {
   switch (action.type) {
@@ -95,6 +96,8 @@ const filterReducer = (state: FilterState, action: FilterAction): FilterState =>
       return { ...state, filterSaleDateEnd: action.payload };
     case 'SET_FILTER_SALE_TYPE':
       return { ...state, filterSaleType: action.payload };
+    case 'RESET_FILTERS':
+      return initialFilterState; // Restablecer a los valores iniciales
     default:
       return state;
   }
@@ -570,12 +573,20 @@ export function DashboardSection({
     <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-white">Resumen del Panel</h2>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200"
-        >
-          <Filter size={20} className="mr-2" /> {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200"
+          >
+            <Filter size={20} className="mr-2" /> {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+          </button>
+          <button
+            onClick={() => dispatch({ type: 'RESET_FILTERS' })}
+            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors duration-200"
+          >
+            Resetear Filtros
+          </button>
+        </div>
       </div>
 
       {showFilters && (
@@ -1125,9 +1136,9 @@ export function DashboardSection({
                           ))}
                         </select>
 
-                        <label htmlFor="inventory-by-type-filter-supplier" className="sr-only">Proveedor</label>
+                        <label htmlFor="sales-trend-filter-supplier" className="sr-only">Proveedor</label>
                         <select
-                          id="inventory-by-type-filter-supplier"
+                          id="sales-trend-filter-supplier"
                           value={filterState.filterSupplier}
                           onChange={(e) => dispatch({ type: 'SET_FILTER_SUPPLIER', payload: e.target.value })}
                           className="rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
@@ -1136,6 +1147,18 @@ export function DashboardSection({
                           {suppliers.map(s => (
                             <option key={s.id} value={s.id}>{s.name}</option>
                           ))}
+                        </select>
+
+                        <label htmlFor="sales-trend-filter-sale-type" className="sr-only">Tipo de Venta</label>
+                        <select
+                          id="sales-trend-filter-sale-type"
+                          value={filterState.filterSaleType}
+                          onChange={(e) => dispatch({ type: 'SET_FILTER_SALE_TYPE', payload: e.target.value })}
+                          className="rounded border border-gray-600 px-3 py-2 bg-gray-700 text-gray-100"
+                        >
+                          <option value="all">Todos los tipos de venta</option>
+                          <option value="sale">Venta</option>
+                          <option value="disposal">Desecho</option>
                         </select>
                       </div>
 

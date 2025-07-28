@@ -67,9 +67,9 @@ function InventoryManagerContent() {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("defaultMaxStock");
       if (saved !== null) return parseInt(saved, 10);
-      return 100;
+      return 50;
     }
-    return 100;
+    return 50;
   });
 
   const [challengeSession, setChallengeSession] = useState<ChallengeSession | null>(null);
