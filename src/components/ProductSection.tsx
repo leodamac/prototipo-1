@@ -2,7 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Package, ShoppingCart, Plus, Edit, Trash2, Search, List, LayoutGrid, MoreVertical } from 'lucide-react';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInDays, startOfDay } from 'date-fns';
 import { Product, Sale, Supplier } from '../types';
 
 interface ProductSectionProps {
@@ -193,7 +193,7 @@ export function ProductSection({
               </tr>
             ) : (
               productosFiltrados.map(p => {
-                const diasParaCaducar = differenceInDays(p.expirationDate, new Date());
+                const diasParaCaducar = differenceInDays(startOfDay(p.expirationDate), startOfDay(new Date()));
                 const caducidadColor = 
                   diasParaCaducar < 0 ? 'text-red-500 font-bold' :
                   diasParaCaducar <= 3 ? 'text-yellow-500 font-semibold' :

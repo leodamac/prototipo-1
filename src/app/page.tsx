@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Package, Bell, Scan, Menu, ShoppingCart, Users, Camera, Image as ImageIcon, X} from 'lucide-react';
 import Image from 'next/image';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, startOfDay } from 'date-fns';
 import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { Product, Sale, Supplier, Notification, DashboardWidget, ChallengeSession } from '../types';
@@ -87,39 +87,41 @@ function InventoryManagerContent() {
     useSensor(KeyboardSensor)
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productsRes, salesRes, suppliersRes, notificationsRes] = await Promise.all([
-          fetch('/api/products'),
-          fetch('/api/sales'),
-          fetch('/api/suppliers'),
-          fetch('/api/notifications'),
-        ]);
+  const fetchData = async () => {
+    try {
+      const [productsRes, salesRes, suppliersRes, notificationsRes] = await Promise.all([
+        fetch('/api/products'),
+        fetch('/api/sales'),
+        fetch('/api/suppliers'),
+        fetch('/api/notifications'),
+      ]);
 
-        const productsData = await productsRes.json();
-        const salesData = await salesRes.json();
-        const suppliersData = await suppliersRes.json();
-        const notificationsData = await notificationsRes.json();
+      const productsData = await productsRes.json();
+      const salesData = await salesRes.json();
+      const suppliersData = await suppliersRes.json();
+      const notificationsData = await notificationsRes.json();
 
-        setProducts(productsData.map((p: any) => ({
+      setProducts(productsData.map((p: any) => ({
           ...p,
           entryDate: new Date(p.entryDate),
           expirationDate: new Date(p.expirationDate),
+          type: p.type ? p.type.trim().toLowerCase() : p.type, // Normalizar el tipo de producto
         })));
-        setSales(salesData.map((s: any) => ({
-          ...s,
-          date: new Date(s.date),
-        })));
-        setSuppliers(suppliersData);
-        setNotifications(notificationsData.map((n: any) => ({
-          ...n,
-          date: new Date(n.date),
-        })));
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-      }
-    };
+      setSales(salesData.map((s: any) => ({
+        ...s,
+        date: new Date(s.date),
+      })));
+      setSuppliers(suppliersData);
+      setNotifications(notificationsData.map((n: any) => ({
+        ...n,
+        date: new Date(n.date),
+      })));
+    } catch (error) {
+      console.error('Error fetching initial data:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -128,7 +130,7 @@ function InventoryManagerContent() {
       const nuevasNotificaciones: Notification[] = [];
       
       products.forEach(producto => {
-        const diasParaCaducar = differenceInDays(producto.expirationDate, new Date());
+        const diasParaCaducar = differenceInDays(startOfDay(producto.expirationDate), startOfDay(new Date()));
         
         if (diasParaCaducar <= 3 && diasParaCaducar > 0) {
           nuevasNotificaciones.push({
@@ -182,17 +184,16 @@ function InventoryManagerContent() {
             price: parseFloat(String(newProduct.price)),
             stock: parseInt(String(newProduct.stock), 10),
             maxStock: newProduct.maxStock ? parseInt(String(newProduct.maxStock), 10) : defaultMaxStock,
-            entryDate: newProduct.entryDate ? new Date(newProduct.entryDate) : new Date(),
-            expirationDate: newProduct.expirationDate ? new Date(newProduct.expirationDate) : new Date(new Date().setDate(new Date().getDate() + 30)),
+            entryDate: newProduct.entryDate ? newProduct.entryDate.toISOString() : new Date().toISOString(),
+            expirationDate: newProduct.expirationDate ? newProduct.expirationDate.toISOString() : new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
             qrCode: newProduct.qrCode || null,
             barcode: newProduct.barcode || null,
             image: newProduct.image || null,
           }),
         });
         if (!res.ok) throw new Error('Failed to update product');
-        const updatedProduct = await res.json();
-        setProducts(prev => prev.map(p => (p.id === updatedProduct.id ? updatedProduct : p)));
-        console.log('Producto actualizado:', updatedProduct);
+        await fetchData(); // Refrescar datos
+        console.log('Producto actualizado:', await res.json());
         setAddProductSuccess('Producto actualizado con éxito!');
       } else {
         const res = await fetch('/api/products', {
@@ -203,8 +204,8 @@ function InventoryManagerContent() {
             price: parseFloat(String(newProduct.price)),
             stock: parseInt(String(newProduct.stock), 10),
             maxStock: newProduct.maxStock ? parseInt(String(newProduct.maxStock), 10) : defaultMaxStock,
-            entryDate: newProduct.entryDate ? new Date(newProduct.entryDate) : new Date(),
-            expirationDate: newProduct.expirationDate ? new Date(newProduct.expirationDate) : new Date(new Date().setDate(new Date().getDate() + 30)),
+            entryDate: newProduct.entryDate ? newProduct.entryDate.toISOString() : new Date().toISOString(),
+            expirationDate: newProduct.expirationDate ? newProduct.expirationDate.toISOString() : new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
             qrCode: newProduct.qrCode || null,
             barcode: newProduct.barcode || null,
             image: newProduct.image || null,
@@ -218,13 +219,8 @@ function InventoryManagerContent() {
             throw new Error('Failed to add product');
           }
         }
-        const addedProduct = await res.json();
-        setProducts(prev => [...prev, {
-          ...addedProduct,
-          entryDate: new Date(addedProduct.entryDate),
-          expirationDate: addedProduct.expirationDate ? new Date(addedProduct.expirationDate) : undefined,
-        }]);
-        console.log('Producto añadido:', addedProduct);
+        await fetchData(); // Refrescar datos
+        console.log('Producto añadido:', await res.json());
         setAddProductSuccess('Producto añadido con éxito!');
       }
       // No cerramos el modal aquí, se cierra desde AddProductModal después de mostrar el mensaje de éxito
@@ -258,8 +254,8 @@ function InventoryManagerContent() {
           price: parseFloat(updatedProduct.price as any),
           stock: parseInt(updatedProduct.stock as any),
           maxStock: updatedProduct.maxStock ? parseInt(updatedProduct.maxStock as any) : defaultMaxStock,
-          entryDate: updatedProduct.entryDate ? new Date(updatedProduct.entryDate) : new Date(),
-          expirationDate: updatedProduct.expirationDate ? new Date(updatedProduct.expirationDate) : null,
+          entryDate: updatedProduct.entryDate ? updatedProduct.entryDate.toISOString() : new Date().toISOString(),
+          expirationDate: updatedProduct.expirationDate ? updatedProduct.expirationDate.toISOString() : null,
         }),
       });
       if (!res.ok) throw new Error('Failed to update product');
@@ -281,7 +277,7 @@ function InventoryManagerContent() {
           method: 'DELETE',
         });
         if (!res.ok) throw new Error('Failed to delete product');
-        setProducts(prev => prev.filter(p => p.id !== productId));
+        await fetchData(); // Refrescar datos
         console.log('Producto eliminado:', productId);
         setProductDeleteSuccess('Producto eliminado con éxito!');
       } catch (error: any) {
@@ -323,9 +319,7 @@ function InventoryManagerContent() {
           body: JSON.stringify(supplierData),
         });
         if (!res.ok) throw new Error('Failed to update supplier');
-        const updatedSupplier = await res.json();
-        updatedSupplier.Product = editingSupplier.Product;
-        setSuppliers(prev => prev.map(s => (s.id === updatedSupplier.id ? updatedSupplier : s)));
+        await fetchData(); // Refrescar datos
         setSupplierSuccess('Proveedor actualizado con éxito!');
       } else {
         const res = await fetch('/api/suppliers', {
@@ -334,8 +328,7 @@ function InventoryManagerContent() {
           body: JSON.stringify(supplierData),
         });
         if (!res.ok) throw new Error('Failed to add supplier');
-        const addedSupplier = await res.json();
-        setSuppliers(prev => [...prev, addedSupplier]);
+        await fetchData(); // Refrescar datos
         setSupplierSuccess('Proveedor añadido con éxito!');
       }
 
@@ -370,7 +363,7 @@ function InventoryManagerContent() {
           method: 'DELETE',
         });
         if (!res.ok) throw new Error('Failed to delete supplier');
-        setSuppliers(prev => prev.filter(s => s.id !== supplierId));
+        await fetchData(); // Refrescar datos
         console.log('Proveedor eliminado:', supplierId);
       } catch (error) {
         console.error('Error al eliminar proveedor:', error);
@@ -423,7 +416,7 @@ function InventoryManagerContent() {
   const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     name: '',
-    type: '',
+            type: '',
     price: 0,
     stock: 0,
     maxStock: defaultMaxStock, // Usar el valor por defecto configurable
@@ -555,7 +548,7 @@ function InventoryManagerContent() {
                     ? 'bg-blue-600 text-white' 
                     : 'text-blue-400 hover:bg-gray-700'
                 }`}>
-                Ventas
+                Movimientos
               </button>
               <button onClick={() => setActiveTab('suppliers')} 
                 className={`px-3 py-1 rounded transition-colors ${
@@ -603,7 +596,7 @@ function InventoryManagerContent() {
                       ? 'bg-blue-600 text-white' 
                       : 'text-blue-400 hover:bg-gray-700'
                   }`}>
-                  Ventas
+                  Movimientos
                 </button>
                 <button onClick={() => {setActiveTab('suppliers'); setIsMobileMenuOpen(false);}} 
                   className={`px-3 py-2 rounded transition-colors ${
@@ -627,7 +620,7 @@ function InventoryManagerContent() {
         </div>
       </header>
 
-      <main className={`flex-grow p-4 lg:p-6 xl:p-8 max-w-[2000px] mx-auto w-full ${showMainMenu ? 'flex flex-col justify-center items-center' : 'overflow-y-auto'}`}>
+      <main className={` flex-grow p-4 lg:p-6 xl:p-8 max-w-[2000px] mx-auto w-full ${showMainMenu ? 'flex flex-col justify-center items-center' : 'overflow-y-auto'}`}>
         {showMainMenu ? (
           <div className="flex flex-col items-center justify-center gap-6 h-full">
           <Image src="/images/logo_dark.png" alt="Productos Icon Dark" width={512} height={512} className="lg:w-7xl lg:h-7xl" priority />
@@ -650,7 +643,7 @@ function InventoryManagerContent() {
             >
 
               <ShoppingCart size={48} className="lg:text-7xl" />
-              <span className="mt-3 text-xl font-semibold text-center">Ventas</span>
+              <span className="mt-3 text-xl font-semibold text-center">Movimientos</span>
             </button>
 
             {/* Tarjeta de Datos Estadísticos (Dashboard) */}

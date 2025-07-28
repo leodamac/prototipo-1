@@ -16,7 +16,7 @@ export function SalesSection({
     <section>
       <h2 className="text-2xl font-semibold flex items-center gap-2 mb-4 text-gray-100">
         <ShoppingCart size={28} className="text-gray-100" aria-hidden="true" />
-        Ventas
+        Movimientos de Stock
       </h2>
 
       <div className="bg-gray-800 rounded-lg shadow">

@@ -5,7 +5,10 @@ export async function GET() {
   try {
     const { data: products, error } = await supabase
       .from('Product')
-      .select('*');
+      .select(`
+        *,
+        supplier:Supplier (*)
+      `);
 
     if (error) throw error;
     return NextResponse.json(products);

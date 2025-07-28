@@ -371,7 +371,7 @@ export function DashboardSection({
 
   const productosProximosCaducar = React.useMemo(() => {
     return products.filter(p => {
-      const dias = p.expirationDate ? differenceInDays(new Date(p.expirationDate), new Date()) : -1;
+      const dias = p.expirationDate ? differenceInDays(startOfDay(p.expirationDate), startOfDay(new Date())) : -1;
       const filters = {
         filterProductName: filterState.filterProductName,
         filterMinPrice: filterState.filterMinPrice,
@@ -535,7 +535,7 @@ export function DashboardSection({
       };
 
       return (
-        differenceInDays(p.expirationDate, new Date()) < 0 &&
+        differenceInDays(startOfDay(p.expirationDate), startOfDay(new Date())) < 0 &&
         applyProductFilters(p, filters)
       );
     });
