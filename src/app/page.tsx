@@ -75,12 +75,25 @@ function InventoryManagerContent() {
   const [challengeSession, setChallengeSession] = useState<ChallengeSession | null>(null);
   const [showFinishChallengeModal, setShowFinishChallengeModal] = useState(false);
   const [isChallengeMode, setIsChallengeMode] = useState(false);
+  const [finishedChallenge, setFinishedChallenge] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("defaultMaxStock", String(defaultMaxStock));
   }, [defaultMaxStock]);
   const [dateRange, setDateRange] = useState('7d');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  // router.push('/?challenge_mode=true'); // Redirect to the main app
+  // get params from URL
+  useEffect(() => {
+    // Obtener challengeSession del localStorage
+    const storedSession = localStorage.getItem('challengeSession');
+    setChallengeSession(storedSession ? JSON.parse(storedSession) : null);
+
+    // Obtener challenge_mode de la URL
+    const params = new URLSearchParams(window.location.search);
+    const challengeModeParam = params.get('challenge_mode');
+    setIsChallengeMode(challengeModeParam === 'true');
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -504,8 +517,6 @@ function InventoryManagerContent() {
 
               {/* Iconos solo en desktop */}
               <div className="hidden md:flex items-center gap-2">
-                
-
                 <div className="relative">
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
@@ -797,23 +808,26 @@ function InventoryManagerContent() {
         </div>
 
         {challengeSession && isChallengeMode && (
-<div className="hover group relative">
-  <div className="fixed bottom-24 md:bottom-6 left-7 z-50">
-    <button
-      onClick={() => setShowFinishChallengeModal(true)}
-      className="bg-red-600 hover:bg-red-700 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-      aria-label="Finalizar Desafío"
-    >
-      <X size={32} />
-    </button>
-    <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-      <span>Terminar Desafío</span>
-      <svg className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2" width="12" height="6" viewBox="0 0 12 6">
-        <polygon points="6,0 12,6 0,6" fill="#ffffff" />
-      </svg>
-    </div>
-  </div>
-</div>
+        <div className="hover group relative">
+          <div className="fixed bottom-24 md:bottom-6 left-7 z-50">
+            <button
+              onClick={() => {
+                setShowFinishChallengeModal(true);
+                setFinishedChallenge(true);
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              aria-label="Finalizar Desafío"
+            >
+              <X size={32} />
+            </button>
+            <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-white text-gray-800 text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <span>Terminar Desafío</span>
+              <svg className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2" width="12" height="6" viewBox="0 0 12 6">
+                <polygon points="6,0 12,6 0,6" fill="#ffffff" />
+              </svg>
+            </div>
+          </div>
+        </div>
         )}
 
         {/* Modal para añadir proveedor */}
