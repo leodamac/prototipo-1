@@ -12,6 +12,7 @@ export default function ChallengePage() {
   const [participantRole, setParticipantRole] = useState('');
   const [participantEmail, setParticipantEmail] = useState('');
   const [participantPhone, setParticipantPhone] = useState('');
+  const [challengeType, setChallengeType] = useState('');
   const [mode, setMode] = useState<'manual' | 'app' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function ChallengePage() {
       const res = await fetch('/api/challenge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ participantName, participantLastName, participantRole, mail: participantEmail, telephone: participantPhone, mode }),
+        body: JSON.stringify({ participantName, participantLastName, participantRole, mail: participantEmail, telephone: participantPhone, mode, challengeType }),
       });
 
       if (!res.ok) {
@@ -100,6 +101,20 @@ export default function ChallengePage() {
             <div className="flex flex-col justify-between">
                 {mode && (<>
                     <div>
+                        <div>
+                            <label htmlFor="challengeType" className="text-sm font-medium text-gray-300">Tipo de Desafío</label>
+                            <select
+                                id="challengeType"
+                                value={challengeType}
+                                onChange={(e) => setChallengeType(e.target.value)}
+                                className="mt-1 block w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-100"
+                            >
+                                <option value="">Selecciona un tipo</option>
+                                <option value="saneamiento">Saneamiento</option>
+                                <option value="registros">Registros</option>
+                                <option value="venta">Venta</option>
+                            </select>
+                        </div>
                         <div className='flex flex-col md:flex-row items-center justify-center gap-4'>
                             <div className="flex-1 w-full">
                                 <label htmlFor="participantName" className="text-sm font-medium text-gray-300">Nombre</label>

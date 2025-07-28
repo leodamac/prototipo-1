@@ -20,11 +20,11 @@ import ManageStockModal from '../components/ManageStockModal';
 import { FinishChallengeModal } from '@/components/FinishChallengeModal';
 import { ProductScanResult } from '@/components/ProductScanResult';
 import { Modal } from '@/components/common/Modal';
-import {  useSearchParams } from 'next/navigation';
-import { se } from 'date-fns/locale';
+import { ChallengeHandler } from '@/components/ChallengeHandler';
+import { Suspense } from 'react';
 
-export default function InventoryManager() {
-    const [showMainMenu, setShowMainMenu] = useState(true);
+function InventoryManagerContent() {
+  const [showMainMenu, setShowMainMenu] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
@@ -73,19 +73,8 @@ export default function InventoryManager() {
   });
 
   const [challengeSession, setChallengeSession] = useState<ChallengeSession | null>(null);
-  const searchParams = useSearchParams();
-
   const [showFinishChallengeModal, setShowFinishChallengeModal] = useState(false);
   const [isChallengeMode, setIsChallengeMode] = useState(false);
-
-  useEffect(() => {
-    const savedSession = localStorage.getItem('challengeSession');
-    if (savedSession && searchParams) {
-      setChallengeSession(JSON.parse(savedSession));
-      const isChallenge = searchParams.get('challenge_mode');
-      setIsChallengeMode(isChallenge === 'true');
-    }
-  }, [isChallengeMode, searchParams]);
 
   useEffect(() => {
     localStorage.setItem("defaultMaxStock", String(defaultMaxStock));
@@ -400,6 +389,11 @@ export default function InventoryManager() {
   const handleManageStock = (product: Product) => {
     setProductToShowDetails(product);
     setShowProductDetailsModal(true);
+  };
+
+    const handleManageProduct = (product: Product) => {
+    setProductToManageStock(product);
+    setShowManageStockModal(true);
   };
 
   const manejarEscaneo = () => {
@@ -867,7 +861,7 @@ export default function InventoryManager() {
           onProductNotFound={handleProductNotFound}
           onUpdateProduct={handleProductUpdated}
           onSaleCreated={handleSaleCreated}
-          onManageStock={handleManageStock }
+          onManageStock={handleManageProduct }
       />
 
       <CameraScanModal
@@ -877,7 +871,7 @@ export default function InventoryManager() {
         suppliers={suppliers}
         onUpdateProduct={handleProductUpdated}
         onProductNotFound={handleProductNotFound}
-        onManageStock={ handleManageStock }
+        onManageStock={ handleManageProduct }
         onSaleCreated={handleSaleCreated}
         manejarEscaneoArchivo={setShowScanModal}
       />
@@ -906,7 +900,7 @@ export default function InventoryManager() {
               setShowManageStockModal(true);
               setShowProductDetailsModal(false); // Close details modal when opening manage stock
             }}
-            onUpdateProduct={handleProductUpdated}
+            onUpdateProduct={handleUpdateProduct}
             onSaleCreated={handleSaleCreated}
           />
         </Modal>
@@ -939,5 +933,13 @@ export default function InventoryManager() {
 
       
     </div>
+  );
+}
+
+export default function InventoryManager() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InventoryManagerContent />
+    </Suspense>
   );
 }

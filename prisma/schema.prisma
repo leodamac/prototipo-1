@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,58 +8,59 @@ datasource db {
 }
 
 model Product {
-  id             String     @id @default(cuid())
+  id             String    @id @default(dbgenerated("gen_random_uuid()"))
   name           String
-  entryDate      DateTime
-  expirationDate DateTime
-  price          Float
-  stock          Int
-  maxStock       Int?       @default(100) // Capacidad máxima de stock, opcional con valor por defecto
+  entryDate      DateTime  @default(dbgenerated("(now() AT TIME ZONE 'utc-5'::text)"))
+  expirationDate DateTime  @default(dbgenerated("(now() AT TIME ZONE 'utc-5'::text)"))
+  price          Float     @default(0)
+  stock          Int       @default(0)
+  maxStock       Int?      @default(100)
   type           String
   image          String?
-  qrCode         String?    @unique
-  barcode        String?    @unique
-  supplier       Supplier?  @relation(fields: [supplierId], references: [id])
+  qrCode         String?   @unique
+  barcode        String?   @unique
   supplierId     String?
+  supplier       Supplier? @relation(fields: [supplierId], references: [id])
   sales          Sale[]
 }
 
 model Sale {
-  id        String   @id @default(cuid())
-  product   Product  @relation(fields: [productId], references: [id])
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
   productId String
   quantity  Int
   date      DateTime
-  type      String // 'sale' or 'disposal'
+  type      String
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 model Supplier {
-  id      String    @id @default(cuid())
-  name    String
-  phone   String?
-  email   String?
+  id       String    @id @default(dbgenerated("gen_random_uuid()"))
+  name     String
+  phone    String?
+  email    String?
   products Product[]
 }
 
 model Notification {
-  id      String   @id @default(cuid())
+  id      String   @id @default(dbgenerated("gen_random_uuid()"))
   message String
-  type    String // 'warning' | 'danger' | 'info'
+  type    String
   date    DateTime
   read    Boolean  @default(false)
 }
 
 model ChallengeSession {
-  id                String    @id @default(cuid())
-  participantName   String
+  id                  String    @id @default(dbgenerated("gen_random_uuid()"))
+  participantName     String
+  mode                String
+  startTime           DateTime  @default(now())
+  endTime             DateTime?
+  comments            String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime? @updatedAt
+  mail                String?
+  telephone           String?
+  participantRole     String?
   participantLastName String?
-  participantRole   String?
-  mail              String?
-  telephone         String?
-  mode              String // "manual" or "app"
-  startTime         DateTime  @default(now())
-  endTime           DateTime?
-  comments          String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  challengeType       String?
 }

@@ -196,7 +196,12 @@ export function CameraScanModal({
           >
             Escanear
           </button>
-                <button 
+                
+          </div>
+        </div>
+      )}
+      <div className='flex flex-col items-end justify-end '>
+      <button 
                   onClick={() => {
                     manejarEscaneoArchivo(true);
                     setShowModal(false);
@@ -205,9 +210,7 @@ export function CameraScanModal({
                   aria-label="Escanear desde imagen">
                   <ImageIcon size={24} aria-hidden="true" />
                 </button>
-          </div>
         </div>
-      )}
     </Modal>
   );
 }

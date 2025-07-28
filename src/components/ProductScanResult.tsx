@@ -28,9 +28,7 @@ export function ProductScanResult({
   }, [product]);
 
   const handleSave = () => {
-    // This component no longer handles product updates directly.
-    // The parent component (ScanProductModal) should handle saving changes
-    // if editing is allowed and needs to persist.
+    onUpdateProduct(editedProduct);
     setIsEditing(false);
   };
 
