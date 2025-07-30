@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import ChallengeResultCard from '../../components/ChallengeResultCard';
 import { Modal } from '../../components/common/Modal';
-
+import { Clock, User} from 'lucide-react';
+import { Smartphone, Book } from 'lucide-react';
 interface ChallengeSession {
   id: string;
   participantName: string;
@@ -64,6 +65,17 @@ const ChallengeResultsPage = () => {
     setSelectedSession(sessions[prevIndex]);
   };
 
+    const calculateDuration = (start: string, end: string | null | undefined) => {
+    if (!end) return 'N/A';
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diff = endDate.getTime() - startDate.getTime();
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
   if (isLoading) {
     return <div className="text-center py-10">Cargando resultados...</div>;
   }
@@ -73,15 +85,27 @@ const ChallengeResultsPage = () => {
       <h1 className="text-3xl font-bold text-center mb-8">Resultados de Desafíos</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sessions.map((session, index) => (
-          <div 
-            key={session.id} 
-            className="bg-gray-700 p-4 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors duration-300"
-            onClick={() => openModal(session, index)}
-          >
-            <h3 className="text-xl font-semibold text-purple-300">{session.participantName} {session.participantLastName}</h3>
-            <p className="text-gray-400">{session.challengeType || 'Desafío General'}</p>
-            <p className="text-sm text-gray-500">{new Date(session.startTime).toLocaleDateString()}</p>
+        <div 
+          key={session.id} 
+          className={`text-purple-300 bg-gray-700 p-4 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors duration-300`}
+          onClick={() => openModal(session, index)}
+        >
+          <h3 className="text-xl font-semibold flex items-center">
+            <User size={24} className="mr-2" />
+            {session.participantName} {session.participantLastName}
+          </h3>
+          <div className="mt-2 flex flex-row justify-between items-center">
+          <p className="text-gray-400 text-xl flex items-center">
+            {session.mode === 'app' && <Smartphone size={20} className="mr-2" />}
+            {session.mode === 'manual' && <Book size={20} className="mr-2" />}
+            {session.mode || '-'}
+          </p>
+            <p className="text-xl text-gray-500 flex items-center">
+              <Clock size={16} className="mr-2" />
+              {`Duracion: ${calculateDuration(session.startTime, session.endTime)}`}
+            </p>
           </div>
+        </div>
         ))}
       </div>
 

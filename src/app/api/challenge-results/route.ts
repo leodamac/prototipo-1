@@ -6,8 +6,8 @@ export async function GET() {
     const { data: challengeSessions, error } = await supabase
       .from('ChallengeSession')
       .select('*')
-      .not('comments', 'is', null)
       .order('startTime', { ascending: false });
+    //.not('comments', 'is', null)
 
     if (error) throw error;
     return NextResponse.json(challengeSessions);
