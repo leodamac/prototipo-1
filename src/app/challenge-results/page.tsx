@@ -89,11 +89,11 @@ const ChallengeResultsPage = () => {
         isOpen={selectedSession !== null}
         onClose={closeModal}
         title={`Resultados de: ${selectedSession?.participantName} ${selectedSession?.participantLastName || ''}`}
-        className="sm:max-w-4xl">
+        className="min-w-full max-w-full m-10 sm:max-w-4xl sm:max-h-screen">
           {selectedSession && (
-              <div className="relative w-full p-4">
+              <div className="relative w-full p-4 max-h-[80vh] overflow-y-auto">
                 <ChallengeResultCard session={selectedSession} />
-                <div className="flex justify-between mt-4">
+                <div className="flex justify-between mt-4 sticky bottom-0 bg-gray-800 py-2">
                     <button onClick={showPrev} className="bg-blue-500 text-white py-2 px-4 rounded">Anterior</button>
                     <button onClick={showNext} className="bg-blue-500 text-white py-2 px-4 rounded">Siguiente</button>
                 </div>
