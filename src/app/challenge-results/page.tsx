@@ -87,7 +87,7 @@ const ChallengeResultsPage = () => {
         {sessions.map((session, index) => (
         <div 
           key={session.id} 
-          className={`text-purple-300 bg-gray-700 p-4 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors duration-300`}
+          className={`text-gray-400 bg-gray-700 p-4 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors duration-300`}
           onClick={() => openModal(session, index)}
         >
           <h3 className="text-xl font-semibold flex items-center">
